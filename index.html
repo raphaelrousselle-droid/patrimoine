@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon Patrimoine — Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+/* ==========================================================
+   THÈME SOMBRE — VARIABLES DE COULEURS
+   On change une couleur ici, elle change partout.
+   ========================================================== */
+:root {
+  --bg: #07060f;
+  --bg2: #0d0b1a;
+  --card: rgba(255,255,255,0.03);
+  --border: rgba(255,255,255,0.07);
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --accent: #818cf8;
+  --green: #34d399;
+  --red: #f87171;
+  --immo: #f59e0b;
+  --comptes: #10b981;
+  --epargne: #06b6d4;
+  --bourse: #8b5cf6;
+  --crypto: #ec4899;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 40%, var(--bg) 100%);
+  color: var(--text);
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* ==================== NAVIGATION ==================== */
+nav {
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(7,6,15,0.88); backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 12px 24px;
+}
+.nav-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; color: #fff;
+}
+.logo-text { font-size: 17px; font-weight: 700; color: #f1f5f9; }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.tab {
+  padding: 7px 14px; border-radius: 8px; border: none;
+  background: transparent; color: #94a3b8; font-size: 13px;
+  font-weight: 500; cursor: pointer; transition: all 0.2s;
+}
+.tab:hover { background: rgba(255,255,255,0.04); }
+.tab.active { background: rgba(99,102,241,0.15); color: #c4b5fd; font-weight: 600; }
+
+/* ==================== LAYOUT ==================== */
+main { max-width: 1200px; margin: 0 auto; padding: 24px 24px 60px; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* ==================== KPI ==================== */
+.kpi-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 12px; margin-bottom: 20px;
+}
+.kpi {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px 20px;
+}
+.kpi-label {
+  font-size: 11px; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.06em; font-weight: 600; margin-bottom: 4px;
+}
+.kpi-value { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; }
+.kpi-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.kpi.small .kpi-value { font-size: 16px; }
+.kpi.small { padding: 10px 14px; }
+
+/* ==================== CARTES ==================== */
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px 24px; margin-bottom: 16px;
+}
+.card-title {
+  font-size: 14px; font-weight: 700; color: #cbd5e1;
+  margin-bottom: 14px; letter-spacing: -0.01em;
+}
+
+/* ==================== GRILLES ==================== */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px; }
+.span-full { grid-column: 1 / -1; }
+@media (max-width: 700px) {
+  .grid-2, .grid-2-1 { grid-template-columns: 1fr; }
+}
+
+/* ==================== TABLEAU ==================== */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th {
+  text-align: right; padding: 8px; color: var(--muted); font-weight: 600;
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+  border-bottom: 1px solid rgba(255,255,255,0.06); white-space: nowrap;
+  cursor: pointer; user-select: none;
+}
+th.left, td.left { text-align: left; }
+td {
+  text-align: right; padding: 9px 8px; color: #cbd5e1;
+  white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+tr { border-bottom: 1px solid rgba(255,255,255,0.03); }
+tr:hover { background: rgba(255,255,255,0.02); }
+.ticker { font-size: 10px; color: var(--muted); }
+
+/* ==================== BADGES ==================== */
+.badge {
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 2px 7px; border-radius: 6px; font-size: 11px; font-weight: 700;
+}
+.badge.pos { background: rgba(16,185,129,0.12); color: var(--green); }
+.badge.neg { background: rgba(239,68,68,0.12); color: var(--red); }
+
+/* ==================== LISTE ==================== */
+.list-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 13px;
+}
+.list-name { font-weight: 600; color: var(--text); font-size: 13px; }
+.list-sub { font-size: 11px; color: var(--muted); }
+.list-value { font-weight: 700; font-size: 15px; }
+
+/* ==================== BARRE DE POIDS ==================== */
+.weight-bar {
+  display: flex; height: 8px; border-radius: 4px;
+  overflow: hidden; background: rgba(255,255,255,0.05); margin-bottom: 16px;
+}
+.weight-bar div { height: 100%; transition: width 0.5s ease; }
+
+/* ==================== PROGRESS BAR ==================== */
+.progress { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.06); overflow: hidden; margin-top: 6px; }
+.progress-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #34d399, #10b981); }
+
+/* ==================== ÉDITION ==================== */
+.editable {
+  cursor: pointer; padding: 2px 6px; border-radius: 4px;
+  border: 1px dashed transparent; transition: all 0.15s;
+}
+.editable:hover { border-color: rgba(99,102,241,0.3); background: rgba(99,102,241,0.06); }
+.cell-input {
+  width: 80px; padding: 3px 6px; border-radius: 4px;
+  background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.4);
+  color: #e0e7ff; font-size: 12px; font-weight: 600; outline: none;
+  text-align: right;
+}
+.delete-btn {
+  width: 24px; height: 24px; border-radius: 6px;
+  background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.15);
+  color: var(--red); font-size: 12px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.add-line-btn {
+  display: block; width: 100%; padding: 10px; margin-top: 8px;
+  background: transparent; border: 2px dashed rgba(255,255,255,0.08);
+  border-radius: 8px; color: var(--muted); font-size: 12px;
+  font-weight: 600; cursor: pointer; text-align: center;
+}
+.add-line-btn:hover { border-color: rgba(99,102,241,0.3); color: #c4b5fd; }
+.add-row {
+  display: flex; gap: 6px; align-items: center; margin-top: 8px; flex-wrap: wrap;
+}
+.add-input {
+  flex: 1; min-width: 70px; padding: 7px 10px; border-radius: 6px;
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+  color: #e2e8f0; font-size: 12px; outline: none;
+}
+.add-confirm {
+  width: 32px; height: 32px; border-radius: 6px;
+  background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3);
+  color: var(--green); font-size: 14px; font-weight: 700; cursor: pointer;
+}
+.add-cancel {
+  width: 32px; height: 32px; border-radius: 6px;
+  background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.15);
+  color: var(--red); font-size: 14px; cursor: pointer;
+}
+
+/* ==================== PÉRIODE ==================== */
+.period-selector { display: flex; gap: 4px; }
+.period-btn {
+  padding: 5px 12px; border-radius: 6px; border: none;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  background: rgba(255,255,255,0.04); color: var(--muted); transition: all 0.15s;
+}
+.period-btn.active { background: rgba(139,92,246,0.25); color: #c4b5fd; }
+
+/* ==================== CHART CONTAINERS ==================== */
+.chart-box { position: relative; height: 240px; }
+.chart-box-sm { position: relative; height: 200px; }
+.chart-legend { display: flex; gap: 20px; justify-content: center; margin-top: 10px; font-size: 12px; }
+
+/* ==================== HIGHLIGHT CARD ==================== */
+.highlight-card {
+  background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.04));
+  border: 1px solid rgba(99,102,241,0.15);
+  border-radius: 14px; padding: 14px 20px; margin-bottom: 20px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+/* ==================== FLEX HELPERS ==================== */
+.flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.flex-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mt-20 { margin-top: 20px; }
+.mb-8 { margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<!-- ==================== NAVIGATION ==================== -->
+<nav>
+  <div class="nav-inner">
+    <div class="logo">
+      <div class="logo-icon">€</div>
+      <span class="logo-text">Mon Patrimoine</span>
+    </div>
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-page="home">Vue d'ensemble</button>
+      <button class="tab" data-page="bourse">Bourse</button>
+      <button class="tab" data-page="epargne">Épargne</button>
+      <button class="tab" data-page="immo">Immobilier</button>
+      <button class="tab" data-page="crypto">Crypto</button>
+      <button class="tab" data-page="dettes">Dettes</button>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============================================================
+     PAGE : VUE D'ENSEMBLE
+     ============================================================ -->
+<div class="page active" id="page-home">
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">Patrimoine Brut</div><div class="kpi-value" id="kpi-brut"></div></div>
+    <div class="kpi"><div class="kpi-label">Patrimoine Net</div><div class="kpi-value" style="color:var(--accent)" id="kpi-net"></div></div>
+    <div class="kpi"><div class="kpi-label">Dettes</div><div class="kpi-value" style="color:var(--red)" id="kpi-dettes"></div></div>
+    <div class="kpi"><div class="kpi-label">Liquidités dispo</div><div class="kpi-value" style="color:var(--green)" id="kpi-liq"></div></div>
+  </div>
+
+  <div class="highlight-card">
+    <div>
+      <span style="font-size:12px;color:var(--muted)">💡 Règle des 4% — Si j'arrête de travailler :</span>
+      <div style="font-size:20px;font-weight:800;color:#c4b5fd;margin-top:2px" id="kpi-4pct"></div>
+    </div>
+    <div style="font-size:13px;color:var(--muted)" id="kpi-4pct-mois"></div>
+  </div>
+
+  <div class="grid-2-1">
+    <div class="card">
+      <div class="card-title">Évolution Patrimoine Net</div>
+      <div class="chart-box"><canvas id="chart-net"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Répartition Brut</div>
+      <div class="chart-box-sm"><canvas id="chart-pie"></canvas></div>
+      <div id="pie-legend" style="padding:8px 12px 0"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Évolution par catégorie (brut)</div>
+    <div class="chart-box"><canvas id="chart-stacked"></canvas></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE : BOURSE
+     ============================================================ -->
+<div class="page" id="page-bourse">
+  <div class="kpi-row" id="bourse-kpis"></div>
+  <div class="weight-bar" id="bourse-weight"></div>
+
+  <!-- Performance pure -->
+  <div class="card">
+    <div class="flex-between mb-8">
+      <div>
+        <div class="card-title">Performance pure vs S&P 500</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:-10px">Hors versements — uniquement la performance des actions</div>
+      </div>
+      <div class="period-selector" id="period-selector"></div>
+    </div>
+    <div class="chart-box"><canvas id="chart-perf"></canvas></div>
+    <div class="chart-legend">
+      <span style="color:#8b5cf6">● Mon portefeuille</span>
+      <span style="color:#f59e0b">- - S&P 500</span>
+    </div>
+  </div>
+
+  <!-- PEA -->
+  <div class="card mt-20">
+    <div class="flex-between">
+      <div>
+        <div class="card-title" style="margin-bottom:0">PEA — Fortuneo</div>
+        <div style="font-size:12px;color:var(--muted)">Ouvert en Mai 2024 • Cliquer sur Qté, PRU ou Cours pour modifier</div>
+      </div>
+      <div class="flex-row" id="pea-kpis"></div>
+    </div>
+    <div class="table-wrap mt-12" id="pea-table"></div>
+  </div>
+
+  <!-- CTO Saxo -->
+  <div class="card mt-16">
+    <div class="flex-between">
+      <div>
+        <div class="card-title" style="margin-bottom:0">CTO — Saxo Banque</div>
+        <div style="font-size:12px;color:var(--muted)">EUR/USD: 0.86547 • Cliquer sur Qté, PRU ou Cours pour modifier</div>
+      </div>
+      <div class="flex-row" id="ctosb-kpis"></div>
+    </div>
+    <div class="table-wrap mt-12" id="ctosb-table"></div>
+  </div>
+
+  <!-- CTO IBKR -->
+  <div class="card mt-16">
+    <div class="flex-between">
+      <div>
+        <div class="card-title" style="margin-bottom:0">CTO — IBKR</div>
+        <div style="font-size:12px;color:var(--muted)">Cliquer sur Qté, PRU ou Cours pour modifier</div>
+      </div>
+      <div class="flex-row" id="ctoibkr-kpis"></div>
+    </div>
+    <div class="table-wrap mt-12" id="ctoibkr-table"></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE : ÉPARGNE
+     ============================================================ -->
+<div class="page" id="page-epargne">
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">Épargne totale</div><div class="kpi-value" style="color:var(--epargne)" id="kpi-ep-total"></div></div>
+    <div class="kpi"><div class="kpi-label">Épargne libre</div><div class="kpi-value" id="kpi-ep-libre"></div></div>
+    <div class="kpi"><div class="kpi-label">Épargne bloquée</div><div class="kpi-value" id="kpi-ep-bloq"></div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-title" id="comptes-title"></div><div id="comptes-list"></div></div>
+    <div class="card"><div class="card-title" id="ep-libre-title"></div><div id="ep-libre-list"></div></div>
+    <div class="card span-full"><div class="card-title" id="ep-bloq-title"></div><div id="ep-bloq-list"></div></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE : IMMOBILIER
+     ============================================================ -->
+<div class="page" id="page-immo">
+  <div class="kpi-row" id="immo-kpis"></div>
+  <div class="grid-2" id="immo-content"></div>
+</div>
+
+<!-- ============================================================
+     PAGE : CRYPTO
+     ============================================================ -->
+<div class="page" id="page-crypto">
+  <div class="kpi-row" id="crypto-kpis"></div>
+  <div class="card"><div class="card-title">Portefeuille Crypto</div><div class="table-wrap" id="crypto-table"></div></div>
+</div>
+
+<!-- ============================================================
+     PAGE : DETTES
+     ============================================================ -->
+<div class="page" id="page-dettes">
+  <div class="kpi-row" id="dettes-kpis"></div>
+  <div class="card"><div class="card-title">Détail des crédits</div><div id="dettes-list"></div></div>
+</div>
+
+</main>
+
+<script>
+/* ==========================================================
+   DONNÉES — MODIFIE ICI TES MONTANTS CHAQUE MOIS
+   ========================================================== */
+
+const DATA = {
+  patrimoine: { brut: 203668, net: 72753, immobilier: 125000, comptes: 3404, epargnelLibre: 14290, epargneBloq: 29779, bourse: 29798, crypto: 1397, autres: 0, dettes: 130915, regle4pct: 2910, liquiditesDispo: 17694 },
+
+  history: [
+    { date: "Juin 25", immobilier: 125000, comptes: 2665, epargne: 9178, bourse: 4300, crypto: 500, dettes: 134708, brut: 141643, net: 6935 },
+    { date: "Juil 25", immobilier: 125000, comptes: 8760, epargne: 9446, bourse: 5134, crypto: 521, dettes: 134708, brut: 148861, net: 14153 },
+    { date: "Août 25", immobilier: 125000, comptes: 2460, epargne: 12818, bourse: 8826, crypto: 684, dettes: 134575, brut: 149788, net: 15213 },
+    { date: "Sep 25", immobilier: 125000, comptes: 2042, epargne: 11440, bourse: 9164, crypto: 756, dettes: 134444, brut: 148402, net: 13958 },
+    { date: "Oct 25", immobilier: 125000, comptes: 31654, epargne: 42869, bourse: 22562, crypto: 730, dettes: 134311, brut: 222815, net: 88504 },
+    { date: "Nov 25", immobilier: 125000, comptes: 7539, epargne: 61970, bourse: 25829, crypto: 2249, dettes: 134179, brut: 222587, net: 88408 },
+    { date: "Déc 25", immobilier: 125000, comptes: 2520, epargne: 59927, bourse: 27200, crypto: 1791, dettes: 132098, brut: 216438, net: 84340 },
+    { date: "Jan 26", immobilier: 125000, comptes: 3925, epargne: 51101, bourse: 27112, crypto: 1730, dettes: 131702, brut: 208868, net: 77166 },
+    { date: "Fév 26", immobilier: 125000, comptes: 19651, epargne: 28844, bourse: 29223, crypto: 1648, dettes: 131309, brut: 204365, net: 73056 },
+    { date: "Mar 26", immobilier: 125000, comptes: 3404, epargne: 44069, bourse: 29564, crypto: 1324, dettes: 130915, brut: 203361, net: 72446 },
+  ],
+
+  /* Performance PURE (hors versements) en %
+     Chaque mois, note la perf cumulée de ton portefeuille et du S&P 500 */
+  perfData: [
+    { date: "Juin 25", portefeuille: 0, sp500: 0 },
+    { date: "Juil 25", portefeuille: 1.2, sp500: 3.2 },
+    { date: "Août 25", portefeuille: 4.8, sp500: 7.8 },
+    { date: "Sep 25", portefeuille: 3.1, sp500: 5.1 },
+    { date: "Oct 25", portefeuille: 6.5, sp500: 11.2 },
+    { date: "Nov 25", portefeuille: 8.9, sp500: 15.6 },
+    { date: "Déc 25", portefeuille: 10.2, sp500: 19.2 },
+    { date: "Jan 26", portefeuille: 7.5, sp500: 16.1 },
+    { date: "Fév 26", portefeuille: 5.8, sp500: 14.8 },
+    { date: "Mar 26", portefeuille: 3.6, sp500: 13.5 },
+  ],
+
+  comptes: [
+    { nom: "Compte courant", banque: "Banque Postale", montant: 0 },
+    { nom: "Compte commun", banque: "Banque Postale", montant: 44 },
+    { nom: "Compte courant", banque: "Fortuneo", montant: 3360 },
+  ],
+  epargnelLibre: [
+    { nom: "LDDS", banque: "Banque Postale", montant: 30 },
+    { nom: "Livret A", banque: "Fortuneo", montant: 14260 },
+  ],
+  epargneBloq: [
+    { nom: "PEE Veolia", banque: "Natixis", montant: 10142 },
+    { nom: "AV Linxea Spirit 2", banque: "Linxea", montant: 19637 },
+  ],
+  dettes: [
+    { nom: "PTZ pompe à chaleur", type: "Crédit Immobilier", banque: "Banque Postale", emprunte: 12691, restant: 9650, fin: "Mars 2032" },
+    { nom: "Prêt RP", type: "Crédit Immobilier", banque: "Banque Postale", emprunte: 124000, restant: 121265, fin: "Sep 2050" },
+  ],
+  immobilier: [
+    { nom: "La Houssaye Béranger", type: "Résidence principale", prixAchat: 109500, valeur: 125000 },
+  ],
+  crypto: [
+    { nom: "Bitcoin", symbol: "BTC", qte: 0.01086, montant: 662.07 },
+    { nom: "Ethereum", symbol: "ETH", qte: 0.17304, montant: 310.62 },
+    { nom: "Near", symbol: "NEAR", qte: 118, montant: 119.34 },
+    { nom: "Solana", symbol: "SOL", qte: 3.778, montant: 268.70 },
+    { nom: "Aster", symbol: "ASTER", qte: 59.94, montant: 35.65 },
+    { nom: "USDC", symbol: "USDC", qte: 0.86, montant: 0.86 },
+  ],
+};
+
+/* --- Portefeuilles modifiables --- */
+const portfolios = {
+  pea: {
+    label: "PEA", especes: 557, versements: 16174, dividendes: 190.52,
+    lignes: [
+      { id:1, code:"EPA:AI", nom:"Air Liquide", cours:167.9, parts:10, pru:167.67 },
+      { id:2, code:"EPA:DCAM", nom:"Amundi MSCI World", cours:5.46, parts:1450, pru:5.285 },
+      { id:3, code:"EPA:PUST", nom:"Amundi Nasdaq-100", cours:86.39, parts:25, pru:85.20 },
+      { id:4, code:"EPA:GTT", nom:"GTT", cours:200.4, parts:8, pru:154.53 },
+      { id:5, code:"EPA:DG", nom:"Vinci", cours:130.1, parts:9, pru:120.09 },
+      { id:6, code:"EPA:EL", nom:"EssilorLuxottica", cours:208.9, parts:5, pru:266.94 },
+      { id:7, code:"EPA:SU", nom:"Schneider Electric", cours:254.8, parts:5, pru:244.45 },
+      { id:8, code:"EPA:ALMIB", nom:"Amoeba", cours:1.02, parts:100, pru:1.098 },
+    ],
+  },
+  ctosb: {
+    label: "CTO SB", especes: 150, versements: 11014,
+    lignes: [
+      { id:101, code:"GOOGL", nom:"Alphabet", cours:267.17, parts:6, pru:218.28 },
+      { id:102, code:"AMBA", nom:"Ambarella", cours:46.74, parts:9, pru:64.95 },
+      { id:103, code:"NET", nom:"Cloudflare", cours:184.35, parts:3, pru:188.00 },
+      { id:104, code:"DXCM", nom:"DexCom", cours:57.39, parts:8, pru:70.47 },
+      { id:105, code:"ON", nom:"ON Semi", cours:51.27, parts:8, pru:62.96 },
+      { id:106, code:"NU", nom:"Nu Holdings", cours:12.54, parts:35, pru:16.54 },
+      { id:107, code:"RKLB", nom:"Rocket Lab", cours:62.28, parts:6, pru:86.58 },
+      { id:108, code:"TOST", nom:"Toast", cours:24.84, parts:20, pru:26.57 },
+      { id:109, code:"AMZN", nom:"Amazon", cours:184.04, parts:6, pru:220.86 },
+      { id:110, code:"SNOW", nom:"Snowflake", cours:155.29, parts:3, pru:207.00 },
+      { id:111, code:"SOFI", nom:"SoFi", cours:16.04, parts:21, pru:26.34 },
+      { id:112, code:"SYM", nom:"Symbotic", cours:44.15, parts:8, pru:68.01 },
+      { id:113, code:"TER", nom:"Teradyne", cours:261.36, parts:3, pru:229.00 },
+      { id:114, code:"TTD", nom:"Trade Desk", cours:23.61, parts:16, pru:36.57 },
+      { id:115, code:"TMDX", nom:"TransMedics", cours:111.62, parts:4, pru:138.00 },
+      { id:116, code:"CELH", nom:"Celsius Holdings", cours:39.57, parts:11, pru:49.43 },
+      { id:117, code:"PATH", nom:"UiPath", cours:10.71, parts:36, pru:15.57 },
+      { id:118, code:"VRT", nom:"Vertiv", cours:232.17, parts:3, pru:173.00 },
+      { id:119, code:"ZS", nom:"Zscaler", cours:133.12, parts:3, pru:217.00 },
+    ],
+  },
+  ctoibkr: {
+    label: "CTO IBKR", especes: 40, versements: 1500,
+    lignes: [
+      { id:201, code:"EPA:BNKE", nom:"Amundi Euro Stoxx Banks", cours:303.2, parts:1.42, pru:322.96 },
+      { id:202, code:"LON:HNSC", nom:"HSBC Nasdaq Semi ETF", cours:23.59, parts:25, pru:24.19 },
+      { id:203, code:"XDGU", nom:"Xtrackers USD Corp Bond", cours:56.55, parts:8, pru:57.51 },
+    ],
+  },
+};
+
+/* ==========================================================
+   FONCTIONS UTILES
+   ========================================================== */
+const fmt = n => new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
+const fmt2 = n => new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
+const fmtPct = n => (n>=0?"+":"") + n.toFixed(2) + "%";
+
+function calcPortfolio(pf) {
+  let totalVal = 0, totalPru = 0;
+  const enriched = pf.lignes.map(l => {
+    const valPru = l.pru * l.parts;
+    const valeur = l.cours * l.parts;
+    const gp = valeur - valPru;
+    const gpPct = valPru > 0 ? (gp/valPru)*100 : 0;
+    totalVal += valeur;
+    totalPru += valPru;
+    return { ...l, valPru, valeur, gp, gpPct };
+  });
+  const valAvecEsp = totalVal + (pf.especes||0);
+  enriched.forEach(l => l.poids = valAvecEsp > 0 ? (l.valeur/valAvecEsp)*100 : 0);
+  const pv = totalVal - totalPru;
+  const pvPct = totalPru > 0 ? (pv/totalPru)*100 : 0;
+  return { lignes: enriched, valeur: valAvecEsp, totalPru, pv, pvPct };
+}
+
+function badge(val) {
+  const pos = val >= 0;
+  return `<span class="badge ${pos?'pos':'neg'}">${pos?'▲':'▼'} ${pos?'+':''}${val.toFixed(2)}%</span>`;
+}
+
+/* ==========================================================
+   NAVIGATION
+   ========================================================== */
+document.getElementById('tabs').addEventListener('click', e => {
+  if (!e.target.classList.contains('tab')) return;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById('page-' + e.target.dataset.page).classList.add('active');
+});
+
+/* ==========================================================
+   RENDU — VUE D'ENSEMBLE
+   ========================================================== */
+function renderHome() {
+  const P = DATA.patrimoine;
+  document.getElementById('kpi-brut').textContent = fmt(P.brut);
+  document.getElementById('kpi-net').textContent = fmt(P.net);
+  document.getElementById('kpi-dettes').textContent = fmt(P.dettes);
+  document.getElementById('kpi-liq').textContent = fmt(P.liquiditesDispo);
+  document.getElementById('kpi-4pct').textContent = fmt(P.regle4pct) + " / an";
+  document.getElementById('kpi-4pct-mois').textContent = "soit " + fmt(Math.round(P.regle4pct/12)) + " / mois";
+
+  // Graphique patrimoine net
+  const H = DATA.history;
+  new Chart(document.getElementById('chart-net'), {
+    type: 'line',
+    data: {
+      labels: H.map(h=>h.date),
+      datasets: [{
+        label: 'Patrimoine Net',
+        data: H.map(h=>h.net),
+        borderColor: '#818cf8', backgroundColor: 'rgba(129,140,248,0.1)',
+        fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2.5,
+      }],
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)}}}, scales:{x:{ticks:{color:'#64748b',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#64748b',font:{size:10},callback:v=>(v/1000).toFixed(0)+'k'},grid:{color:'rgba(255,255,255,0.04)'}}} },
+  });
+
+  // Camembert
+  const pieLabels = ["Immobilier","Comptes","Épargne","Bourse","Crypto"];
+  const pieValues = [P.immobilier, P.comptes, P.epargnelLibre+P.epargneBloq, P.bourse, P.crypto];
+  const pieColors = ["#f59e0b","#10b981","#06b6d4","#8b5cf6","#ec4899"];
+  new Chart(document.getElementById('chart-pie'), {
+    type: 'doughnut',
+    data: { labels: pieLabels, datasets: [{ data: pieValues, backgroundColor: pieColors, borderWidth: 0 }] },
+    options: { responsive:true, maintainAspectRatio:false, cutout:'58%', plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)}}} },
+  });
+  const total = pieValues.reduce((a,b)=>a+b,0);
+  document.getElementById('pie-legend').innerHTML = pieLabels.map((l,i) =>
+    `<div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;margin-bottom:4px">
+      <div style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:${pieColors[i]};flex-shrink:0"></span><span style="color:#cbd5e1">${l}</span></div>
+      <span style="color:var(--muted)">${fmt(pieValues[i])}</span>
+    </div>`
+  ).join('');
+
+  // Graphique empilé
+  const cats = [
+    {key:'immobilier',color:'#f59e0b',label:'Immobilier'},
+    {key:'epargne',color:'#06b6d4',label:'Épargne'},
+    {key:'bourse',color:'#8b5cf6',label:'Bourse'},
+    {key:'comptes',color:'#10b981',label:'Comptes'},
+    {key:'crypto',color:'#ec4899',label:'Crypto'},
+  ];
+  new Chart(document.getElementById('chart-stacked'), {
+    type: 'bar',
+    data: {
+      labels: H.map(h=>h.date),
+      datasets: cats.map(c => ({
+        label: c.label, data: H.map(h=>h[c.key]||0),
+        backgroundColor: c.color+'33', borderColor: c.color, borderWidth: 1,
+      })),
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:'#94a3b8',font:{size:11}}}}, scales:{x:{stacked:true,ticks:{color:'#64748b',font:{size:10}},grid:{display:false}},y:{stacked:true,ticks:{color:'#64748b',font:{size:10},callback:v=>(v/1000).toFixed(0)+'k'},grid:{color:'rgba(255,255,255,0.04)'}}} },
+  });
+}
+
+/* ==========================================================
+   RENDU — BOURSE (avec édition)
+   ========================================================== */
+let perfChart = null;
+let currentPeriod = 999;
+
+function renderBourse() {
+  // Calculs
+  const peaC = calcPortfolio(portfolios.pea);
+  const sbC = calcPortfolio(portfolios.ctosb);
+  const ibkrC = calcPortfolio(portfolios.ctoibkr);
+  const totalB = peaC.valeur + sbC.valeur + ibkrC.valeur;
+  const totalV = portfolios.pea.versements + portfolios.ctosb.versements + portfolios.ctoibkr.versements;
+  const totalPV = peaC.pv + sbC.pv + ibkrC.pv;
+
+  // KPIs
+  document.getElementById('bourse-kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Total Bourse</div><div class="kpi-value" style="color:var(--bourse)">${fmt(totalB)}</div></div>
+    <div class="kpi"><div class="kpi-label">Total Versé</div><div class="kpi-value">${fmt(totalV)}</div></div>
+    <div class="kpi"><div class="kpi-label">+/- Value totale</div><div class="kpi-value" style="color:${totalPV>=0?'var(--green)':'var(--red)'}">${fmt2(totalPV)}</div><div class="kpi-sub">${fmtPct(totalV>0?(totalPV/totalV)*100:0)}</div></div>
+    <div class="kpi"><div class="kpi-label">Dividendes perçus</div><div class="kpi-value" style="color:#f59e0b">${fmt2(portfolios.pea.dividendes||0)}</div></div>
+  `;
+
+  // Barre de poids
+  document.getElementById('bourse-weight').innerHTML = `
+    <div style="width:${(peaC.valeur/totalB*100)}%;background:#8b5cf6" title="PEA: ${fmt(peaC.valeur)}"></div>
+    <div style="width:${(sbC.valeur/totalB*100)}%;background:#6366f1" title="CTO SB: ${fmt(sbC.valeur)}"></div>
+    <div style="width:${(ibkrC.valeur/totalB*100)}%;background:#a78bfa" title="CTO IBKR: ${fmt(ibkrC.valeur)}"></div>
+  `;
+
+  // Période selector
+  const periods = [{id:'1m',label:'1M',m:1},{id:'3m',label:'3M',m:3},{id:'6m',label:'6M',m:6},{id:'1a',label:'1A',m:12},{id:'max',label:'Max',m:999}];
+  document.getElementById('period-selector').innerHTML = periods.map(p =>
+    `<button class="period-btn ${currentPeriod===p.m?'active':''}" onclick="setPeriod(${p.m})">${p.label}</button>`
+  ).join('');
+
+  renderPerfChart();
+
+  // Portefeuilles KPIs
+  function miniKpis(calc, pf) {
+    return `
+      <div class="kpi small"><div class="kpi-label">Valeur</div><div class="kpi-value" style="color:#a78bfa">${fmt2(calc.valeur)}</div></div>
+      <div class="kpi small"><div class="kpi-label">+/- Value</div><div class="kpi-value" style="color:${calc.pv>=0?'var(--green)':'var(--red)'}">${fmt2(calc.pv)}</div><div class="kpi-sub">${fmtPct(calc.pvPct)}</div></div>
+      <div class="kpi small"><div class="kpi-label">Espèces</div><div class="kpi-value">${fmt(pf.especes)}</div></div>
+    `;
+  }
+  document.getElementById('pea-kpis').innerHTML = miniKpis(peaC, portfolios.pea);
+  document.getElementById('ctosb-kpis').innerHTML = miniKpis(sbC, portfolios.ctosb);
+  document.getElementById('ctoibkr-kpis').innerHTML = miniKpis(ibkrC, portfolios.ctoibkr);
+
+  // Tableaux
+  renderPortfolioTable('pea-table', peaC.lignes, 'pea');
+  renderPortfolioTable('ctosb-table', sbC.lignes, 'ctosb');
+  renderPortfolioTable('ctoibkr-table', ibkrC.lignes, 'ctoibkr');
+}
+
+function renderPerfChart() {
+  const raw = DATA.perfData;
+  const maxIdx = raw.length - 1;
+  const startIdx = Math.max(0, maxIdx - currentPeriod);
+  const filtered = raw.slice(startIdx);
+  const baseP = filtered[0]?.portefeuille || 0;
+  const baseS = filtered[0]?.sp500 || 0;
+  const rebased = filtered.map(d => ({
+    date: d.date,
+    portefeuille: +(d.portefeuille - baseP).toFixed(2),
+    sp500: +(d.sp500 - baseS).toFixed(2),
+  }));
+
+  if (perfChart) perfChart.destroy();
+  perfChart = new Chart(document.getElementById('chart-perf'), {
+    type: 'line',
+    data: {
+      labels: rebased.map(d=>d.date),
+      datasets: [
+        { label:'Mon portefeuille', data:rebased.map(d=>d.portefeuille), borderColor:'#8b5cf6', backgroundColor:'rgba(139,92,246,0.08)', fill:true, tension:0.3, pointRadius:3, borderWidth:2.5 },
+        { label:'S&P 500', data:rebased.map(d=>d.sp500), borderColor:'#f59e0b', borderDash:[6,3], tension:0.3, pointRadius:2, borderWidth:2, fill:false },
+      ],
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.raw>0?'+':''}${c.raw.toFixed(1)}%`}}}, scales:{x:{ticks:{color:'#64748b',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#64748b',font:{size:10},callback:v=>`${v>0?'+':''}${v}%`},grid:{color:'rgba(255,255,255,0.04)'}}} },
+  });
+}
+
+window.setPeriod = function(m) {
+  currentPeriod = m;
+  renderBourse();
+};
+
+/* --- Tableau de portefeuille éditable --- */
+function renderPortfolioTable(containerId, lignes, pfKey) {
+  let html = `<table><thead><tr>
+    <th class="left">Titre</th><th>Qté</th><th>PRU</th><th>Cours</th>
+    <th>Valeur</th><th>+/- Value</th><th>+/- %</th><th>Poids</th><th></th>
+  </tr></thead><tbody>`;
+
+  lignes.forEach(l => {
+    html += `<tr>
+      <td class="left"><div style="font-weight:600;color:var(--text);font-size:12px">${l.nom}</div><div class="ticker">${l.code}</div></td>
+      <td><span class="editable" onclick="startEdit(this,'${pfKey}',${l.id},'parts')">${l.parts}</span></td>
+      <td><span class="editable" onclick="startEdit(this,'${pfKey}',${l.id},'pru')">${fmt2(l.pru)}</span></td>
+      <td><span class="editable" onclick="startEdit(this,'${pfKey}',${l.id},'cours')">${fmt2(l.cours)}</span></td>
+      <td style="font-weight:700;font-size:12px">${fmt2(l.valeur)}</td>
+      <td style="color:${l.gp>=0?'var(--green)':'var(--red)'};font-weight:600;font-size:12px">${l.gp>=0?'+':''}${fmt2(l.gp)}</td>
+      <td>${badge(l.gpPct)}</td>
+      <td style="color:var(--muted);font-size:11px">${l.poids.toFixed(1)}%</td>
+      <td><button class="delete-btn" onclick="deleteLine('${pfKey}',${l.id})">✕</button></td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>`;
+  html += `<div id="add-form-${pfKey}"><button class="add-line-btn" onclick="showAddForm('${pfKey}')">+ Ajouter une ligne</button></div>`;
+
+  document.getElementById(containerId).innerHTML = html;
+}
+
+/* Édition d'une cellule */
+window.startEdit = function(el, pfKey, id, field) {
+  const current = el.textContent.replace(/[^\d.,-]/g, '').replace(',', '.');
+  el.outerHTML = `<input class="cell-input" value="${current}" 
+    onkeydown="if(event.key==='Enter')commitEdit(this,'${pfKey}',${id},'${field}');if(event.key==='Escape')renderBourse()" 
+    onblur="commitEdit(this,'${pfKey}',${id},'${field}')" autofocus>`;
+  el.parentElement?.querySelector('.cell-input')?.select();
+};
+
+window.commitEdit = function(input, pfKey, id, field) {
+  const val = parseFloat(input.value.replace(',', '.'));
+  if (!isNaN(val)) {
+    const line = portfolios[pfKey].lignes.find(l => l.id === id);
+    if (line) line[field] = val;
+  }
+  renderBourse();
+};
+
+window.deleteLine = function(pfKey, id) {
+  portfolios[pfKey].lignes = portfolios[pfKey].lignes.filter(l => l.id !== id);
+  renderBourse();
+};
+
+window.showAddForm = function(pfKey) {
+  document.getElementById(`add-form-${pfKey}`).innerHTML = `
+    <div class="add-row">
+      <input class="add-input" placeholder="Code" id="add-code-${pfKey}">
+      <input class="add-input" style="flex:2" placeholder="Nom *" id="add-nom-${pfKey}">
+      <input class="add-input" placeholder="Cours" id="add-cours-${pfKey}">
+      <input class="add-input" placeholder="Qté" id="add-parts-${pfKey}">
+      <input class="add-input" placeholder="PRU" id="add-pru-${pfKey}">
+      <button class="add-confirm" onclick="confirmAdd('${pfKey}')">✓</button>
+      <button class="add-cancel" onclick="renderBourse()">✕</button>
+    </div>`;
+};
+
+window.confirmAdd = function(pfKey) {
+  const nom = document.getElementById(`add-nom-${pfKey}`).value.trim();
+  if (!nom) return;
+  const code = document.getElementById(`add-code-${pfKey}`).value.trim() || '—';
+  const cours = parseFloat(document.getElementById(`add-cours-${pfKey}`).value.replace(',','.')) || 0;
+  const parts = parseFloat(document.getElementById(`add-parts-${pfKey}`).value.replace(',','.')) || 0;
+  const pru = parseFloat(document.getElementById(`add-pru-${pfKey}`).value.replace(',','.')) || 0;
+  portfolios[pfKey].lignes.push({ id: Date.now(), code, nom, cours, parts, pru });
+  renderBourse();
+};
+
+/* ==========================================================
+   RENDU — ÉPARGNE
+   ========================================================== */
+function renderEpargne() {
+  const P = DATA.patrimoine;
+  document.getElementById('kpi-ep-total').textContent = fmt(P.epargnelLibre + P.epargneBloq);
+  document.getElementById('kpi-ep-libre').textContent = fmt(P.epargnelLibre);
+  document.getElementById('kpi-ep-bloq').textContent = fmt(P.epargneBloq);
+
+  function renderList(items) {
+    return items.map(c => `
+      <div class="list-row">
+        <div><div class="list-name">${c.nom}</div><div class="list-sub">${c.banque}</div></div>
+        <div class="list-value">${fmt(c.montant)}</div>
+      </div>
+    `).join('');
+  }
+  document.getElementById('comptes-title').textContent = "Comptes courants — " + fmt(P.comptes);
+  document.getElementById('comptes-list').innerHTML = renderList(DATA.comptes);
+  document.getElementById('ep-libre-title').textContent = "Épargne libre — " + fmt(P.epargnelLibre);
+  document.getElementById('ep-libre-list').innerHTML = renderList(DATA.epargnelLibre);
+  document.getElementById('ep-bloq-title').textContent = "Épargne bloquée — " + fmt(P.epargneBloq);
+  document.getElementById('ep-bloq-list').innerHTML = renderList(DATA.epargneBloq);
+}
+
+/* ==========================================================
+   RENDU — IMMOBILIER
+   ========================================================== */
+function renderImmo() {
+  const P = DATA.patrimoine;
+  document.getElementById('immo-kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Valeur estimée</div><div class="kpi-value" style="color:var(--immo)">${fmt(125000)}</div></div>
+    <div class="kpi"><div class="kpi-label">Prix d'achat</div><div class="kpi-value">${fmt(109500)}</div></div>
+    <div class="kpi"><div class="kpi-label">Plus-value latente</div><div class="kpi-value" style="color:var(--green)">${fmt(15500)}</div><div class="kpi-sub">${fmtPct(14.16)}</div></div>
+    <div class="kpi"><div class="kpi-label">Capital restant dû</div><div class="kpi-value" style="color:var(--red)">${fmt(P.dettes)}</div></div>
+  `;
+  let html = '';
+  // Bien
+  html += `<div class="card"><div class="card-title">Bien immobilier</div>`;
+  DATA.immobilier.forEach(b => {
+    html += `<div style="font-weight:700;font-size:16px;margin-bottom:4px">${b.nom}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${b.type}</div>
+      <div class="list-row"><span style="color:var(--muted)">Prix d'achat</span><span style="font-weight:600">${fmt(b.prixAchat)}</span></div>
+      <div class="list-row"><span style="color:var(--muted)">Valeur estimée</span><span style="font-weight:700;color:var(--immo)">${fmt(b.valeur)}</span></div>`;
+  });
+  html += `</div>`;
+  // Crédits
+  html += `<div class="card"><div class="card-title">Crédits en cours</div>`;
+  DATA.dettes.forEach(d => {
+    const pct = ((d.emprunte-d.restant)/d.emprunte*100).toFixed(1);
+    html += `<div style="margin-bottom:16px">
+      <div style="font-weight:700;font-size:14px">${d.nom}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">${d.banque} — Fin : ${d.fin}</div>
+      <div class="list-row"><span style="color:var(--muted)">Emprunté</span><span style="font-weight:600">${fmt(d.emprunte)}</span></div>
+      <div class="list-row"><span style="color:var(--muted)">Restant dû</span><span style="font-weight:700;color:var(--red)">${fmt(d.restant)}</span></div>
+      <div class="progress"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div style="font-size:10px;color:var(--muted);margin-top:3px">${pct}% remboursé</div>
+    </div>`;
+  });
+  html += `</div>`;
+  document.getElementById('immo-content').innerHTML = html;
+}
+
+/* ==========================================================
+   RENDU — CRYPTO
+   ========================================================== */
+function renderCrypto() {
+  const total = DATA.crypto.reduce((s,c)=>s+c.montant,0);
+  document.getElementById('crypto-kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Total Crypto</div><div class="kpi-value" style="color:var(--crypto)">${fmt2(total)}</div></div>
+    <div class="kpi"><div class="kpi-label">Nb de tokens</div><div class="kpi-value">${DATA.crypto.length} cryptos</div></div>
+    <div class="kpi"><div class="kpi-label">Plateforme</div><div class="kpi-value">Binance</div></div>
+  `;
+  const sorted = [...DATA.crypto].sort((a,b) => b.montant - a.montant);
+  let html = `<table><thead><tr><th class="left">Crypto</th><th>Quantité</th><th>Valeur</th><th>% du total</th></tr></thead><tbody>`;
+  sorted.forEach(c => {
+    html += `<tr>
+      <td class="left"><div style="font-weight:600">${c.nom}</div><div class="ticker">${c.symbol}</div></td>
+      <td>${c.qte}</td>
+      <td style="font-weight:700">${fmt2(c.montant)}</td>
+      <td style="color:var(--muted)">${(c.montant/total*100).toFixed(1)}%</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  document.getElementById('crypto-table').innerHTML = html;
+}
+
+/* ==========================================================
+   RENDU — DETTES
+   ========================================================== */
+function renderDettes() {
+  const P = DATA.patrimoine;
+  document.getElementById('dettes-kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Total dettes</div><div class="kpi-value" style="color:var(--red)">${fmt(P.dettes)}</div></div>
+    <div class="kpi"><div class="kpi-label">Net vendeur estimé</div><div class="kpi-value" style="color:${P.immobilier-P.dettes>=0?'var(--green)':'var(--red)'}">${fmt(P.immobilier-P.dettes)}</div><div class="kpi-sub">Valeur immo - dettes</div></div>
+  `;
+  let html = '';
+  DATA.dettes.forEach(d => {
+    const pct = ((d.emprunte-d.restant)/d.emprunte*100).toFixed(1);
+    html += `<div style="padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div style="font-weight:700;font-size:15px">${d.nom}</div><div style="font-size:12px;color:var(--muted)">${d.type} — ${d.banque}</div></div>
+        <div style="text-align:right"><div style="font-weight:700;font-size:18px;color:var(--red)">${fmt(d.restant)}</div><div style="font-size:11px;color:var(--muted)">sur ${fmt(d.emprunte)}</div></div>
+      </div>
+      <div class="progress" style="margin-top:10px"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px"><span>${fmt(d.emprunte-d.restant)} remboursé (${pct}%)</span><span>Fin : ${d.fin}</span></div>
+    </div>`;
+  });
+  document.getElementById('dettes-list').innerHTML = html;
+}
+
+/* ==========================================================
+   DÉMARRAGE
+   ========================================================== */
+renderHome();
+renderBourse();
+renderEpargne();
+renderImmo();
+renderCrypto();
+renderDettes();
+</script>
+</body>
+</html>
