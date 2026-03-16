@@ -63,7 +63,7 @@ const DEFAULTS={
   perfData:[{date:"Juin 25",portf:0,sp:0},{date:"Juil 25",portf:19.4,sp:null},{date:"Août 25",portf:105.3,sp:null},{date:"Sep 25",portf:113.1,sp:null},{date:"Oct 25",portf:424.7,sp:null},{date:"Nov 25",portf:500.7,sp:null},{date:"Déc 25",portf:532.6,sp:null},{date:"Jan 26",portf:530.5,sp:null},{date:"Fév 26",portf:579.6,sp:null},{date:"Mar 26",portf:587.5,sp:null}],
 };
 
-const SK="pData_v14";
+const SK="patrimoine_data";
 let S;try{const sv=localStorage.getItem(SK);S=sv?JSON.parse(sv):JSON.parse(JSON.stringify(DEFAULTS))}catch(e){S=JSON.parse(JSON.stringify(DEFAULTS))}
 function autoSave(){try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}}
 window.doReset=()=>{localStorage.removeItem(SK);localStorage.removeItem('ps_v14');S=JSON.parse(JSON.stringify(DEFAULTS));snaps=[];R(true)};
