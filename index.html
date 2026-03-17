@@ -202,6 +202,119 @@ window.cPf2=(i,pk,id,f)=>{const v=parseFloat(i.value.replace(',','.'));const l=S
 window.dPf=(pk,id)=>{S.pf[pk].l=S.pf[pk].l.filter(l=>l.id!==id);autoSave();R()};
 window.sA=pk=>{document.getElementById(`add-${pk}`).innerHTML=`<div class="ar"><input class="ai" placeholder="Ticker Yahoo (ex: AI.PA, GOOGL)" id="ac-${pk}" style="flex:1.5"><input class="ai" style="flex:2" placeholder="Nom *" id="an-${pk}"><input class="ai" placeholder="Cours €" id="ao-${pk}"><input class="ai" placeholder="Qté" id="ap-${pk}"><input class="ai" placeholder="PRU" id="ar-${pk}"><input class="ai" placeholder="Div/an" id="ad-${pk}"><button class="ac" onclick="cA('${pk}')">✓</button><button class="ax" onclick="R()">✕</button></div><div style="font-size:10px;color:var(--muted);margin-top:4px">💡 Laisse le cours vide et renseigne le ticker Yahoo pour récupérer le prix automatiquement</div>`};
 window.cA=async pk=>{const n=document.getElementById(`an-${pk}`).value.trim();if(!n)return;const ticker=document.getElementById(`ac-${pk}`).value.trim()||'—';let cours=parseFloat(document.getElementById(`ao-${pk}`).value.replace(',','.'))||0;const newLine={id:nid(),c:ticker,n,co:cours,p:parseFloat(document.getElementById(`ap-${pk}`).value.replace(',','.'))||0,pr:parseFloat(document.getElementById(`ar-${pk}`).value.replace(',','.'))||0,div:parseFloat(document.getElementById(`ad-${pk}`).value.replace(',','.'))||0,var:0};if(ticker!=='—'){YM[ticker]=ticker;/* Ajouter au mapping pour les futurs refresh */}if(cours===0&&ticker!=='—'){const q=await yQuote(ticker);if(q){newLine.co=Math.round(q.price*100)/100;if(q.cur==='USD'){newLine.usd=newLine.co;newLine.co=Math.round(q.price*eurUsd*100)/100}}}S.pf[pk].l.push(newLine);autoSave();R()};
+/* ====== BUDGET SANKEY ====== */
+if(!S.budget)S.budget={revenus:[{id:'r1',nom:'Salaire',montant:2500}],categories:[{id:'cat1',nom:'Investissements mensuels',postes:[{id:'p1',nom:'Actions',montant:200},{id:'p2',nom:'Assurance vie',montant:200}]},{id:'cat2',nom:'Logement',postes:[{id:'p3',nom:'Loyer',montant:1498},{id:'p4',nom:'Charges',montant:120}]},{id:'cat3',nom:'Vie quotidienne',postes:[{id:'p5',nom:'Courses',montant:300},{id:'p6',nom:'Restaurants',montant:100}]},{id:'cat4',nom:'Abonnements',postes:[{id:'p7',nom:'Internet / Téléphone',montant:50},{id:'p8',nom:'Sport',montant:32}]}]};
+
+function drawBudget(){
+const B=S.budget;if(!B)return;
+const totRev=B.revenus.reduce((a,r)=>a+r.montant,0);
+const totDep=B.categories.reduce((a,c)=>a+c.postes.reduce((b,p)=>b+p.montant,0),0);
+const reste=totRev-totDep;
+
+/* KPIs */
+document.getElementById('budgetKpi').innerHTML=`<div class="kpi"><div class="kl">Revenus</div><div class="kv" style="color:var(--green)">${F(totRev)}</div></div><div class="kpi"><div class="kl">Dépenses</div><div class="kv" style="color:var(--red)">${F(totDep)}</div></div><div class="kpi"><div class="kl">Reste</div><div class="kv" style="color:${reste>=0?'var(--green)':'var(--red)'}">${F(reste)}</div></div><div class="kpi"><div class="kl">Taux d'épargne</div><div class="kv" style="color:var(--accent)">${totRev>0?Math.round(reste/totRev*100):0}%</div></div>`;
+
+/* Sankey via Canvas */
+const canvas=document.getElementById('cSankey');
+if(!canvas)return;
+const ctx=canvas.getContext('2d');
+const W=canvas.parentElement.clientWidth;
+const H=canvas.parentElement.clientHeight;
+canvas.width=W;canvas.height=H;
+ctx.clearRect(0,0,W,H);
+
+const colL=60,colM=W*0.42,colR=W*0.78,barW=8;
+const catColors=['#f59e0b','#ec4899','#8b5cf6','#0891b2','#ef4444','#6366f1','#14b8a6','#f97316'];
+const pad=20;
+
+/* Colonne gauche: revenus */
+let yL=pad;
+B.revenus.forEach((r,i)=>{
+  const h=Math.max(30,(r.montant/totRev)*(H-pad*2));
+  ctx.fillStyle='rgba(99,102,241,0.15)';ctx.fillRect(colL,yL,colM-colL-20,h);
+  ctx.fillStyle='#6366f1';ctx.fillRect(colL-barW,yL,barW,h);
+  ctx.fillStyle='#1a2332';ctx.font='600 13px -apple-system,sans-serif';
+  ctx.textAlign='left';ctx.fillText(r.nom+': '+F(r.montant),colL+12,yL+h/2+5);
+  yL+=h;
+});
+
+/* Colonne milieu: catégories */
+let yM=pad;
+const catBoxes=[];
+B.categories.forEach((c,ci)=>{
+  const catTot=c.postes.reduce((a,p)=>a+p.montant,0);
+  const h=Math.max(30,(catTot/totRev)*(H-pad*2));
+  const color=catColors[ci%catColors.length];
+  ctx.fillStyle=color+'22';ctx.fillRect(colM,yM,colR-colM-20,h);
+  ctx.fillStyle=color;ctx.fillRect(colM-barW/2,yM,barW/2,h);
+  /* Flow from left */
+  ctx.fillStyle=color+'18';
+  ctx.beginPath();ctx.moveTo(colM-20,yM);ctx.lineTo(colL+barW,pad);ctx.lineTo(colL+barW,pad+(catTot/totRev)*(H-pad*2));ctx.lineTo(colM-20,yM+h);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#1a2332';ctx.font='500 12px -apple-system,sans-serif';
+  ctx.textAlign='left';ctx.fillText(c.nom+': '+F(catTot),colM+10,yM+h/2+4);
+  catBoxes.push({y:yM,h,ci,postes:c.postes,catTot,color});
+  yM+=h;
+});
+
+/* Colonne droite: postes */
+catBoxes.forEach(cb=>{
+  let yR=cb.y;
+  cb.postes.forEach((p,pi)=>{
+    const h=Math.max(20,(p.montant/totRev)*(H-pad*2));
+    const color=cb.color;
+    ctx.fillStyle=color+'15';ctx.fillRect(colR,yR,W-colR-10,h);
+    ctx.fillStyle=color;ctx.fillRect(colR-barW/2,yR,barW/2,h);
+    /* Flow from middle */
+    ctx.fillStyle=color+'12';
+    ctx.beginPath();ctx.moveTo(colR-20,yR);ctx.lineTo(colR-20-barW,cb.y);ctx.lineTo(colR-20-barW,cb.y+cb.h);ctx.lineTo(colR-20,yR+h);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#1a2332';ctx.font='500 11px -apple-system,sans-serif';
+    ctx.textAlign='right';ctx.fillText(p.nom+': '+F(p.montant),W-16,yR+h/2+4);
+    yR+=h;
+  });
+});
+
+/* Budget detail — éditable */
+let dH='';
+dH+='<div style="font-weight:700;font-size:13px;margin-bottom:8px">Revenus</div>';
+B.revenus.forEach(r=>{
+  dH+=`<div class="lr"><div class="ln">${r.nom}</div><div style="display:flex;align-items:center;gap:8px"><span class="ed" onclick="edBudget(this,'rev','${r.id}')" style="font-weight:700;color:var(--green)">${F(r.montant)}</span><button class="db" onclick="delBudget('rev','${r.id}')">✕</button></div></div>`;
+});
+dH+=`<button class="ab" onclick="addBudgetRev()">+ Revenu</button>`;
+
+B.categories.forEach(c=>{
+  const catTot=c.postes.reduce((a,p)=>a+p.montant,0);
+  dH+=`<div style="font-weight:700;font-size:13px;margin:16px 0 8px;display:flex;justify-content:space-between"><span class="ed" onclick="edBudget(this,'catnom','${c.id}')">${c.nom}</span><span style="color:var(--muted)">${F(catTot)}</span></div>`;
+  c.postes.forEach(p=>{
+    dH+=`<div class="lr"><div class="ln" style="padding-left:12px">${p.nom}</div><div style="display:flex;align-items:center;gap:8px"><span class="ed" onclick="edBudget(this,'poste','${c.id}','${p.id}')">${F(p.montant)}</span><button class="db" onclick="delBudget('poste','${c.id}','${p.id}')">✕</button></div></div>`;
+  });
+  dH+=`<button class="ab" style="margin-left:12px;width:calc(100% - 12px)" onclick="addBudgetPoste('${c.id}')">+ Poste</button>`;
+});
+dH+=`<button class="ab" style="margin-top:16px" onclick="addBudgetCat()">+ Catégorie</button>`;
+
+document.getElementById('budgetDetail').innerHTML=dH;
+}
+
+window.edBudget=function(el,type,id1,id2){
+  let val='';
+  if(type==='rev'){const r=S.budget.revenus.find(x=>x.id===id1);val=r?r.montant:0}
+  else if(type==='catnom'){const c=S.budget.categories.find(x=>x.id===id1);val=c?c.nom:'';el.outerHTML=`<input class="ci" style="width:160px;text-align:left" value="${val}" onkeydown="if(event.key==='Enter')cmBudget(this,'catnom','${id1}');if(event.key==='Escape')R(true)" onblur="cmBudget(this,'catnom','${id1}')" autofocus>`;return}
+  else if(type==='poste'){const c=S.budget.categories.find(x=>x.id===id1);const p=c?c.postes.find(x=>x.id===id2):null;val=p?p.montant:0}
+  el.outerHTML=`<input class="ci" style="width:90px" value="${val}" onkeydown="if(event.key==='Enter')cmBudget(this,'${type}','${id1}','${id2||''}');if(event.key==='Escape')R(true)" onblur="cmBudget(this,'${type}','${id1}','${id2||''}')" autofocus>`;
+};
+window.cmBudget=function(inp,type,id1,id2){
+  if(type==='rev'){const v=parseFloat(inp.value.replace(',','.'));const r=S.budget.revenus.find(x=>x.id===id1);if(r&&!isNaN(v))r.montant=v}
+  else if(type==='catnom'){const c=S.budget.categories.find(x=>x.id===id1);if(c)c.nom=inp.value.trim()||c.nom}
+  else if(type==='poste'){const v=parseFloat(inp.value.replace(',','.'));const c=S.budget.categories.find(x=>x.id===id1);const p=c?c.postes.find(x=>x.id===id2):null;if(p&&!isNaN(v))p.montant=v}
+  autoSave();R(true);
+};
+window.delBudget=function(type,id1,id2){
+  if(type==='rev')S.budget.revenus=S.budget.revenus.filter(x=>x.id!==id1);
+  else if(type==='poste'){const c=S.budget.categories.find(x=>x.id===id1);if(c)c.postes=c.postes.filter(x=>x.id!==id2)}
+  autoSave();R(true);
+};
+window.addBudgetRev=function(){S.budget.revenus.push({id:'r'+nid(),nom:prompt('Nom du revenu','Autre revenu')||'Revenu',montant:0});autoSave();R(true)};
+window.addBudgetCat=function(){S.budget.categories.push({id:'cat'+nid(),nom:prompt('Nom de la catégorie','Nouvelle catégorie')||'Catégorie',postes:[]});autoSave();R(true)};
+window.addBudgetPoste=function(catId){const c=S.budget.categories.find(x=>x.id===catId);if(c){c.postes.push({id:'p'+nid(),nom:prompt('Nom du poste','Nouveau poste')||'Poste',montant:0});autoSave();R(true)}};
 function initApp(){R(true);fSP();setTimeout(()=>doRef(),2000)}
 </script>
 </body>
