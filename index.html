@@ -66,6 +66,7 @@ async function saveData(){if(!uid)return;try{await db.collection('users').doc(ui
 const AV="P3CLMM04M63LQ42M";let nxId=Date.now();const nid=()=>++nxId;
 const GAS="https://script.google.com/macros/s/AKfycbzcnR1NQWNl3N1FqlFKQbSEdT-Hv36hzVVzM4Ny9bJH6ZONbC22euCViHGdOGI6Z6Di1w/exec";
 async function yQ(t){try{const r=await fetch(GAS+"?t="+encodeURIComponent(t));if(!r.ok)return null;const j=await r.json();if(j.error||!j.price)return null;return{price:j.price,prev:j.prev||0,chg:j.chg||0,cur:j.cur||'USD'}}catch(e){return null}}
+async function yQBatch(tickers){try{const r=await fetch(GAS+"?t="+encodeURIComponent(tickers.join(",")));if(!r.ok)return{};return await r.json()}catch(e){return{}}}
 const YM={"EPA:AI":"AI.PA","EPA:DCAM":"DCAM.PA","EPA:PUST":"PUST.PA","EPA:GTT":"GTT.PA","EPA:DG":"DG.PA","EPA:EL":"EL.PA","EPA:SU":"SU.PA","EPA:ALMIB":"ALMIB.PA","GOOGL":"GOOGL","AMBA":"AMBA","NET":"NET","DXCM":"DXCM","ON":"ON","NU":"NU","RKLB":"RKLB","TOST":"TOST","AMZN":"AMZN","SNOW":"SNOW","SOFI":"SOFI","SYM":"SYM","TER":"TER","TTD":"TTD","TMDX":"TMDX","CELH":"CELH","PATH":"PATH","VRT":"VRT","ZS":"ZS","EPA:BNKE":"BNKE.PA","LON:HNSC":"HNSC.L","XDGU":"XDGU.DE","BTC":"BTC-EUR","ETH":"ETH-EUR","NEAR":"NEAR-EUR","SOL":"SOL-EUR","USDC":"USDC-EUR"};
 let rStat="",rL=false,eurUsd=.92,spM={};
 const _F=n=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
@@ -98,10 +99,17 @@ function cTWR(key){
 function cPan(){const vm=S.versMensuels||[],ml=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"],mn=["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"],ym=["2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09","2026-10","2026-11","2026-12"],r=[];for(let i=1;i<vm.length;i++){const m=vm[i].mois||'',p=m.split(' ');if(!p[1]||!p[1].startsWith('26'))continue;const mi=mn.indexOf(p[0]);if(mi<0)continue;const debut=vm[i-1].bourse||0;const fin=vm[i].bourse||0;const vers=vm[i].versement||0;const perf=debut>0?((fin-vers-debut)/debut)*100:0;r.push({l:ml[mi],perf:Math.round(perf*100)/100,pv:Math.round((fin-vers-debut)*100)/100,sp:spM[ym[mi]]!=null?Math.round(spM[ym[mi]]*100)/100:null})}return r}
 function cSec(){const s={};['pea','ctosb','ctoibkr'].forEach(pk=>{S.pf[pk].l.forEach(l=>{const k=SECTORS[l.c]||'Autre';s[k]=(s[k]||0)+l.co*l.p})});return Object.entries(s).sort((a,b)=>b[1]-a[1])}
 
-async function doRef(){if(rL)return;rL=true;const b=document.getElementById('rbtn');b.innerHTML='⏳';b.disabled=true;const fx=await yQ('EURUSD=X');if(fx&&fx.price>0)eurUsd=1/fx.price;const tasks=[];['pea','ctosb','ctoibkr'].forEach(pk=>{S.pf[pk].l.forEach(x=>{const yt=YM[x.c]||x.c;if(yt&&yt!=='—')tasks.push({t:'s',pk,id:x.id,yt})})});S.crypto.forEach(x=>{const yt=YM[x.symbol];if(yt)tasks.push({t:'c',id:x.id,yt})});
-const parisH=new Date().toLocaleString('en-US',{timeZone:'Europe/Paris',hour:'numeric',hour12:false});const usOpen=parseInt(parisH)>=15||parseInt(parisH)<1;/* US ouvert ~14h30-22h Paris */
-let ok=0;for(let i=0;i<tasks.length;i++){const task=tasks[i],r=await yQ(task.yt);if(!r)continue;ok++;if(task.t==='s'){const l=S.pf[task.pk].l.find(x=>x.id===task.id);if(l){const isUS=r.cur==='USD';if(isUS){l.usd=Math.round(r.price*100)/100;l.co=Math.round(r.price*eurUsd*100)/100}else if(r.cur==='GBp')l.co=Math.round(r.price*.01*1.17*100)/100;else l.co=Math.round(r.price*100)/100;/* Var jour : masquer pour US si marché fermé */if(isUS&&!usOpen){l.var=0}else{l.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0}}}else{const cr=S.crypto.find(x=>x.id===task.id);if(cr){cr.prix=Math.round(r.price*100)/100;cr.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0}}}
-let spyDay=null;const spyQ=await yQ('SPY');if(spyQ)spyDay=Math.round(spyQ.chg*100)/100;
+async function doRef(){if(rL)return;rL=true;const b=document.getElementById('rbtn');b.innerHTML='⏳';b.disabled=true;
+const allT=['EURUSD=X','SPY'];const taskMap=[];
+['pea','ctosb','ctoibkr'].forEach(pk=>{S.pf[pk].l.forEach(x=>{const yt=YM[x.c]||x.c;if(yt&&yt!=='—'){allT.push(yt);taskMap.push({t:'s',pk,id:x.id,yt})}})});
+S.crypto.forEach(x=>{const yt=YM[x.symbol];if(yt){allT.push(yt);taskMap.push({t:'c',id:x.id,yt})}});
+const data=await yQBatch(allT);
+if(data['EURUSD=X']&&data['EURUSD=X'].price>0)eurUsd=1/data['EURUSD=X'].price;
+const parisH=new Date().toLocaleString('en-US',{timeZone:'Europe/Paris',hour:'numeric',hour12:false});const usOpen=parseInt(parisH)>=15||parseInt(parisH)<1;
+let ok=0;taskMap.forEach(task=>{const r=data[task.yt];if(!r||r.error||!r.price)return;ok++;
+if(task.t==='s'){const l=S.pf[task.pk].l.find(x=>x.id===task.id);if(l){const isUS=r.cur==='USD';if(isUS){l.usd=Math.round(r.price*100)/100;l.co=Math.round(r.price*eurUsd*100)/100}else if(r.cur==='GBp')l.co=Math.round(r.price*.01*1.17*100)/100;else l.co=Math.round(r.price*100)/100;if(isUS&&!usOpen){l.var=0}else{l.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0}}}
+else{const cr=S.crypto.find(x=>x.id===task.id);if(cr){cr.prix=Math.round(r.price*100)/100;cr.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0}}});
+let spyDay=null;if(data['SPY']&&data['SPY'].price)spyDay=Math.round(data['SPY'].chg*100)/100;
 if(ok>0){if(!S.histJour)S.histJour=[];const today=new Date().toISOString().slice(0,10);const t2=Tot();const dp=t2.p.dayPnl+t2.s.dayPnl+t2.i.dayPnl;const dpct=t2.bo>0?(dp/t2.bo*100):0;const ex=S.histJour.findIndex(h=>h.date===today);const ent={date:today,portf:Math.round(dpct*100)/100,pnl:Math.round(dp*100)/100,sp:spyDay,bourse:Math.round(t2.bo)};if(ex>=0)S.histJour[ex]=ent;else S.histJour.push(ent);if(S.histJour.length>30)S.histJour=S.histJour.slice(-30)}
 const now=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});rStat='✓ '+ok+' à '+now;rL=false;b.innerHTML='🔄';b.disabled=false;autoSave();R(true)}
 
