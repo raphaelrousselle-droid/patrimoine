@@ -714,13 +714,11 @@ window.delRev=function(id){S.revSources=S.revSources.filter(x=>x.id!==id);autoSa
 window.addRev=function(){const nom=prompt("Nom de la source","Loyer");if(!nom)return;const colors=['#f59e0b','#ec4899','#6366f1','#14b8a6','#f97316','#8b5cf6'];S.revSources.push({id:'rs'+nid(),nom:nom,mensuel:0,auto:false,color:colors[S.revSources.length%colors.length]});autoSave();R(true)};
 
 /* Notes libres */
-if(!S.notes)S.notes={};
-window.edNote=function(section){const cur=S.notes[section]||'';const n=prompt('📝 Note pour '+section+'\n(laisse vide pour supprimer)',cur);if(n===null)return;S.notes[section]=n;autoSave();R(true)};
-function noteBtn(section){const has=S.notes&&S.notes[section];return ' <button style="font-size:10px;background:none;border:1px solid '+(has?'var(--accent)':'var(--border)')+';border-radius:4px;padding:2px 6px;cursor:pointer;color:'+(has?'var(--accent)':'var(--muted)')+'" onclick="edNote(\''+section+'\')">📝'+(has?' ✓':'')+'</button>'}
-function noteDisp(section){const n=S.notes&&S.notes[section];return n?'<div style="background:rgba(15,186,129,.05);border:1px solid rgba(15,186,129,.15);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text);margin-bottom:12px">📝 '+n+'</div>':''}
+window.edNote=function(section){if(!S||!S.notes)return;const cur=S.notes[section]||'';const n=prompt('📝 Note pour '+section+'\n(laisse vide pour supprimer)',cur);if(n===null)return;S.notes[section]=n;autoSave();R(true)};
+function noteBtn(section){const has=S&&S.notes&&S.notes[section];return ' <button style="font-size:10px;background:none;border:1px solid '+(has?'var(--accent)':'var(--border)')+';border-radius:4px;padding:2px 6px;cursor:pointer;color:'+(has?'var(--accent)':'var(--muted)')+'" onclick="edNote(\''+section+'\')">📝'+(has?' ✓':'')+'</button>'}
+function noteDisp(section){if(!S||!S.notes)return '';const n=S.notes[section];return n?'<div style="background:rgba(15,186,129,.05);border:1px solid rgba(15,186,129,.15);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text);margin-bottom:12px">📝 '+n+'</div>':''}
 
 function initApp(){R(true);fSP();setTimeout(doRef,2000);setInterval(function(){if(!rL)doRef()},300000)}
 </script>
 </body>
 </html>
-
