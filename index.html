@@ -75,7 +75,7 @@ async function yQBatch(tickers){
   return results;
 }
 const YM={"EPA:AI":"AI.PA","EPA:DCAM":"DCAM.PA","EPA:PUST":"PUST.PA","EPA:GTT":"GTT.PA","EPA:DG":"DG.PA","EPA:EL":"EL.PA","EPA:SU":"SU.PA","EPA:ALMIB":"ALMIB.PA","GOOGL":"GOOGL","AMBA":"AMBA","NET":"NET","DXCM":"DXCM","ON":"ON","NU":"NU","RKLB":"RKLB","TOST":"TOST","AMZN":"AMZN","SNOW":"SNOW","SOFI":"SOFI","SYM":"SYM","TER":"TER","TTD":"TTD","TMDX":"TMDX","CELH":"CELH","PATH":"PATH","VRT":"VRT","ZS":"ZS","EPA:BNKE":"BNKE.PA","LON:HNSC":"HNSC.L","XDGU":"XDGU.DE","BTC":"BTC-EUR","ETH":"ETH-EUR","NEAR":"NEAR-EUR","SOL":"SOL-EUR","USDC":"USDC-EUR"};
-let rStat="",rL=false,eurUsd=.92,spM={};
+let rStat="",rL=false,eurUsd=.85,spM={};
 const _F=n=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
 const _F2=n=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
 const F=n=>hiddenMode?'***':_F(n);
@@ -107,11 +107,12 @@ function cPan(){const vm=S.versMensuels||[],ml=["Janvier","Février","Mars","Avr
 function cSec(){const s={};['pea','ctosb','ctoibkr'].forEach(pk=>{S.pf[pk].l.forEach(l=>{const k=SECTORS[l.c]||'Autre';s[k]=(s[k]||0)+l.co*l.p})});return Object.entries(s).sort((a,b)=>b[1]-a[1])}
 
 async function doRef(){if(rL)return;rL=true;const b=document.getElementById('rbtn');b.innerHTML='⏳';b.disabled=true;
-const allT=['EURUSD=X','SPY'];const taskMap=[];
+/* Récupérer taux EUR/USD en premier */
+try{const fxr=await fetch(GAS+"?t=EURUSD%3DX");if(fxr.ok){const fxj=await fxr.json();const fxd=fxj['EURUSD=X']||fxj;if(fxd&&fxd.price>0)eurUsd=1/fxd.price}}catch(e){}
+const allT=['SPY'];const taskMap=[];
 ['pea','ctosb','ctoibkr'].forEach(pk=>{S.pf[pk].l.forEach(x=>{const yt=YM[x.c]||x.c;if(yt&&yt!=='—'){allT.push(yt);taskMap.push({t:'s',pk,id:x.id,yt})}})});
 S.crypto.forEach(x=>{const yt=YM[x.symbol];if(yt){allT.push(yt);taskMap.push({t:'c',id:x.id,yt})}});
 const data=await yQBatch(allT);
-if(data['EURUSD=X']&&data['EURUSD=X'].price>0)eurUsd=1/data['EURUSD=X'].price;
 const parisH=new Date().toLocaleString('en-US',{timeZone:'Europe/Paris',hour:'numeric',hour12:false});const usOpen=parseInt(parisH)>=15||parseInt(parisH)<1;
 let ok=0;taskMap.forEach(task=>{const r=data[task.yt];if(!r||r.error||!r.price)return;ok++;
 if(task.t==='s'){const l=S.pf[task.pk].l.find(x=>x.id===task.id);if(l){const isUS=r.cur==='USD';if(isUS){l.usd=Math.round(r.price*100)/100;l.co=Math.round(r.price*eurUsd*100)/100}else if(r.cur==='GBp')l.co=Math.round(r.price*.01*1.17*100)/100;else l.co=Math.round(r.price*100)/100;if(isUS&&!usOpen){l.var=0}else{l.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0}}}
