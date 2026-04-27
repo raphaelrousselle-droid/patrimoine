@@ -64,7 +64,7 @@ let sT=null;function autoSave(){if(sT)clearTimeout(sT);sT=setTimeout(saveData,20
 async function saveData(){if(!uid)return;try{await db.collection('users').doc(uid).set({patrimoine:JSON.parse(JSON.stringify(S)),snapshots:snaps,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true})}catch(e){}}
 
 const AV="P3CLMM04M63LQ42M";let nxId=Date.now();const nid=()=>++nxId;
-const GAS="https://script.google.com/macros/s/AKfycbyda3b71DiDDmw3Jvk-AVM4xrRasHUPjfCS0qGGoPEIjvXvtxKzWJ2bEsS04NjhaI8uKA/exec";
+const GAS="https://script.google.com/macros/s/AKfycbxY_GpDiqdSGbH3IWiDH1qSBy6As5dXP2CwmsJRiAbgN7KX1MODZ5_fF383japbnOhGkA/exec";
 async function yQ(t){return new Promise(resolve=>{const cb='_yq'+Date.now()+Math.random().toString(36).slice(2);window[cb]=function(d){delete window[cb];const r=d[t]||d;if(r&&r.price)resolve({price:r.price,prev:r.prev||0,chg:r.chg||0,cur:r.cur||'USD'});else resolve(null)};const s=document.createElement('script');s.src=GAS+"?t="+encodeURIComponent(t)+"&callback="+cb;s.onerror=()=>{delete window[cb];resolve(null)};document.head.appendChild(s);setTimeout(()=>{delete window[cb];resolve(null)},15000)})}
 async function yQBatch(tickers){
   const results={};const chunkSize=8;
