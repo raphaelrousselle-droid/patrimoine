@@ -65,12 +65,13 @@ async function saveData(){if(!uid)return;try{await db.collection('users').doc(ui
 
 const AV="P3CLMM04M63LQ42M";let nxId=Date.now();const nid=()=>++nxId;
 const GAS="https://script.google.com/macros/s/AKfycbyda3b71DiDDmw3Jvk-AVM4xrRasHUPjfCS0qGGoPEIjvXvtxKzWJ2bEsS04NjhaI8uKA/exec";
-async function yQ(t){try{const r=await fetch(GAS+"?t="+encodeURIComponent(t),{redirect:'follow'});if(!r.ok)return null;const j=await r.json();const d=j[t]||j;if(d.error||!d.price)return null;return{price:d.price,prev:d.prev||0,chg:d.chg||0,cur:d.cur||'USD'}}catch(e){return null}}
+async function yQ(t){return new Promise(resolve=>{const cb='_yq'+Date.now()+Math.random().toString(36).slice(2);window[cb]=function(d){delete window[cb];const r=d[t]||d;if(r&&r.price)resolve({price:r.price,prev:r.prev||0,chg:r.chg||0,cur:r.cur||'USD'});else resolve(null)};const s=document.createElement('script');s.src=GAS+"?t="+encodeURIComponent(t)+"&callback="+cb;s.onerror=()=>{delete window[cb];resolve(null)};document.head.appendChild(s);setTimeout(()=>{delete window[cb];resolve(null)},15000)})}
 async function yQBatch(tickers){
   const results={};const chunkSize=8;
   for(let i=0;i<tickers.length;i+=chunkSize){
     const chunk=tickers.slice(i,i+chunkSize);
-    try{const r=await fetch(GAS+"?t="+encodeURIComponent(chunk.join(",")),{redirect:'follow'});if(r.ok){const j=await r.json();Object.assign(results,j)}}catch(e){}
+    const r=await new Promise(resolve=>{const cb='_yqb'+Date.now()+Math.random().toString(36).slice(2);window[cb]=function(d){delete window[cb];resolve(d)};const s=document.createElement('script');s.src=GAS+"?t="+encodeURIComponent(chunk.join(","))+"&callback="+cb;s.onerror=()=>{delete window[cb];resolve({})};document.head.appendChild(s);setTimeout(()=>{delete window[cb];resolve({})},15000)});
+    Object.assign(results,r);
   }
   return results;
 }
