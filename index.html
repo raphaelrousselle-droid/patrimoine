@@ -65,8 +65,15 @@ async function saveData(){if(!uid)return;try{await db.collection('users').doc(ui
 
 const AV="P3CLMM04M63LQ42M";let nxId=Date.now();const nid=()=>++nxId;
 const GAS="https://script.google.com/macros/s/AKfycbyda3b71DiDDmw3Jvk-AVM4xrRasHUPjfCS0qGGoPEIjvXvtxKzWJ2bEsS04NjhaI8uKA/exec";
-async function yQ(t){try{const r=await fetch(GAS+"?t="+encodeURIComponent(t));if(!r.ok)return null;const j=await r.json();const d=j[t]||j;if(d.error||!d.price)return null;return{price:d.price,prev:d.prev||0,chg:d.chg||0,cur:d.cur||'USD'}}catch(e){return null}}
-async function yQBatch(tickers){try{const r=await fetch(GAS+"?t="+encodeURIComponent(tickers.join(",")));if(!r.ok)return{};return await r.json()}catch(e){return{}}}
+async function yQ(t){try{const r=await fetch(GAS+"?t="+encodeURIComponent(t),{redirect:'follow'});if(!r.ok)return null;const j=await r.json();const d=j[t]||j;if(d.error||!d.price)return null;return{price:d.price,prev:d.prev||0,chg:d.chg||0,cur:d.cur||'USD'}}catch(e){return null}}
+async function yQBatch(tickers){
+  const results={};const chunkSize=8;
+  for(let i=0;i<tickers.length;i+=chunkSize){
+    const chunk=tickers.slice(i,i+chunkSize);
+    try{const r=await fetch(GAS+"?t="+encodeURIComponent(chunk.join(",")),{redirect:'follow'});if(r.ok){const j=await r.json();Object.assign(results,j)}}catch(e){}
+  }
+  return results;
+}
 const YM={"EPA:AI":"AI.PA","EPA:DCAM":"DCAM.PA","EPA:PUST":"PUST.PA","EPA:GTT":"GTT.PA","EPA:DG":"DG.PA","EPA:EL":"EL.PA","EPA:SU":"SU.PA","EPA:ALMIB":"ALMIB.PA","GOOGL":"GOOGL","AMBA":"AMBA","NET":"NET","DXCM":"DXCM","ON":"ON","NU":"NU","RKLB":"RKLB","TOST":"TOST","AMZN":"AMZN","SNOW":"SNOW","SOFI":"SOFI","SYM":"SYM","TER":"TER","TTD":"TTD","TMDX":"TMDX","CELH":"CELH","PATH":"PATH","VRT":"VRT","ZS":"ZS","EPA:BNKE":"BNKE.PA","LON:HNSC":"HNSC.L","XDGU":"XDGU.DE","BTC":"BTC-EUR","ETH":"ETH-EUR","NEAR":"NEAR-EUR","SOL":"SOL-EUR","USDC":"USDC-EUR"};
 let rStat="",rL=false,eurUsd=.92,spM={};
 const _F=n=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
