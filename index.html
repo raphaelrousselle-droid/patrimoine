@@ -28,7 +28,7 @@
 <nav><div class="ni"><div class="logo"><div class="li">€</div><span class="lt">Mon Patrimoine</span></div><div class="nr"><div class="tabs" id="tabs"><button class="tab active" data-page="home">Vue d'ensemble</button><button class="tab" data-page="bourse">Bourse</button><button class="tab" data-page="epargne">Épargne</button><button class="tab" data-page="immo">Immo</button><button class="tab" data-page="crypto">Crypto</button><button class="tab" data-page="dettes">Dettes</button><div style="position:relative;display:inline-block" id="moreMenu"><button class="tab" onclick="document.getElementById('moreDD').style.display=document.getElementById('moreDD').style.display==='block'?'none':'block'">⚡ Outils ▾</button><div id="moreDD" style="display:none;position:absolute;top:100%;right:0;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);padding:6px;z-index:50;min-width:160px"><button class="tab" data-page="budget" style="width:100%;text-align:left">💰 Budget</button><button class="tab" data-page="objectifs" style="width:100%;text-align:left">🎯 Objectifs</button><button class="tab" data-page="revenus" style="width:100%;text-align:left">💸 Revenus</button><button class="tab" data-page="resume" style="width:100%;text-align:left">📋 Résumé</button><button class="tab" data-page="simulator" style="width:100%;text-align:left">🔮 Simulateur</button></div></div></div><button class="btn btn-o" id="rbtn" onclick="doRef()">🔄</button><button class="btn btn-o" onclick="exportCSV()">📥</button><button class="btn btn-g" id="sbtn" onclick="doSave()">📸</button><div class="user-bar" id="userBar"></div></div></div></nav>
 <main>
 <div class="page active" id="page-home"><div class="kr" id="hk"></div><div id="widgetResume" style="margin-bottom:20px"></div><div class="hc"><div><span style="font-size:12px;color:var(--muted)">💡 Règle des 4%</span><div style="font-size:20px;font-weight:800;color:var(--accent);margin-top:2px" id="k4"></div></div><div style="font-size:13px;color:var(--muted)" id="k4m"></div></div><div class="g21"><div class="card"><div class="ct">Évolution Patrimoine Net</div><div class="cb"><canvas id="cN"></canvas></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">Répartition</div><div style="display:flex;gap:4px"><button class="ctb active" id="pieMode_brut" onclick="setPieMode('brut')">Brut</button><button class="ctb" id="pieMode_net" onclick="setPieMode('net')">Net</button></div></div><div class="cbs"><canvas id="cP"></canvas></div><div id="pl" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution par catégorie</div><div style="display:flex;gap:4px" id="evoPs"></div></div><div class="cto" id="et"></div><div class="cb"><canvas id="cE"></canvas></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">📸 Historique</div><button class="reset-btn" onclick="if(confirm('Reset?'))doReset()">🔄 Reset</button></div><div id="sl" style="margin-top:12px"></div></div></div>
-<div class="page" id="page-bourse"><div class="kr" id="bk"></div><div class="wb" id="bw"></div><div class="g2" style="margin-bottom:16px"><div class="card"><div class="ct">📊 Panorama 2026</div><div id="ptw"></div><div class="ss" id="sps"></div></div><div class="card"><div class="ct">Répartition secteur</div><div class="cbs"><canvas id="cSec"></canvas></div><div id="secLeg" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:8px"><div class="ct" style="margin:0">Perf cumulée TWR vs S&P</div><div style="display:flex;gap:4px" id="ps"></div></div><div class="cb"><canvas id="cPf"></canvas></div><div class="cl"><span style="color:#7c3aed">● Portf.</span><span style="color:#f59e0b">- - S&P</span></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">💰 Versements mensuels</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addVM()">+ Mois</button></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Valeur = relevée au 1er du mois suivant. Versement = viré pendant le mois.</div><div id="vmList"></div></div><div id="rstat" class="rs" style="margin:12px 0"></div><div class="card"><div class="fb"><div class="ct" style="margin:0">PEA — Fortuneo</div></div><div class="kr" id="pk1" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt1"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — Saxo <span style="font-size:11px;color:var(--muted)">(PRU $)</span></div></div><div class="kr" id="pk2" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt2"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — IBKR</div></div><div class="kr" id="pk3" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt3"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">🎯 Objectifs Bourse</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addBourseGoal()">+ Objectif</button></div><div id="bourseGoals" style="margin-top:12px"></div></div></div>
+<div class="page" id="page-bourse"><div class="kr" id="bk"></div><div class="wb" id="bw"></div><div class="g2" style="margin-bottom:16px"><div class="card"><div class="ct">📊 Panorama 2026</div><div id="ptw"></div><div class="ss" id="sps"></div></div><div class="card"><div class="ct">Répartition secteur</div><div class="cbs"><canvas id="cSec"></canvas></div><div id="secLeg" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:8px"><div class="ct" style="margin:0">Perf cumulée TWR vs S&P</div><div style="display:flex;gap:4px" id="ps"></div></div><div class="cb"><canvas id="cPf"></canvas></div><div class="cl"><span style="color:#7c3aed">● Portf.</span><span style="color:#f59e0b">- - S&P</span></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">💰 Versements mensuels</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addVM()">+ Mois</button></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Valeur = relevée au 1er du mois suivant. Versement = viré pendant le mois.</div><div id="vmList"></div></div><div id="rstat" class="rs" style="margin:12px 0"></div><div class="card"><div class="fb"><div class="ct" style="margin:0">PEA — Fortuneo</div></div><div class="kr" id="pk1" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt1"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — Saxo <span style="font-size:11px;color:var(--muted)">(PRU $)</span></div></div><div class="kr" id="pk2" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt2"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — IBKR</div></div><div class="kr" id="pk3" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt3"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">🎯 Objectifs Bourse</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addBourseGoal()">+ Objectif</button></div><div id="bourseGoals" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">👀 Watchlist</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addWatch()">+ Suivre</button></div><div id="watchlist" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">📓 Journal d'investissement</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addJournal()">+ Entrée</button></div><div id="journal" style="margin-top:12px"></div></div></div>
 <div class="page" id="page-epargne"><div class="kr" id="ek"></div><div class="g2"><div class="card"><div class="ct" id="ct1"></div><div id="cl1"></div><div id="af1"></div></div><div class="card"><div class="ct" id="ct2"></div><div id="cl2"></div><div id="af2"></div></div><div class="card sf"><div class="ct" id="ct3"></div><div id="cl3"></div><div id="af3"></div></div></div></div>
 <div class="page" id="page-immo"><div class="kr" id="ik"></div><div id="ic"></div></div>
 <div class="page" id="page-crypto"><div class="kr" id="ck"></div><div id="rstatc" class="rs" style="margin-bottom:8px"></div><div class="card"><div class="ct">Portefeuille Crypto</div><div class="tw" id="crt"></div><div id="cra"></div></div></div>
@@ -110,12 +110,18 @@ try{const fxr=await fetch(GAS+"?t=EURUSD%3DX");if(fxr.ok){const fxj=await fxr.js
 const allT=['SPY'];const taskMap=[];
 ['pea','ctosb','ctoibkr'].forEach(pk=>{S.pf[pk].l.forEach(x=>{const yt=YM[x.c]||x.c;if(yt&&yt!=='—'){allT.push(yt);taskMap.push({t:'s',pk,id:x.id,yt})}})});
 S.crypto.forEach(x=>{const yt=YM[x.symbol];if(yt){allT.push(yt);taskMap.push({t:'c',id:x.id,yt})}});
+/* Watchlist */
+if(S.watchlist)S.watchlist.forEach(w=>{allT.push(w.ticker);taskMap.push({t:'w',id:w.id,yt:w.ticker})});
 const data=await yQBatch(allT);
 const parisH=new Date().toLocaleString('en-US',{timeZone:'Europe/Paris',hour:'numeric',hour12:false});const usOpen=parseInt(parisH)>=15||parseInt(parisH)<1;
 let ok=0;taskMap.forEach(task=>{const r=data[task.yt];if(!r||r.error||!r.price)return;ok++;
-if(task.t==='s'){const l=S.pf[task.pk].l.find(x=>x.id===task.id);if(l){const isUS=r.cur==='USD';if(isUS){l.usd=Math.round(r.price*100)/100;l.co=Math.round(r.price*eurUsd*100)/100}else if(r.cur==='GBp')l.co=Math.round(r.price*.01*1.17*100)/100;else l.co=Math.round(r.price*100)/100;if(isUS&&!usOpen){l.var=0}else{l.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0}}}
-else{const cr=S.crypto.find(x=>x.id===task.id);if(cr){cr.prix=Math.round(r.price*100)/100;cr.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0}}});
-let spyDay=null;if(data['SPY']&&data['SPY'].price)spyDay=Math.round(data['SPY'].chg*100)/100;
+if(task.t==='s'){const l=S.pf[task.pk].l.find(x=>x.id===task.id);if(l){const isUS=r.cur==='USD';if(isUS){l.usd=Math.round(r.price*100)/100;l.co=Math.round(r.price*eurUsd*100)/100}else if(r.cur==='GBp')l.co=Math.round(r.price*.01*1.17*100)/100;else l.co=Math.round(r.price*100)/100;if(isUS&&!usOpen){l.var=0}else{l.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0}
+/* Sparkline: stocker les 5 derniers prix */
+if(!l.spark)l.spark=[];const today2=new Date().toISOString().slice(0,10);if(l.spark.length===0||l.spark[l.spark.length-1].d!==today2)l.spark.push({d:today2,p:l.co});else l.spark[l.spark.length-1].p=l.co;if(l.spark.length>5)l.spark=l.spark.slice(-5);
+}}
+else{const cr=S.crypto.find(x=>x.id===task.id);if(cr){cr.prix=Math.round(r.price*100)/100;cr.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0}}
+if(task.t==='w'){const w=S.watchlist?S.watchlist.find(x=>x.id===task.id):null;if(w){w.prix=Math.round(r.price*100)/100;w.prev=r.prev||0;w.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0;w.cur=r.cur||''}}
+});let spyDay=null;if(data['SPY']&&data['SPY'].price)spyDay=Math.round(data['SPY'].chg*100)/100;
 if(ok>0){if(!S.histJour)S.histJour=[];const today=new Date().toISOString().slice(0,10);const t2=Tot();const dp=t2.p.dayPnl+t2.s.dayPnl+t2.i.dayPnl;const dpct=t2.bo>0?(dp/t2.bo*100):0;const ex=S.histJour.findIndex(h=>h.date===today);const ent={date:today,portf:Math.round(dpct*100)/100,pnl:Math.round(dp*100)/100,sp:spyDay,bourse:Math.round(t2.bo)};if(ex>=0)S.histJour[ex]=ent;else S.histJour.push(ent);if(S.histJour.length>30)S.histJour=S.histJour.slice(-30)}
 const now=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});rStat='✓ '+ok+' à '+now;rL=false;b.innerHTML='🔄';b.disabled=false;autoSave();R(true)}
 
@@ -182,6 +188,15 @@ window.addBourseGoal=function(){
 };
 window.edBourseGoal=function(el,i){const g=S.bourseGoals[i];if(!g)return;const v=parseFloat(prompt('Nouvelle cible ?',g.cible));if(isNaN(v))return;g.cible=v;autoSave();R(true)};
 window.delBourseGoal=function(i){S.bourseGoals.splice(i,1);autoSave();R(true)};
+
+/* Watchlist */
+window.addWatch=function(){const ticker=prompt('Ticker Yahoo (ex: AAPL, MSFT, LVMH.PA)','');if(!ticker)return;const nom=prompt('Nom','');const alerteHaut=parseFloat(prompt('Alerte si prix > (laisser vide = pas d\'alerte)',''))||0;const alerteBas=parseFloat(prompt('Alerte si prix < (laisser vide = pas d\'alerte)',''))||0;if(!S.watchlist)S.watchlist=[];S.watchlist.push({id:'w'+nid(),ticker:ticker.trim(),nom:nom||ticker.trim(),prix:0,prev:0,var:0,cur:'',alerteHaut,alerteBas});autoSave();R(true)};
+window.delWatch=function(id){S.watchlist=S.watchlist.filter(x=>x.id!==id);autoSave();R(true)};
+window.edWatchAlerte=function(el,id,type){const w=S.watchlist.find(x=>x.id===id);if(!w)return;const v=parseFloat(prompt(type==='haut'?'Alerte si prix >':'Alerte si prix <',type==='haut'?w.alerteHaut:w.alerteBas));if(isNaN(v))return;if(type==='haut')w.alerteHaut=v;else w.alerteBas=v;autoSave();R(true)};
+
+/* Journal d'investissement */
+window.addJournal=function(){const date=new Date().toLocaleDateString('fr-FR');const action=prompt('Action (ex: Achat GOOGL, Vente Air Liquide, Renforcement ETF...)','');if(!action)return;const raison=prompt('Pourquoi ? (ta réflexion, ton analyse)','');if(!S.journal)S.journal=[];S.journal.push({id:'j'+nid(),date,action,raison:raison||'',ts:Date.now()});autoSave();R(true)};
+window.delJournal=function(id){S.journal=S.journal.filter(x=>x.id!==id);autoSave();R(true)};
 
 /* Edit helpers */
 function mkEd(val,onclick){return '<span class="ed" onclick="'+onclick+'">'+val+'</span>'}
@@ -393,6 +408,38 @@ S.bourseGoals.forEach((g,i)=>{
 });
 if(S.bourseGoals.length===0)bgH='<div style="color:var(--muted);font-size:12px">Aucun objectif. Clique + Objectif pour en ajouter.</div>';
 document.getElementById('bourseGoals').innerHTML=bgH;
+
+/* Watchlist */
+if(!S.watchlist)S.watchlist=[];
+let wlH='';
+if(S.watchlist.length>0){
+  wlH+='<table><thead><tr><th class="l">Titre</th><th>Prix</th><th>Var</th><th>Alerte ↑</th><th>Alerte ↓</th><th></th></tr></thead><tbody>';
+  S.watchlist.forEach(w=>{
+    const alerteH=w.alerteHaut>0&&w.prix>=w.alerteHaut;
+    const alerteB=w.alerteBas>0&&w.prix>0&&w.prix<=w.alerteBas;
+    wlH+='<tr'+(alerteH||alerteB?' style="background:rgba(239,68,68,.06)"':'')+'>';
+    wlH+='<td class="l"><b style="font-size:12px">'+(alerteH?'🔴 ':alerteB?'🟢 ':'')+w.nom+'</b><div class="tk">'+w.ticker+'</div></td>';
+    wlH+='<td style="font-weight:700">'+(w.prix>0?(w.cur==='USD'?'$':'')+w.prix.toFixed(2)+(w.cur==='EUR'?' €':''):'—')+'</td>';
+    wlH+='<td>'+VC(w.var)+'</td>';
+    wlH+='<td><span class="ed" onclick="edWatchAlerte(this,\''+w.id+'\',\'haut\')" style="color:'+(alerteH?'var(--red)':'var(--muted)')+'">'+(w.alerteHaut>0?w.alerteHaut:'—')+'</span></td>';
+    wlH+='<td><span class="ed" onclick="edWatchAlerte(this,\''+w.id+'\',\'bas\')" style="color:'+(alerteB?'var(--green)':'var(--muted)')+'">'+(w.alerteBas>0?w.alerteBas:'—')+'</span></td>';
+    wlH+='<td><button class="db" onclick="delWatch(\''+w.id+'\')">✕</button></td></tr>';
+  });
+  wlH+='</tbody></table>';
+}else wlH='<div style="color:var(--muted);font-size:12px">Aucune action suivie. Clique + Suivre pour ajouter un ticker.</div>';
+document.getElementById('watchlist').innerHTML=wlH;
+
+/* Journal */
+if(!S.journal)S.journal=[];
+let jlH='';
+if(S.journal.length>0){
+  S.journal.slice().sort((a,b)=>b.ts-a.ts).forEach(j=>{
+    jlH+='<div style="padding:10px 0;border-bottom:1px solid #f0f2f5"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-weight:700;font-size:13px">'+j.action+'</div>';
+    if(j.raison)jlH+='<div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4">'+j.raison+'</div>';
+    jlH+='</div><div style="display:flex;gap:8px;align-items:center;flex-shrink:0"><span style="font-size:11px;color:var(--muted)">'+j.date+'</span><button class="db" onclick="delJournal(\''+j.id+'\')">✕</button></div></div></div>';
+  });
+}else jlH='<div style="color:var(--muted);font-size:12px">Aucune entrée. Note tes décisions d\'investissement ici.</div>';
+document.getElementById('journal').innerHTML=jlH;
 
 /* Épargne */
 document.getElementById('ek').innerHTML='<div class="kpi"><div class="kl">Total</div><div class="kv" style="color:#0891b2">'+F(t.ep)+'</div></div><div class="kpi"><div class="kl">Libre</div><div class="kv">'+F(t.eL)+'</div></div><div class="kpi"><div class="kl">Bloquée</div><div class="kv">'+F(t.eB)+'</div></div>';
@@ -796,6 +843,7 @@ h+='<th>+/-</th>';
 h+='<th style="cursor:pointer" onclick="sortPf(\''+pk+'\',\'pv\')">%'+sortIcon(pk,'pv')+'</th>';
 h+='<th>Div</th>';
 h+='<th style="cursor:pointer" onclick="sortPf(\''+pk+'\',\'poids\')">Poids'+sortIcon(pk,'poids')+'</th>';
+h+='<th style="width:50px"></th>';
 h+='<th></th></tr></thead><tbody>';
 
 /* Appliquer le tri */
@@ -814,7 +862,11 @@ if(activeSort){
   });
 }
 
-sorted.forEach(l=>{const u=calc.isUSD;h+='<tr><td class="l"><b style="font-size:12px">'+l.n+'</b><div class="tk">'+l.c+'</div></td><td><span class="ed" onclick="ePf(this,\''+pk+'\','+l.id+',\'p\')">'+l.p+'</span></td><td><span class="ed" onclick="ePf(this,\''+pk+'\','+l.id+',\'pr\')">'+(u?'$'+l.pr.toFixed(2):F2(l.pr))+'</span></td><td>'+F2(l.co)+(u&&l.usd?'<div class="tk">$'+l.usd.toFixed(2)+'</div>':'')+'</td><td>'+VC(l.var)+'</td><td style="font-weight:700">'+F2(l.vaEur)+'</td><td style="color:'+(l.g>=0?'var(--green)':'var(--red)')+';font-weight:600">'+(l.g>=0?'+':'')+(u?'$'+l.g.toFixed(2):F2(l.g))+'</td><td>'+BG(l.gp)+'</td><td><span class="ed" onclick="ePf(this,\''+pk+'\','+l.id+',\'div\')" style="color:var(--orange)">'+(l.div||0).toFixed(2)+'€</span></td><td style="color:var(--muted);font-size:11px">'+l.w.toFixed(1)+'%</td><td><button class="db" onclick="dPf(\''+pk+'\','+l.id+')">✕</button></td></tr>'});
+sorted.forEach(l=>{const u=calc.isUSD;
+/* Mini sparkline SVG */
+let sparkSvg='';
+if(l.spark&&l.spark.length>=2){const pts=l.spark.map(s=>s.p);const mn=Math.min(...pts),mx=Math.max(...pts);const rng=mx-mn||1;const w=44,h2=18;const coords=pts.map((p,i)=>((i/(pts.length-1))*w).toFixed(1)+','+(h2-((p-mn)/rng)*h2).toFixed(1));const col=pts[pts.length-1]>=pts[0]?'#0fba81':'#ef4444';sparkSvg='<svg width="'+w+'" height="'+h2+'" style="vertical-align:middle"><polyline points="'+coords.join(' ')+'" fill="none" stroke="'+col+'" stroke-width="1.5" stroke-linecap="round"/></svg>'}
+h+='<tr><td class="l"><b style="font-size:12px">'+l.n+'</b><div class="tk">'+l.c+'</div></td><td><span class="ed" onclick="ePf(this,\''+pk+'\','+l.id+',\'p\')">'+l.p+'</span></td><td><span class="ed" onclick="ePf(this,\''+pk+'\','+l.id+',\'pr\')">'+(u?'$'+l.pr.toFixed(2):F2(l.pr))+'</span></td><td>'+F2(l.co)+(u&&l.usd?'<div class="tk">$'+l.usd.toFixed(2)+'</div>':'')+'</td><td>'+VC(l.var)+'</td><td style="font-weight:700">'+F2(l.vaEur)+'</td><td style="color:'+(l.g>=0?'var(--green)':'var(--red)')+';font-weight:600">'+(l.g>=0?'+':'')+(u?'$'+l.g.toFixed(2):F2(l.g))+'</td><td>'+BG(l.gp)+'</td><td><span class="ed" onclick="ePf(this,\''+pk+'\','+l.id+',\'div\')" style="color:var(--orange)">'+(l.div||0).toFixed(2)+'€</span></td><td style="color:var(--muted);font-size:11px">'+l.w.toFixed(1)+'%</td><td>'+sparkSvg+'</td><td><button class="db" onclick="dPf(\''+pk+'\','+l.id+')">✕</button></td></tr>'});
 h+='</tbody></table><div id="add-'+pk+'"><button class="ab" onclick="sA(\''+pk+'\')">+ Ajouter</button></div>';document.getElementById(cid).innerHTML=h}
 
 window.ePf=function(el,pk,id,f){const c=el.textContent.replace(/[^\d.,-]/g,'').replace(',','.');el.outerHTML='<input class="ci" value="'+c+'" onkeydown="if(event.key===\'Enter\')cPf2(this,\''+pk+'\','+id+',\''+f+'\');if(event.key===\'Escape\')R()" onblur="cPf2(this,\''+pk+'\','+id+',\''+f+'\')" autofocus>'};
