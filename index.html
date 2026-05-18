@@ -174,9 +174,10 @@ window.addBourseGoal=function(){
   const pk=pks[pkChoice-1];
   const cible=parseFloat(prompt('Objectif cible ?',type==='etf_pct'?'60':type==='dividendes'?'500':type==='nb_positions'?'20':'30000'));
   if(isNaN(cible))return;
+  const echeance=prompt('Échéance (ex: 31/12/2026, laisser vide si pas d\'échéance)','');
   const nom=prompt('Note (optionnel)','');
   if(!S.bourseGoals)S.bourseGoals=[];
-  S.bourseGoals.push({type,pk,cible,nom:nom||''});
+  S.bourseGoals.push({type,pk,cible,nom:nom||'',echeance:echeance||''});
   autoSave();R(true);
 };
 window.edBourseGoal=function(el,i){const g=S.bourseGoals[i];if(!g)return;const v=parseFloat(prompt('Nouvelle cible ?',g.cible));if(isNaN(v))return;g.cible=v;autoSave();R(true)};
@@ -373,7 +374,20 @@ S.bourseGoals.forEach((g,i)=>{
   const pct=g.cible>0?Math.min(100,r.cur/g.cible*100):0;
   const onTrack=r.cur>=g.cible;
   const color=onTrack?'var(--green)':'var(--orange)';
-  bgH+='<div style="margin-bottom:16px"><div class="lr"><div><div class="ln">'+gt.label+' — '+pkNames[g.pk]+'</div><div class="ls">'+(g.nom||'')+'</div></div><div style="display:flex;gap:8px;align-items:center"><span style="color:'+color+';font-weight:700">'+gt.fmt(r.cur)+'</span><span style="color:var(--muted);font-size:11px">/ <span class="ed" onclick="edBourseGoal(this,'+i+')">'+gt.fmt(g.cible)+'</span></span><button class="db" onclick="delBourseGoal('+i+')">✕</button></div></div>';
+  /* Calcul échéance */
+  let echeanceStr='';
+  if(g.echeance){
+    const parts=g.echeance.split('/');
+    if(parts.length===3){
+      const target=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));
+      const today=new Date();
+      const diff=Math.ceil((target-today)/(1000*60*60*24));
+      if(diff<0)echeanceStr='<span style="color:var(--red);font-weight:600">⏰ Échéance dépassée ('+g.echeance+')</span>';
+      else if(diff<30)echeanceStr='<span style="color:var(--orange);font-weight:600">⏰ '+diff+'j restants ('+g.echeance+')</span>';
+      else echeanceStr='<span style="color:var(--muted)">📅 '+g.echeance+' ('+diff+'j)</span>';
+    }else echeanceStr='<span style="color:var(--muted)">📅 '+g.echeance+'</span>';
+  }
+  bgH+='<div style="margin-bottom:16px"><div class="lr"><div><div class="ln">'+gt.label+' — '+pkNames[g.pk]+'</div><div class="ls">'+(g.nom?g.nom+'  ':'')+(echeanceStr||'')+'</div></div><div style="display:flex;gap:8px;align-items:center"><span style="color:'+color+';font-weight:700">'+gt.fmt(r.cur)+'</span><span style="color:var(--muted);font-size:11px">/ <span class="ed" onclick="edBourseGoal(this,'+i+')">'+gt.fmt(g.cible)+'</span></span><button class="db" onclick="delBourseGoal('+i+')">✕</button></div></div>';
   bgH+='<div class="obj-bar" style="margin-top:4px"><div class="obj-fill" style="width:'+pct+'%;background:'+color+'"></div></div>';
   bgH+='<div style="font-size:11px;color:var(--muted);margin-top:2px">'+(onTrack?'✓ Objectif atteint ('+pct.toFixed(0)+'%)':'⚠ '+pct.toFixed(0)+'% — reste '+(g.type==='etf_pct'?(g.cible-r.cur).toFixed(1)+'%':F(g.cible-r.cur)))+'</div></div>';
 });
