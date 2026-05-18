@@ -232,9 +232,9 @@ if(dc){
 const Hf=evoPr>=999?H:H.slice(-evoPr);
 if(_cN)_cN.destroy();_cN=new Chart(document.getElementById('cN'),{type:'line',data:{labels:H.map(h=>h.date),datasets:[{data:H.map(h=>h.net),borderColor:'#0fba81',backgroundColor:'rgba(15,186,129,.08)',fill:true,tension:.3,pointRadius:4,borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>F(c.raw)}}},scales:{x:{ticks:{color:'#7a8699',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#7a8699',font:{size:10},callback:v=>(v/1000).toFixed(0)+'k'},grid:{color:'#f0f2f5'}}}}});
 
-const pL=pieMode==='net'?["Immobilier","Comptes","Épargne","Bourse","Crypto","Dettes"]:["Immobilier","Comptes","Épargne","Bourse","Crypto"];
-const pV=pieMode==='net'?[t.im,t.co,t.ep,t.bo,t.cr,t.de]:[ t.im,t.co,t.ep,t.bo,t.cr];
-const pC=pieMode==='net'?["#f59e0b","#0fba81","#0891b2","#7c3aed","#ec4899","#ef4444"]:["#f59e0b","#0fba81","#0891b2","#7c3aed","#ec4899"];
+const pL=pieMode==='net'?["Immobilier net","Comptes","Épargne","Bourse","Crypto"]:["Immobilier","Comptes","Épargne","Bourse","Crypto"];
+const pV=pieMode==='net'?[Math.max(0,t.im-t.de),t.co,t.ep,t.bo,t.cr]:[t.im,t.co,t.ep,t.bo,t.cr];
+const pC=["#f59e0b","#0fba81","#0891b2","#7c3aed","#ec4899"];
 const pT=pV.reduce((a,b)=>a+b,0);
 document.getElementById('pieMode_brut').className='ctb'+(pieMode==='brut'?' active':'');
 document.getElementById('pieMode_net').className='ctb'+(pieMode==='net'?' active':'');
