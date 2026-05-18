@@ -247,6 +247,13 @@ document.getElementById('et').innerHTML=evo.map((s,i)=>'<label class="ctb '+(s.o
 if(_cE)_cE.destroy();_cE=new Chart(document.getElementById('cE'),{type:'line',data:{labels:Hf.map(h=>h.date),datasets:evo.filter(s=>s.on).map(x=>({label:x.l,data:Hf.map(h=>h[x.k]||0),borderColor:x.c,fill:false,tension:.3,pointRadius:3,borderWidth:2.5}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#7a8699',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#7a8699',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v},grid:{color:'#f0f2f5'}}}}});
 
 /* Graphique Patrimoine Net vs FIRE */
+if(!S.simParams)S.simParams={age:30,dep:25000,rend:7,ep:500,inflation:2,dcaSteps:[],horizon:30};
+const sp=S.simParams;
+if(!sp.dcaSteps)sp.dcaSteps=[];
+if(!sp.inflation&&sp.inflation!==0)sp.inflation=2;
+if(!sp.horizon)sp.horizon=30;
+const fireTarget=sp.dep*25;
+
 const fireEl=document.getElementById('cFire');
 if(fireEl){
   if(window._cFire)window._cFire.destroy();
@@ -550,12 +557,6 @@ wH+='</div>';
 document.getElementById('widgetResume').innerHTML=wH;
 
 /* ====== SIMULATEUR FIRE AVANCÉ ====== */
-if(!S.simParams)S.simParams={age:30,dep:25000,rend:7,ep:500,inflation:2,dcaSteps:[],horizon:30};
-const sp=S.simParams;
-if(!sp.dcaSteps)sp.dcaSteps=[];
-if(!sp.inflation&&sp.inflation!==0)sp.inflation=2;
-if(!sp.horizon)sp.horizon=30;
-const fireTarget=sp.dep*25;
 
 /* Calcul projection avec DCA progressif + 3 scénarios */
 function runSim(rendement,withInflation){
