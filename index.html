@@ -280,9 +280,9 @@ window.edBourseGoal=function(el,i){const g=S.bourseGoals[i];if(!g)return;const v
 window.delBourseGoal=function(i){S.bourseGoals.splice(i,1);autoSave();R(true)};
 
 /* Watchlist */
-window.addWatch=function(){const ticker=prompt('Ticker Yahoo (ex: AAPL, MSFT, LVMH.PA)','');if(!ticker)return;const nom=prompt('Nom','');const alerteHaut=parseFloat(prompt('Alerte si prix > (laisser vide = pas d\'alerte)',''))||0;const alerteBas=parseFloat(prompt('Alerte si prix < (laisser vide = pas d\'alerte)',''))||0;if(!S.watchlist)S.watchlist=[];S.watchlist.push({id:'w'+nid(),ticker:ticker.trim(),nom:nom||ticker.trim(),prix:0,prev:0,var:0,cur:'',alerteHaut,alerteBas});autoSave();R(true)};
+window.addWatch=function(){const ticker=prompt('Ticker Yahoo (ex: AAPL, MSFT, LVMH.PA)','');if(!ticker)return;const nom=prompt('Nom','');const zoneMin=parseFloat(prompt('Zone d\'achat — Prix MIN (laisser vide = pas de zone)',''))||0;const zoneMax=parseFloat(prompt('Zone d\'achat — Prix MAX',''))||0;if(!S.watchlist)S.watchlist=[];S.watchlist.push({id:'w'+nid(),ticker:ticker.trim(),nom:nom||ticker.trim(),prix:0,prev:0,var:0,cur:'',zoneMin,zoneMax});autoSave();R(true)};
 window.delWatch=function(id){S.watchlist=S.watchlist.filter(x=>x.id!==id);autoSave();R(true)};
-window.edWatchAlerte=function(el,id,type){const w=S.watchlist.find(x=>x.id===id);if(!w)return;const v=parseFloat(prompt(type==='haut'?'Alerte si prix >':'Alerte si prix <',type==='haut'?w.alerteHaut:w.alerteBas));if(isNaN(v))return;if(type==='haut')w.alerteHaut=v;else w.alerteBas=v;autoSave();R(true)};
+window.edWatchZone=function(el,id,type){const w=S.watchlist.find(x=>x.id===id);if(!w)return;const v=parseFloat(prompt(type==='min'?'Prix MIN de la zone d\'achat':'Prix MAX de la zone d\'achat',type==='min'?w.zoneMin:w.zoneMax));if(isNaN(v))return;if(type==='min')w.zoneMin=v;else w.zoneMax=v;autoSave();R(true)};
 
 /* Journal d'investissement */
 window.addJournal=function(){const date=new Date().toLocaleDateString('fr-FR');const action=prompt('Action (ex: Achat GOOGL, Vente Air Liquide, Renforcement ETF...)','');if(!action)return;const raison=prompt('Pourquoi ? (ta réflexion, ton analyse)','');if(!S.journal)S.journal=[];S.journal.push({id:'j'+nid(),date,action,raison:raison||'',ts:Date.now()});autoSave();R(true)};
@@ -514,16 +514,33 @@ document.getElementById('bourseGoals').innerHTML=bgH;
 if(!S.watchlist)S.watchlist=[];
 let wlH='';
 if(S.watchlist.length>0){
-  wlH+='<table><thead><tr><th class="l">Titre</th><th>Prix</th><th>Var</th><th>Alerte ↑</th><th>Alerte ↓</th><th></th></tr></thead><tbody>';
+  wlH+='<table><thead><tr><th class="l">Titre</th><th>Prix</th><th>Var</th><th>Zone d\'achat</th><th>Signal</th><th></th></tr></thead><tbody>';
   S.watchlist.forEach(w=>{
-    const alerteH=w.alerteHaut>0&&w.prix>=w.alerteHaut;
-    const alerteB=w.alerteBas>0&&w.prix>0&&w.prix<=w.alerteBas;
-    wlH+='<tr'+(alerteH||alerteB?' style="background:rgba(239,68,68,.06)"':'')+'>';
-    wlH+='<td class="l"><b style="font-size:12px">'+(alerteH?'🔴 ':alerteB?'🟢 ':'')+w.nom+'</b><div class="tk">'+w.ticker+'</div></td>';
+    const hasZone=w.zoneMin>0&&w.zoneMax>0;
+    const inZone=hasZone&&w.prix>0&&w.prix>=w.zoneMin&&w.prix<=w.zoneMax;
+    const belowZone=hasZone&&w.prix>0&&w.prix<w.zoneMin;
+    const aboveZone=hasZone&&w.prix>0&&w.prix>w.zoneMax;
+    /* Barre visuelle de la zone */
+    let zoneBar='';
+    if(hasZone){
+      const range=w.zoneMax-w.zoneMin;
+      const displayMin=w.zoneMin-range*0.3;
+      const displayMax=w.zoneMax+range*0.3;
+      const displayRange=displayMax-displayMin;
+      const zLeft=((w.zoneMin-displayMin)/displayRange*100).toFixed(0);
+      const zWidth=((w.zoneMax-w.zoneMin)/displayRange*100).toFixed(0);
+      const pxPos=w.prix>0?((Math.min(Math.max(w.prix,displayMin),displayMax)-displayMin)/displayRange*100).toFixed(0):0;
+      zoneBar='<div style="position:relative;height:16px;background:#ece5da;border-radius:2px;margin-top:4px">';
+      zoneBar+='<div style="position:absolute;left:'+zLeft+'%;width:'+zWidth+'%;height:100%;background:rgba(13,122,62,.15);border:1px solid rgba(13,122,62,.3);border-radius:2px"></div>';
+      if(w.prix>0)zoneBar+='<div style="position:absolute;left:calc('+pxPos+'% - 3px);top:-1px;width:6px;height:18px;background:'+(inZone?'var(--green)':aboveZone?'var(--red)':'var(--orange)')+';border-radius:1px"></div>';
+      zoneBar+='</div>';
+    }
+    wlH+='<tr'+(inZone?' style="background:rgba(13,122,62,.05)"':'')+'>';
+    wlH+='<td class="l"><b style="font-size:12px">'+(inZone?'🟢 ':'')+w.nom+'</b><div class="tk">'+w.ticker+'</div></td>';
     wlH+='<td style="font-weight:700">'+(w.prix>0?(w.cur==='USD'?'$':'')+w.prix.toFixed(2)+(w.cur==='EUR'?' €':''):'—')+'</td>';
     wlH+='<td>'+VC(w.var)+'</td>';
-    wlH+='<td><span class="ed" onclick="edWatchAlerte(this,\''+w.id+'\',\'haut\')" style="color:'+(alerteH?'var(--red)':'var(--muted)')+'">'+(w.alerteHaut>0?w.alerteHaut:'—')+'</span></td>';
-    wlH+='<td><span class="ed" onclick="edWatchAlerte(this,\''+w.id+'\',\'bas\')" style="color:'+(alerteB?'var(--green)':'var(--muted)')+'">'+(w.alerteBas>0?w.alerteBas:'—')+'</span></td>';
+    wlH+='<td style="min-width:140px"><div style="display:flex;gap:4px;align-items:center;font-size:11px"><span class="ed" onclick="edWatchZone(this,\''+w.id+'\',\'min\')">'+(w.zoneMin||'—')+'</span><span style="color:var(--muted)">→</span><span class="ed" onclick="edWatchZone(this,\''+w.id+'\',\'max\')">'+(w.zoneMax||'—')+'</span></div>'+zoneBar+'</td>';
+    wlH+='<td style="font-weight:700;font-size:11px">'+(inZone?'<span style="color:var(--green)">✓ EN ZONE</span>':belowZone?'<span style="color:var(--orange)">↓ Sous la zone</span>':aboveZone?'<span style="color:var(--red)">↑ Au-dessus</span>':'<span style="color:var(--muted)">—</span>')+'</td>';
     wlH+='<td><button class="db" onclick="delWatch(\''+w.id+'\')">✕</button></td></tr>';
   });
   wlH+='</tbody></table>';
