@@ -540,7 +540,14 @@ if(S.watchlist.length>0){
     wlH+='<td style="font-weight:700">'+(w.prix>0?(w.cur==='USD'?'$':'')+w.prix.toFixed(2)+(w.cur==='EUR'?' €':''):'—')+'</td>';
     wlH+='<td>'+VC(w.var)+'</td>';
     wlH+='<td style="min-width:140px"><div style="display:flex;gap:4px;align-items:center;font-size:11px"><span class="ed" onclick="edWatchZone(this,\''+w.id+'\',\'min\')">'+(w.zoneMin||'—')+'</span><span style="color:var(--muted)">→</span><span class="ed" onclick="edWatchZone(this,\''+w.id+'\',\'max\')">'+(w.zoneMax||'—')+'</span></div>'+zoneBar+'</td>';
-    wlH+='<td style="font-weight:700;font-size:11px">'+(inZone?'<span style="color:var(--green)">✓ EN ZONE</span>':belowZone?'<span style="color:var(--orange)">↓ Sous la zone</span>':aboveZone?'<span style="color:var(--red)">↑ Au-dessus</span>':'<span style="color:var(--muted)">—</span>')+'</td>';
+    /* Calcul écart par rapport à la zone */
+    let ecartTxt='';
+    if(hasZone&&w.prix>0){
+      if(inZone){const pctInZone=((w.prix-w.zoneMin)/(w.zoneMax-w.zoneMin)*100).toFixed(0);ecartTxt='<div style="font-size:10px;color:var(--muted);margin-top:2px">Position: '+pctInZone+'% de la zone</div>'}
+      else if(belowZone){const ecart=((w.zoneMin-w.prix)/w.zoneMin*100).toFixed(1);ecartTxt='<div style="font-size:10px;color:var(--orange);margin-top:2px">'+ecart+'% sous la zone</div>'}
+      else if(aboveZone){const ecart=((w.prix-w.zoneMax)/w.zoneMax*100).toFixed(1);ecartTxt='<div style="font-size:10px;color:var(--red);margin-top:2px">'+ecart+'% au-dessus</div>'}
+    }
+    wlH+='<td style="font-weight:700;font-size:11px">'+(inZone?'<span style="color:var(--green)">✓ EN ZONE</span>':belowZone?'<span style="color:var(--orange)">↓ Sous la zone</span>':aboveZone?'<span style="color:var(--red)">↑ Au-dessus</span>':'<span style="color:var(--muted)">—</span>')+ecartTxt+'</td>';
     wlH+='<td><button class="db" onclick="delWatch(\''+w.id+'\')">✕</button></td></tr>';
   });
   wlH+='</tbody></table>';
