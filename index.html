@@ -138,7 +138,7 @@ const D={comptes:[{id:'c1',nom:"Compte courant",banque:"BP",montant:0},{id:'c2',
 let S,snaps=[];
 const SEED=[{date:"Juin 25",immobilier:125000,comptes:2665,epargne:9178,bourse:4300,crypto:500,dettes:134708,brut:141643,net:6935},{date:"Juil 25",immobilier:125000,comptes:8760,epargne:9446,bourse:5134,crypto:521,dettes:134708,brut:148861,net:14153},{date:"Août 25",immobilier:125000,comptes:2460,epargne:12818,bourse:8826,crypto:684,dettes:134575,brut:149788,net:15213},{date:"Sep 25",immobilier:125000,comptes:2042,epargne:11440,bourse:9164,crypto:756,dettes:134444,brut:148402,net:13958},{date:"Oct 25",immobilier:125000,comptes:31654,epargne:42869,bourse:22562,crypto:730,dettes:134311,brut:222815,net:88504},{date:"Nov 25",immobilier:125000,comptes:7539,epargne:61970,bourse:25829,crypto:2249,dettes:134179,brut:222587,net:88408},{date:"Déc 25",immobilier:125000,comptes:2520,epargne:59927,bourse:27200,crypto:1791,dettes:132098,brut:216438,net:84340},{date:"Jan 26",immobilier:125000,comptes:3925,epargne:51101,bourse:27112,crypto:1730,dettes:131702,brut:208868,net:77166},{date:"Fév 26",immobilier:125000,comptes:19651,epargne:28844,bourse:29223,crypto:1648,dettes:131309,brut:204365,net:73056},{date:"Mar 26",immobilier:125000,comptes:3404,epargne:44069,bourse:29564,crypto:1324,dettes:130915,brut:203361,net:72446}];
 
-async function loadData(){try{const doc=await db.collection('users').doc(uid).get();if(doc.exists){S=doc.data().patrimoine||JSON.parse(JSON.stringify(D));snaps=doc.data().snapshots||[]}else{let ls=localStorage.getItem('patrimoine_data');if(ls){S=JSON.parse(ls);snaps=JSON.parse(localStorage.getItem('patrimoine_snaps')||'[]');await saveData()}else{S=JSON.parse(JSON.stringify(D));snaps=[]}}if(!S.versMensuels)S.versMensuels=D.versMensuels.map(x=>({...x}));if(!S.objectifs)S.objectifs=D.objectifs.map(x=>({...x}));S.objectifs.forEach(o=>{if(o.actuel===undefined)o.actuel=0});if(!S.budget)S.budget=JSON.parse(JSON.stringify(BDEF));if(!S.pf.avl)S.pf.avl={esp:0,ver:0,cur:'EUR',l:[]};if(!S.simParams)S.simParams={age:30,dep:25000,rend:7,ep:500};if(!S.notes)S.notes={};if(!S.histJour)S.histJour=[];if(!S.bourseGoals)S.bourseGoals=[];if(!S.watchlist)S.watchlist=[];if(!S.journal)S.journal=[];if(!S.revSources)S.revSources=[];if(!S.etfGoals)S.etfGoals={pea:60,ctosb:0,ctoibkr:0};if(!S.avEtf)S.avEtf=[]}catch(e){S=JSON.parse(JSON.stringify(D));snaps=[]}}
+async function loadData(){try{const doc=await db.collection('users').doc(uid).get();if(doc.exists){S=doc.data().patrimoine||JSON.parse(JSON.stringify(D));snaps=doc.data().snapshots||[]}else{let ls=localStorage.getItem('patrimoine_data');if(ls){S=JSON.parse(ls);snaps=JSON.parse(localStorage.getItem('patrimoine_snaps')||'[]');await saveData()}else{S=JSON.parse(JSON.stringify(D));snaps=[]}}if(!S.versMensuels)S.versMensuels=D.versMensuels.map(x=>({...x}));if(!S.objectifs)S.objectifs=D.objectifs.map(x=>({...x}));S.objectifs.forEach(o=>{if(o.actuel===undefined)o.actuel=0});if(!S.budget)S.budget=JSON.parse(JSON.stringify(BDEF));if(!S.pf.avl)S.pf.avl={esp:0,ver:0,cur:'EUR',l:[]};if(!S.simParams)S.simParams={age:30,dep:25000,rend:7,ep:500};if(!S.notes)S.notes={};if(!S.histJour)S.histJour=[];if(!S.bourseGoals)S.bourseGoals=[];if(!S.watchlist)S.watchlist=[];if(!S.journal)S.journal=[];if(!S.revSources)S.revSources=[];if(!S.etfGoals)S.etfGoals={pea:60,ctosb:0,ctoibkr:0};if(!S.avEtf)S.avEtf=[];if(!S.benchCours)S.benchCours={}}catch(e){S=JSON.parse(JSON.stringify(D));snaps=[]}}
 let sT=null;function autoSave(){if(sT)clearTimeout(sT);sT=setTimeout(saveData,2000)}
 async function saveData(){if(!uid)return;try{
 /* Nettoyer les données avant sauvegarde */
@@ -216,16 +216,83 @@ if(task.t==='w'){const w=S.watchlist?S.watchlist.find(x=>x.id===task.id):null;if
 if(ok>0){if(!S.histJour)S.histJour=[];const today=new Date().toISOString().slice(0,10);const t2=Tot();const dp=t2.p.dayPnl+t2.s.dayPnl+t2.i.dayPnl;const dpct=t2.bo>0?(dp/t2.bo*100):0;const ex=S.histJour.findIndex(h=>h.date===today);const ent={date:today,portf:Math.round(dpct*100)/100,pnl:Math.round(dp*100)/100,sp:spyDay,bourse:Math.round(t2.bo)};if(ex>=0)S.histJour[ex]=ent;else S.histJour.push(ent);if(S.histJour.length>30)S.histJour=S.histJour.slice(-30)}
 const now=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});rStat='✓ '+ok+' à '+now;rL=false;b.innerHTML='🔄';b.disabled=false;autoSave();R(true)}
 
-let spD=null,spSt="";async function fSP(){try{const r=await fetch('https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=SPY&apikey='+AV);const j=await r.json();if(j["Monthly Time Series"]){spD=j["Monthly Time Series"];cSPx();spSt="✓"}else spSt="⚠"}catch(e){spSt="⚠"}R(true)}
+let spD=null,spSt="";
+const BENCH_TICKERS={SPY:'SPY',QQQ:'QQQ','IWDA.AS':'IWDA.AS','CAC.PA':'^FCHI'};
+let benchData={};/* {SPY:{mois:perf_cum}, QQQ:{...}, ...} */
+
+async function fSP(){
+  try{
+    const r=await fetch('https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=SPY&apikey='+AV);
+    const j=await r.json();
+    if(j["Monthly Time Series"]){spD=j["Monthly Time Series"];cSPx();spSt="✓"}else spSt="⚠"
+  }catch(e){spSt="⚠"}
+  /* Récupérer les autres indices via Yahoo proxy */
+  await fetchBenchmarks();
+  R(true);
+}
+
+async function fetchBenchmarks(){
+  const mn=["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
+  const indices={SPY:'SPY',QQQ:'QQQ','IWDA.AS':'IWDA.AS','CAC.PA':'^FCHI'};
+  if(!S.benchCours)S.benchCours={};
+  
+  /* Récupérer les cours actuels de chaque indice */
+  const tickers=Object.values(indices);
+  const data=await yQBatch(tickers);
+  
+  for(const [key,ticker] of Object.entries(indices)){
+    const d=data[ticker];
+    if(!d||!d.price)continue;
+    if(!S.benchCours[key])S.benchCours[key]={};
+    /* Stocker le cours du mois en cours */
+    const now=new Date();
+    const curMois=mn[now.getMonth()]+' '+(now.getFullYear()%100);
+    S.benchCours[key][curMois]=Math.round(d.price*100)/100;
+    /* Stocker aussi un point de base si on n'en a pas */
+    if(!S.benchCours[key]['_base']){
+      /* Utiliser prev comme approximation du mois précédent */
+      const prevMois=now.getMonth()===0?mn[11]+' '+((now.getFullYear()-1)%100):mn[now.getMonth()-1]+' '+(now.getFullYear()%100);
+      if(!S.benchCours[key][prevMois]&&d.prev)S.benchCours[key][prevMois]=Math.round(d.prev*100)/100;
+    }
+  }
+  
+  /* Pour SPY, enrichir avec les données Alpha Vantage mensuelles */
+  if(spD&&S.benchCours['SPY']){
+    const vm=S.versMensuels||[];
+    vm.forEach(v=>{
+      const p=v.mois.split(' ');if(p.length<2)return;
+      const mi=mn.indexOf(p[0]);if(mi<0)return;
+      const yr='20'+p[1];
+      const ymk=yr+'-'+(mi+1<10?'0':'')+(mi+1);
+      const spClose=gMC(ymk);
+      if(spClose)S.benchCours['SPY'][v.mois]=Math.round(spClose*100)/100;
+    });
+  }
+}
+
 function gMC(ym){if(!spD)return null;const k=Object.keys(spD).sort().reverse().find(k=>k.startsWith(ym));return k?parseFloat(spD[k]["4. close"]):null}
+
 function cSPx(){if(!spD)return;
 const mn=["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
 const ym=["2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09","2026-10","2026-11","2026-12"];
 for(let i=1;i<ym.length;i++){const prev=gMC(ym[i-1]),cur=gMC(ym[i]);if(prev&&cur)spM[ym[i]]=((cur-prev)/prev)*100}
-/* Mettre à jour perfData avec S&P cumulé */
+/* S&P cumulé pour chaque mois des versements */
 const bp=gMC("2025-12");if(!bp)return;
 const vm=S.versMensuels||[];
 vm.forEach(v=>{const p=v.mois.split(' ');if(p.length<2)return;const mi=mn.indexOf(p[0]);if(mi<0)return;const yr='20'+p[1];const ymk=yr+'-'+(mi+1<10?'0':'')+(mi+1);const spClose=gMC(ymk);if(spClose&&bp)v.spCum=((spClose-bp)/bp)*100});
+}
+
+/* Calculer la perf cumulée d'un benchmark à partir de S.benchCours */
+function getBenchCum(idx){
+  const mn=["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
+  const vm=S.versMensuels||[];
+  if(!S.benchCours||!S.benchCours[idx])return vm.map(()=>null);
+  const cours=S.benchCours[idx];
+  /* Trouver le premier mois comme base */
+  let base=null;
+  for(const v of vm){if(cours[v.mois]){base=cours[v.mois];break}}
+  if(!base)return vm.map(()=>null);
+  return vm.map(v=>{const c=cours[v.mois];return c!=null?Math.round(((c-base)/base)*10000)/100:null});
 }
 
 window.exportCSV=function(){const t=Tot();const now=new Date().toISOString().slice(0,10);let c="PATRIMOINE;"+now+"\nBrut;"+t.br.toFixed(2)+"\nNet;"+t.ne.toFixed(2)+"\nDettes;"+t.de.toFixed(2)+"\nLiquidités;"+t.lq.toFixed(2)+"\n";
@@ -612,15 +679,21 @@ if(dc){
 const benchEl=document.getElementById('cBench');
 if(benchEl){
   if(window._cBench)window._cBench.destroy();
-  /* Utiliser les données TWR existantes */
   const twrG=cTWR('bourse');
   const vm=S.versMensuels||[];
-  const benchData=twrG.map(d=>d.twr);
-  const spData=vm.map(v=>v.spCum!=null?v.spCum:null);
+  const benchData2=twrG.map(d=>d.twr);
+  /* Utiliser les données du bon indice */
+  let idxData;
+  if(S.benchIdx==='SPY'){
+    idxData=vm.map(v=>v.spCum!=null?v.spCum:null);
+  }else{
+    idxData=getBenchCum(S.benchIdx);
+  }
+  const idxName={SPY:'S&P 500',QQQ:'Nasdaq 100','IWDA.AS':'MSCI World','CAC.PA':'CAC 40'}[S.benchIdx]||S.benchIdx;
   window._cBench=new Chart(benchEl,{type:'line',data:{labels:twrG.map(d=>d.mois),datasets:[
-    {label:'Mon portefeuille',data:benchData,borderColor:'#7c3aed',backgroundColor:'rgba(124,58,237,.06)',fill:true,tension:.3,pointRadius:3,borderWidth:2.5},
-    {label:({SPY:'S&P 500',QQQ:'Nasdaq 100','IWDA.AS':'MSCI World','CAC.PA':'CAC 40'}[S.benchIdx]||S.benchIdx),data:spData,borderColor:'#f59e0b',borderDash:[6,3],tension:.3,pointRadius:2,borderWidth:2,fill:false,spanGaps:true}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},usePointStyle:true}},tooltip:{callbacks:{label:c=>c.raw!=null?c.dataset.label+': '+(c.raw>0?'+':'')+c.raw.toFixed(1)+'%':'—'}}},scales:{x:{ticks:{color:'#7a8699',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#7a8699',font:{size:10},callback:v=>(v>0?'+':'')+v+'%'},grid:{color:'#f0f2f5'}}}}});
+    {label:'Mon portefeuille',data:benchData2,borderColor:'var(--accent)',backgroundColor:'rgba(26,92,58,.06)',fill:true,tension:.3,pointRadius:3,borderWidth:2.5},
+    {label:idxName,data:idxData,borderColor:'#b07d2e',borderDash:[6,3],tension:.3,pointRadius:2,borderWidth:2,fill:false,spanGaps:true}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},usePointStyle:true}},tooltip:{callbacks:{label:c=>c.raw!=null?c.dataset.label+': '+(c.raw>0?'+':'')+c.raw.toFixed(1)+'%':'—'}}},scales:{x:{ticks:{color:'#7a7468',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#7a7468',font:{size:10},callback:v=>(v>0?'+':'')+v+'%'},grid:{color:'#ece5da'}}}}});
 }}
 
 /* Journal */
