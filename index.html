@@ -767,9 +767,9 @@ immoLoc.forEach(b=>{
   const me2=cr?moisEcoules(cr.dateDebut):0;
   const am2=cr?cAm(cr.emprunte,cr.taux||0,cr.dureeMois||0,cr.differe||0):null;
   const enDiff=cr&&me2>0&&me2<=(cr.differe||0);
-  const mensC=(am2?(enDiff?am2.mDiff:am2.m):0)*pct;
-  const chM=((b.charges||0)+(b.taxeFonciere||0)/12+(b.assurance||0)/12+(b.gestion||0))*pct;
-  const loyM=(b.loyer||0)*pct;
+  const mensC=am2?(enDiff?am2.mDiff:am2.m):0;
+  const chM=(b.charges||0)+(b.taxeFonciere||0)/12+(b.assurance||0)/12+(b.gestion||0);
+  const loyM=(b.loyer||0);
   const cf=loyM-chM-mensC;
   const rb=b.valeur>0?((b.loyer||0)*12/b.valeur*100).toFixed(1):0;
   totLoy+=loyM;totCh+=chM;totCr+=mensC;totCf+=cf;totValLoc+=b.valeur*pct;
@@ -891,13 +891,14 @@ crH+='</tbody></table>';document.getElementById('crt').innerHTML=crH;
 document.getElementById('cra').innerHTML=addB('cra',[{k:'nom',label:'Nom',w:2},{k:'symbol',label:'Symbol'},{k:'qte',label:'Qté',num:true},{k:'pru',label:'PRU',num:true}],'crypto',{prix:0,var:0,pru:0,montant:0});
 
 /* Dettes — avec calcul auto du restant basé sur date début */
-function moisEcoules(dateDebut){if(!dateDebut)return 0;const parts=dateDebut.split('-');if(parts.length!==2)return 0;const y=parseInt(parts[0]),m=parseInt(parts[1]);const now=new Date();return(now.getFullYear()-y)*12+(now.getMonth()+1-m)}
+function moisEcoules(dateDebut){if(!dateDebut)return 0;const parts=dateDebut.split('-');if(parts.length!==2)return 0;const y=parseInt(parts[0]),m=parseInt(parts[1]);const now=new Date();const diff=(now.getFullYear()-y)*12+(now.getMonth()+1-m);return Math.max(0,diff)}
 document.getElementById('dk').innerHTML='<div class="kpi"><div class="kl">Dettes</div><div class="kv" style="color:var(--red)">'+F(t.de)+'</div></div><div class="kpi"><div class="kl">Mensualités</div><div class="kv">'+F(S.dettes.reduce((a,d)=>a+cAm(d.emprunte,d.taux||0,d.dureeMois||0,d.differe||0).m,0))+'</div><div class="ks">/mois</div></div>';
 let dH='';S.dettes.forEach(d=>{
   const am=cAm(d.emprunte,d.taux||0,d.dureeMois||0,d.differe||0);
   /* Calcul auto du restant si date début renseignée */
   const me=moisEcoules(d.dateDebut);
   if(d.dateDebut&&am.t.length>0&&me>0){const idx=Math.min(me,am.t.length)-1;d.restant=am.t[idx].r}
+  else if(d.dateDebut&&me===0){d.restant=d.emprunte}/* Prêt pas encore commencé */
   const p=d.emprunte>0?((d.emprunte-d.restant)/d.emprunte*100).toFixed(1):'0';
   dH+='<div class="card"><div style="display:flex;justify-content:space-between"><div style="font-weight:700">'+d.nom+'</div><button class="db" onclick="dI(\'dettes\',\''+d.id+'\')">✕</button></div>';
   dH+='<div class="lr"><span>Emprunté</span><span class="ed" onclick="eI(this,\'dettes\',\''+d.id+'\',\'emprunte\')" style="font-weight:600">'+F(d.emprunte)+'</span></div>';
@@ -909,6 +910,7 @@ let dH='';S.dettes.forEach(d=>{
   dH+='<div class="lr"><span>Mensualité'+(enDiffere?' <span style="color:var(--orange);font-size:10px">(différé)</span>':'')+'</span><span style="font-weight:700">'+(enDiffere?F2(am.mDiff||0):F2(am.m))+'</span></div>';
   dH+='<div class="lr"><span>Restant dû</span><span style="font-weight:700;color:var(--red)">'+F(d.restant)+'</span></div>';
   if(me>0)dH+='<div class="lr"><span>Échéances payées</span><span>'+me+' / '+(d.dureeMois||0)+'</span></div>';
+  else if(d.dateDebut)dH+='<div class="lr"><span>Statut</span><span style="color:var(--orange);font-weight:600">⏳ Pas encore commencé</span></div>';
   dH+='<div class="pg"><div class="pf" style="width:'+p+'%"></div></div>';
   dH+='<div style="font-size:10px;color:var(--muted);margin-top:3px">'+p+'% remboursé — Fin: '+(d.fin||'—')+'</div>';
   /* Mini tableau amortissement */
