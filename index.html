@@ -449,6 +449,13 @@ window.delAVetf=function(id){S.avEtf=S.avEtf.filter(x=>x.id!==id);autoSave();R(t
 /* ====== RENDER ====== */
 function R(dc){
 try{
+/* Mettre à jour le restant dû de chaque dette AVANT les calculs */
+S.dettes.forEach(d=>{
+  const am=cAm(d.emprunte,d.taux||0,d.dureeMois||0,d.differe||0);
+  const me=moisEcoules(d.dateDebut);
+  if(me>0&&am.t.length>0){const idx=Math.min(me,am.t.length)-1;d.restant=am.t[idx].r}
+  else{d.restant=d.emprunte}
+});
 const t=Tot(),H=gH(),r4=Math.round(t.ne*.04);
 document.getElementById('hk').innerHTML='<div class="kpi"><div class="kl">Brut</div><div class="kv">'+F(t.br)+'</div></div><div class="kpi"><div class="kl">Net</div><div class="kv" style="color:var(--accent)">'+F(t.ne)+'</div></div><div class="kpi"><div class="kl">Dettes</div><div class="kv" style="color:var(--red)">'+F(t.de)+'</div></div><div class="kpi"><div class="kl">Liquidités</div><div class="kv" style="color:var(--green)">'+F(t.lq)+'</div></div>';
 document.getElementById('k4').textContent=F(r4)+' / an';document.getElementById('k4m').textContent='soit '+F(Math.round(r4/12))+' / mois';
@@ -745,7 +752,13 @@ const mensCredImmo=S.dettes.filter(d=>d.type==='Immo').reduce((a,d)=>a+cAm(d.emp
 const cashflowTotal=loyerTotal-chargesTotal-mensCredImmo;
 const rendBrut=imBrut>0?Math.round(loyerTotal*12/imBrut*10000)/100:0;
 const rendNet=imBrut>0?Math.round((loyerTotal-chargesTotal)*12/imBrut*10000)/100:0;
-const imDettes=S.dettes.filter(d=>d.type==='Immo').reduce((a,d)=>a+d.restant,0);
+/* Dettes immo = toutes les dettes liées à un bien */
+const creditIds=S.immo.map(b=>b.creditId).filter(x=>x);
+const imDettes=S.dettes.filter(d=>creditIds.includes(d.id)).reduce((a,d)=>{
+  const bienLie=S.immo.find(b=>b.creditId===d.id);
+  const pct=bienLie?(bienLie.partsPct||100)/100:1;
+  return a+d.restant*pct;
+},0);
 
 document.getElementById('ik').innerHTML='<div class="kpi"><div class="kl">Valeur brute</div><div class="kv" style="color:#f59e0b">'+F(imBrut)+'</div></div><div class="kpi"><div class="kl">Dettes immo</div><div class="kv" style="color:var(--red)">'+F(imDettes)+'</div></div><div class="kpi"><div class="kl">Net (tes parts)</div><div class="kv" style="color:'+(imT-imDettes>=0?'var(--green)':'var(--red)')+'">'+F(imT-imDettes)+'</div></div><div class="kpi"><div class="kl">Loyers/mois</div><div class="kv" style="color:var(--accent)">'+F(loyerTotal)+'</div></div><div class="kpi"><div class="kl">Cashflow net</div><div class="kv" style="color:'+(cashflowTotal>=0?'var(--green)':'var(--red)')+'">'+F(Math.round(cashflowTotal))+'</div><div class="ks">/mois</div></div><div class="kpi"><div class="kl">Rdt brut / net</div><div class="kv">'+rendBrut+'% / '+rendNet+'%</div></div>';
 
