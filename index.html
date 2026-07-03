@@ -174,7 +174,13 @@ const BG=v=>hiddenMode?'<span class="badge pos">***</span>':'<span class="badge 
 const PC=v=>hiddenMode?'<td>***</td>':(v!=null?'<td class="'+(v>=0?'cg':'cr')+'">'+(v>=0?'+':'')+v.toFixed(2)+'%</td>':'<td style="color:var(--muted)">—</td>');
 const VC=v=>hiddenMode?'<span>***</span>':((!v&&v!==0)?'<span style="color:var(--muted)">—</span>':'<span class="vc '+(v>=0?'cg':'cr')+'">'+(v>=0?'+':'')+v.toFixed(2)+'%</span>');
 
-function cAm(e,tx,d){if(!e||!d)return{m:0,t:[]};const r=tx/100/12;let m;if(r===0)m=e/d;else m=e*r*Math.pow(1+r,d)/(Math.pow(1+r,d)-1);let rest=e;const t=[];for(let i=1;i<=d&&rest>0;i++){const int=rest*r;const cap=Math.min(m-int,rest);rest=Math.max(0,rest-cap);t.push({n:i,m:Math.round(m*100)/100,i:Math.round(int*100)/100,c:Math.round(cap*100)/100,r:Math.round(rest*100)/100})}return{m:Math.round(m*100)/100,t}}
+function cAm(e,tx,d,diff){if(!e||!d)return{m:0,t:[]};const r=tx/100/12;const diffMois=diff||0;let rest=e;const t=[];
+/* Phase différé: on ne paye que les intérêts */
+for(let i=1;i<=diffMois;i++){const int=rest*r;t.push({n:i,m:Math.round(int*100)/100,i:Math.round(int*100)/100,c:0,r:Math.round(rest*100)/100,diff:true})}
+/* Phase amortissement normal */
+const dAmort=d-diffMois;let m;if(r===0)m=e/Math.max(1,dAmort);else m=e*r*Math.pow(1+r,dAmort)/(Math.pow(1+r,dAmort)-1);
+for(let i=diffMois+1;i<=d&&rest>0;i++){const int=rest*r;const cap=Math.min(m-int,rest);rest=Math.max(0,rest-cap);t.push({n:i,m:Math.round(m*100)/100,i:Math.round(int*100)/100,c:Math.round(cap*100)/100,r:Math.round(rest*100)/100})}
+return{m:Math.round(m*100)/100,mDiff:diffMois>0?Math.round(e*r*100)/100:0,t}}
 function cTWR(key){
   /* Ligne i : valeur = relevée au 1er du mois SUIVANT, versement = viré pendant ce mois
      Perf du mois i = (valeur_i - versement_i - valeur_(i-1)) / valeur_(i-1)
@@ -425,6 +431,8 @@ window.togSCI=function(id){const b=S.immo.find(x=>x.id===id);if(!b)return;b.sci=
 window.edImmoCredit=function(id){const b=S.immo.find(x=>x.id===id);if(!b)return;const dettes=S.dettes;if(dettes.length===0){alert('Aucune dette. Ajoute un crédit dans l\'onglet Dettes.');return}let menu='0. Aucun\n';dettes.forEach((d,i)=>{menu+=(i+1)+'. '+d.nom+' ('+F(d.restant)+')\n'});const c=parseInt(prompt('Lier un crédit :\n'+menu,'0'));if(c===0)b.creditId='';else if(c>0&&c<=dettes.length)b.creditId=dettes[c-1].id;autoSave();R(true)};
 window.addTravaux=function(id){const b=S.immo.find(x=>x.id===id);if(!b)return;const desc=prompt('Description','');if(!desc)return;const montant=parseFloat(prompt('Montant €','0'));if(isNaN(montant))return;const date=new Date().toLocaleDateString('fr-FR');if(!b.travaux)b.travaux=[];b.travaux.push({desc,montant,date});autoSave();R(true)};
 window.delTravaux=function(id,i){const b=S.immo.find(x=>x.id===id);if(b&&b.travaux)b.travaux.splice(i,1);autoSave();R(true)};
+window.edRevMois=function(el,id,annee,mois){const b=S.immo.find(x=>x.id===id);if(!b)return;if(!b.revenusMois)b.revenusMois={};if(!b.revenusMois[annee])b.revenusMois[annee]={};el.outerHTML='<input class="ci" style="width:45px" value="'+(b.revenusMois[annee][mois]||0)+'" onkeydown="if(event.key===\'Enter\')cmRevMois(this,\''+id+'\',\''+annee+'\',\''+mois+'\');if(event.key===\'Escape\')R(true)" onblur="cmRevMois(this,\''+id+'\',\''+annee+'\',\''+mois+'\')" autofocus>'};
+window.cmRevMois=function(inp,id,annee,mois){const v=parseFloat(inp.value.replace(',','.'));const b=S.immo.find(x=>x.id===id);if(b&&!isNaN(v)){if(!b.revenusMois)b.revenusMois={};if(!b.revenusMois[annee])b.revenusMois[annee]={};b.revenusMois[annee][mois]=v}autoSave();R(true)};
 window.edCD=function(el,id,field,mi){const b=S.immo.find(x=>x.id===id);if(!b)return;el.outerHTML='<input class="ci" style="width:45px" value="'+(b[field][mi]||0)+'" onkeydown="if(event.key===\'Enter\')cmCD(this,\''+id+'\',\''+field+'\','+mi+');if(event.key===\'Escape\')R(true)" onblur="cmCD(this,\''+id+'\',\''+field+'\','+mi+')" autofocus>'};
 window.cmCD=function(inp,id,field,mi){const v=parseFloat(inp.value.replace(',','.'));const b=S.immo.find(x=>x.id===id);if(b&&!isNaN(v))b[field][mi]=v;autoSave();R(true)};
 
@@ -729,7 +737,7 @@ const imT=S.immo.reduce((a,x)=>a+x.valeur*(x.partsPct/100),0);
 const imBrut=S.immo.reduce((a,x)=>a+x.valeur,0);
 const loyerTotal=S.immo.reduce((a,x)=>a+(x.loyer||0),0);
 const chargesTotal=S.immo.reduce((a,x)=>a+(x.charges||0)+(x.taxeFonciere||0)/12+(x.assurance||0)/12+(x.gestion||0),0);
-const mensCredImmo=S.dettes.filter(d=>d.type==='Immo').reduce((a,d)=>a+cAm(d.emprunte,d.taux||0,d.dureeMois||0).m,0);
+const mensCredImmo=S.dettes.filter(d=>d.type==='Immo').reduce((a,d)=>a+cAm(d.emprunte,d.taux||0,d.dureeMois||0,d.differe||0).m,0);
 const cashflowTotal=loyerTotal-chargesTotal-mensCredImmo;
 const rendBrut=imBrut>0?Math.round(loyerTotal*12/imBrut*10000)/100:0;
 const rendNet=imBrut>0?Math.round((loyerTotal-chargesTotal)*12/imBrut*10000)/100:0;
@@ -744,17 +752,24 @@ if(cImEl){if(window._cImN)window._cImN.destroy();
 const imH2=H.filter(h=>h.immobilier);
 window._cImN=new Chart(cImEl,{type:'line',data:{labels:imH2.map(h=>h.date),datasets:[{label:'Valeur immo',data:imH2.map(h=>h.immobilier||0),borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.08)',fill:true,tension:.3,pointRadius:3,borderWidth:2},{label:'Dettes immo',data:imH2.map(h=>h.dettes||0),borderColor:'#ef4444',borderDash:[4,4],tension:.3,pointRadius:2,borderWidth:2,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},usePointStyle:true}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+F(c.raw)}}},scales:{x:{ticks:{color:'#7a8699',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#7a8699',font:{size:10},callback:v=>(v/1000).toFixed(0)+'k'},grid:{color:'#f0f2f5'}}}}})}}
 
-/* Tableau récap mensuel */
+/* Tableau récap mensuel — hors RP */
+const immoLoc=S.immo.filter(b=>b.typeLocation&&b.typeLocation!=='rp');
 let rcH='<table><thead><tr><th class="l">Bien</th><th>Loyer</th><th>Charges</th><th>Crédit</th><th>Cashflow</th><th>Rdt brut</th></tr></thead><tbody>';
-S.immo.forEach(b=>{
+let totLoy=0,totCh=0,totCr=0,totCf=0,totValLoc=0;
+immoLoc.forEach(b=>{
   const cr=b.creditId?S.dettes.find(d=>d.id===b.creditId):null;
-  const mensC=cr?cAm(cr.emprunte,cr.taux||0,cr.dureeMois||0).m:0;
+  const me2=cr?moisEcoules(cr.dateDebut):0;
+  const am2=cr?cAm(cr.emprunte,cr.taux||0,cr.dureeMois||0,cr.differe||0):null;
+  const enDiff=cr&&me2>0&&me2<=(cr.differe||0);
+  const mensC=am2?(enDiff?am2.mDiff:am2.m):0;
   const chM=(b.charges||0)+(b.taxeFonciere||0)/12+(b.assurance||0)/12+(b.gestion||0);
   const cf=(b.loyer||0)-chM-mensC;
   const rb=b.valeur>0?((b.loyer||0)*12/b.valeur*100).toFixed(1):0;
+  totLoy+=b.loyer||0;totCh+=chM;totCr+=mensC;totCf+=cf;totValLoc+=b.valeur;
   rcH+='<tr><td class="l" style="font-weight:600">'+b.nom+'</td><td style="color:var(--green);font-weight:600">'+F(b.loyer||0)+'</td><td style="color:var(--red)">'+F(Math.round(chM))+'</td><td style="color:var(--red)">'+F(Math.round(mensC))+'</td><td style="font-weight:700;color:'+(cf>=0?'var(--green)':'var(--red)')+'">'+F(Math.round(cf))+'</td><td>'+rb+'%</td></tr>';
 });
-rcH+='<tr style="background:#f8fafb;font-weight:800"><td class="l">Total</td><td style="color:var(--green)">'+F(loyerTotal)+'</td><td style="color:var(--red)">'+F(Math.round(chargesTotal))+'</td><td style="color:var(--red)">'+F(Math.round(mensCredImmo))+'</td><td style="color:'+(cashflowTotal>=0?'var(--green)':'var(--red)')+'">'+F(Math.round(cashflowTotal))+'</td><td>'+rendBrut+'%</td></tr>';
+if(immoLoc.length===0)rcH+='<tr><td colspan="6" style="text-align:center;color:var(--muted)">Aucun bien locatif. Change le type de location d\'un bien.</td></tr>';
+rcH+='<tr style="background:rgba(45,36,24,.03);font-weight:800"><td class="l">Total</td><td style="color:var(--green)">'+F(Math.round(totLoy))+'</td><td style="color:var(--red)">'+F(Math.round(totCh))+'</td><td style="color:var(--red)">'+F(Math.round(totCr))+'</td><td style="color:'+(totCf>=0?'var(--green)':'var(--red)')+'">'+F(Math.round(totCf))+'</td><td>'+(totValLoc>0?(totLoy*12/totValLoc*100).toFixed(1):0)+'%</td></tr>';
 rcH+='</tbody></table>';
 document.getElementById('immoRecap').innerHTML=rcH;
 
@@ -773,7 +788,7 @@ if(sciBiens.length>0){
 /* Fiches détaillées par bien */
 let imH='';S.immo.forEach(b=>{
   const cr=b.creditId?S.dettes.find(d=>d.id===b.creditId):null;
-  const mensC=cr?cAm(cr.emprunte,cr.taux||0,cr.dureeMois||0).m:0;
+  const mensC=cr?cAm(cr.emprunte,cr.taux||0,cr.dureeMois||0,cr.differe||0).m:0;
   const chM=(b.charges||0)+(b.taxeFonciere||0)/12+(b.assurance||0)/12+(b.gestion||0);
   const cf=(b.loyer||0)-chM-mensC;
   const rb=b.valeur>0?((b.loyer||0)*12/b.valeur*100).toFixed(1):0;
@@ -809,6 +824,25 @@ let imH='';S.immo.forEach(b=>{
   imH+='<details style="margin-top:12px"><summary style="font-size:12px;font-weight:600;cursor:pointer">🔧 Travaux & dépenses ('+(b.travaux||[]).length+')</summary><div style="margin-top:8px">';
   (b.travaux||[]).forEach((tr,ti)=>{imH+='<div class="lr"><div><div class="ln">'+tr.desc+'</div><div class="ls">'+tr.date+'</div></div><div style="display:flex;gap:8px;align-items:center"><span style="font-weight:600;color:var(--red)">'+F(tr.montant)+'</span><button class="db" onclick="delTravaux(\''+b.id+'\','+ti+')">✕</button></div></div>'});
   imH+='<button class="ab" onclick="addTravaux(\''+b.id+'\')">+ Dépense</button></div></details>';
+
+  /* Historique revenus perçus */
+  if(!b.revenusMois)b.revenusMois={};
+  const moisRev=["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
+  const annee=new Date().getFullYear();
+  const anStr=String(annee);
+  if(!b.revenusMois[anStr])b.revenusMois[anStr]={};
+  const totRevAn=moisRev.reduce((a,m)=>a+(b.revenusMois[anStr][m]||0),0);
+  imH+='<details style="margin-top:12px"><summary style="font-size:12px;font-weight:600;cursor:pointer">💰 Revenus perçus '+annee+' — '+F(totRevAn)+'</summary><div style="margin-top:8px">';
+  imH+='<table style="font-size:11px"><thead><tr><th></th>';
+  moisRev.forEach(m=>{imH+='<th>'+m+'</th>'});
+  imH+='<th>Total</th></tr></thead><tbody><tr><td class="l" style="font-weight:600">Loyer</td>';
+  moisRev.forEach(m=>{const v=b.revenusMois[anStr][m]||0;imH+='<td><span class="ed" onclick="edRevMois(this,\''+b.id+'\',\''+anStr+'\',\''+m+'\')">'+v+'</span></td>'});
+  imH+='<td style="font-weight:800;color:var(--green)">'+F(totRevAn)+'</td></tr></tbody></table>';
+  /* Année précédente en lecture */
+  const anPrec=String(annee-1);
+  if(b.revenusMois[anPrec]){const totPrev=moisRev.reduce((a,m)=>a+(b.revenusMois[anPrec][m]||0),0);
+  if(totPrev>0){imH+='<div style="margin-top:8px;font-size:11px;color:var(--muted)">'+anPrec+' : '+F(totPrev)+' ('+(totRevAn>0?((totRevAn-totPrev)/totPrev*100>0?'+':'')+(((totRevAn-totPrev)/totPrev)*100).toFixed(0)+'% vs '+anPrec:'—')+')</div>'}}
+  imH+='</div></details>';
 
   imH+='</div>';
 });
@@ -849,9 +883,9 @@ document.getElementById('cra').innerHTML=addB('cra',[{k:'nom',label:'Nom',w:2},{
 
 /* Dettes — avec calcul auto du restant basé sur date début */
 function moisEcoules(dateDebut){if(!dateDebut)return 0;const parts=dateDebut.split('-');if(parts.length!==2)return 0;const y=parseInt(parts[0]),m=parseInt(parts[1]);const now=new Date();return(now.getFullYear()-y)*12+(now.getMonth()+1-m)}
-document.getElementById('dk').innerHTML='<div class="kpi"><div class="kl">Dettes</div><div class="kv" style="color:var(--red)">'+F(t.de)+'</div></div><div class="kpi"><div class="kl">Mensualités</div><div class="kv">'+F(S.dettes.reduce((a,d)=>a+cAm(d.emprunte,d.taux||0,d.dureeMois||0).m,0))+'</div><div class="ks">/mois</div></div>';
+document.getElementById('dk').innerHTML='<div class="kpi"><div class="kl">Dettes</div><div class="kv" style="color:var(--red)">'+F(t.de)+'</div></div><div class="kpi"><div class="kl">Mensualités</div><div class="kv">'+F(S.dettes.reduce((a,d)=>a+cAm(d.emprunte,d.taux||0,d.dureeMois||0,d.differe||0).m,0))+'</div><div class="ks">/mois</div></div>';
 let dH='';S.dettes.forEach(d=>{
-  const am=cAm(d.emprunte,d.taux||0,d.dureeMois||0);
+  const am=cAm(d.emprunte,d.taux||0,d.dureeMois||0,d.differe||0);
   /* Calcul auto du restant si date début renseignée */
   const me=moisEcoules(d.dateDebut);
   if(d.dateDebut&&am.t.length>0&&me>0){const idx=Math.min(me,am.t.length)-1;d.restant=am.t[idx].r}
@@ -861,7 +895,9 @@ let dH='';S.dettes.forEach(d=>{
   dH+='<div class="lr"><span>Date début (AAAA-MM)</span><span class="ed" onclick="edTxt(this,\'dettes\',\''+d.id+'\',\'dateDebut\')">'+(d.dateDebut||'—')+'</span></div>';
   dH+='<div class="lr"><span>Taux annuel</span><span class="ed" onclick="eI(this,\'dettes\',\''+d.id+'\',\'taux\')">'+(d.taux||0).toFixed(2)+'%</span></div>';
   dH+='<div class="lr"><span>Durée</span><span class="ed" onclick="eI(this,\'dettes\',\''+d.id+'\',\'dureeMois\')">'+(d.dureeMois||0)+' mois</span></div>';
-  dH+='<div class="lr"><span>Mensualité</span><span style="font-weight:700">'+F2(am.m)+'</span></div>';
+  dH+='<div class="lr"><span>Différé (mois)</span><span class="ed" onclick="eI(this,\'dettes\',\''+d.id+'\',\'differe\')">'+(d.differe||0)+' mois</span></div>';
+  const enDiffere=me>0&&me<=(d.differe||0);
+  dH+='<div class="lr"><span>Mensualité'+(enDiffere?' <span style="color:var(--orange);font-size:10px">(différé)</span>':'')+'</span><span style="font-weight:700">'+(enDiffere?F2(am.mDiff||0):F2(am.m))+'</span></div>';
   dH+='<div class="lr"><span>Restant dû</span><span style="font-weight:700;color:var(--red)">'+F(d.restant)+'</span></div>';
   if(me>0)dH+='<div class="lr"><span>Échéances payées</span><span>'+me+' / '+(d.dureeMois||0)+'</span></div>';
   dH+='<div class="pg"><div class="pf" style="width:'+p+'%"></div></div>';
@@ -870,7 +906,7 @@ let dH='';S.dettes.forEach(d=>{
   if(am.t.length>0){const sl=am.t.slice(Math.max(0,me-2),Math.max(0,me-2)+6);dH+='<details style="margin-top:8px"><summary style="font-size:11px;color:var(--muted);cursor:pointer">📋 Amortissement</summary><div class="amor-table"><table><thead><tr><th>N°</th><th>Mens.</th><th>Capital</th><th>Int.</th><th>Restant</th></tr></thead><tbody>';sl.forEach(r=>{dH+='<tr'+(r.n>=me&&r.n<=me+1?' style="background:#f0fdf4;font-weight:600"':'')+'><td>'+r.n+'</td><td>'+F2(r.m)+'</td><td>'+F2(r.c)+'</td><td>'+F2(r.i)+'</td><td>'+F2(r.r)+'</td></tr>'});dH+='</tbody></table></div></details>'}
   dH+='</div>'});
 dH+='<div id="da"></div>';document.getElementById('dl2').innerHTML=dH;
-document.getElementById('da').innerHTML=addB('da',[{k:'nom',label:'Nom',w:2},{k:'emprunte',label:'Emprunté',num:true},{k:'taux',label:'Taux%',num:true},{k:'dureeMois',label:'Mois',num:true},{k:'dateDebut',label:'Début (2025-03)'},{k:'fin',label:'Fin'}],'dettes',{restant:0,type:'',banque:'',dateDebut:''});
+document.getElementById('da').innerHTML=addB('da',[{k:'nom',label:'Nom',w:2},{k:'emprunte',label:'Emprunté',num:true},{k:'taux',label:'Taux%',num:true},{k:'dureeMois',label:'Mois',num:true},{k:'differe',label:'Différé mois',num:true},{k:'dateDebut',label:'Début (2025-03)'},{k:'fin',label:'Fin'}],'dettes',{restant:0,type:'',banque:'',dateDebut:'',differe:0});
 
 /* ====== BUDGET ====== */
 const B=S.budget;
