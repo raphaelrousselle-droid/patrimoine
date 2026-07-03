@@ -138,7 +138,7 @@ const D={comptes:[{id:'c1',nom:"Compte courant",banque:"BP",montant:0},{id:'c2',
 let S,snaps=[];
 const SEED=[{date:"Juin 25",immobilier:125000,comptes:2665,epargne:9178,bourse:4300,crypto:500,dettes:134708,brut:141643,net:6935},{date:"Juil 25",immobilier:125000,comptes:8760,epargne:9446,bourse:5134,crypto:521,dettes:134708,brut:148861,net:14153},{date:"Août 25",immobilier:125000,comptes:2460,epargne:12818,bourse:8826,crypto:684,dettes:134575,brut:149788,net:15213},{date:"Sep 25",immobilier:125000,comptes:2042,epargne:11440,bourse:9164,crypto:756,dettes:134444,brut:148402,net:13958},{date:"Oct 25",immobilier:125000,comptes:31654,epargne:42869,bourse:22562,crypto:730,dettes:134311,brut:222815,net:88504},{date:"Nov 25",immobilier:125000,comptes:7539,epargne:61970,bourse:25829,crypto:2249,dettes:134179,brut:222587,net:88408},{date:"Déc 25",immobilier:125000,comptes:2520,epargne:59927,bourse:27200,crypto:1791,dettes:132098,brut:216438,net:84340},{date:"Jan 26",immobilier:125000,comptes:3925,epargne:51101,bourse:27112,crypto:1730,dettes:131702,brut:208868,net:77166},{date:"Fév 26",immobilier:125000,comptes:19651,epargne:28844,bourse:29223,crypto:1648,dettes:131309,brut:204365,net:73056},{date:"Mar 26",immobilier:125000,comptes:3404,epargne:44069,bourse:29564,crypto:1324,dettes:130915,brut:203361,net:72446}];
 
-async function loadData(){try{const doc=await db.collection('users').doc(uid).get();if(doc.exists){S=doc.data().patrimoine||JSON.parse(JSON.stringify(D));snaps=doc.data().snapshots||[]}else{let ls=localStorage.getItem('patrimoine_data');if(ls){S=JSON.parse(ls);snaps=JSON.parse(localStorage.getItem('patrimoine_snaps')||'[]');await saveData()}else{S=JSON.parse(JSON.stringify(D));snaps=[]}}if(!S.versMensuels)S.versMensuels=D.versMensuels.map(x=>({...x}));if(!S.objectifs)S.objectifs=D.objectifs.map(x=>({...x}));S.objectifs.forEach(o=>{if(o.actuel===undefined)o.actuel=0});if(!S.budget)S.budget=JSON.parse(JSON.stringify(BDEF));if(!S.pf.avl)S.pf.avl={esp:0,ver:0,cur:'EUR',l:[]};if(!S.simParams)S.simParams={age:30,dep:25000,rend:7,ep:500};if(!S.notes)S.notes={};if(!S.histJour)S.histJour=[];if(!S.bourseGoals)S.bourseGoals=[];if(!S.watchlist)S.watchlist=[];if(!S.journal)S.journal=[];if(!S.revSources)S.revSources=[];if(!S.etfGoals)S.etfGoals={pea:60,ctosb:0,ctoibkr:0};if(!S.avEtf)S.avEtf=[];if(!S.benchCours)S.benchCours={}}catch(e){S=JSON.parse(JSON.stringify(D));snaps=[]}}
+async function loadData(){try{const doc=await db.collection('users').doc(uid).get();if(doc.exists){S=doc.data().patrimoine||JSON.parse(JSON.stringify(D));snaps=doc.data().snapshots||[]}else{let ls=localStorage.getItem('patrimoine_data');if(ls){S=JSON.parse(ls);snaps=JSON.parse(localStorage.getItem('patrimoine_snaps')||'[]');await saveData()}else{S=JSON.parse(JSON.stringify(D));snaps=[]}}if(!S.versMensuels)S.versMensuels=D.versMensuels.map(x=>({...x}));if(!S.objectifs)S.objectifs=D.objectifs.map(x=>({...x}));S.objectifs.forEach(o=>{if(o.actuel===undefined)o.actuel=0});if(!S.budget)S.budget=JSON.parse(JSON.stringify(BDEF));if(!S.pf.avl)S.pf.avl={esp:0,ver:0,cur:'EUR',l:[]};if(!S.simParams)S.simParams={age:30,dep:25000,rend:7,ep:500};if(!S.notes)S.notes={};if(!S.histJour)S.histJour=[];if(!S.bourseGoals)S.bourseGoals=[];if(!S.watchlist)S.watchlist=[];if(!S.journal)S.journal=[];if(!S.revSources)S.revSources=[];if(!S.etfGoals)S.etfGoals={pea:60,ctosb:0,ctoibkr:0};if(!S.benchCours)S.benchCours={}}catch(e){S=JSON.parse(JSON.stringify(D));snaps=[]}}
 let sT=null;function autoSave(){if(sT)clearTimeout(sT);sT=setTimeout(saveData,2000)}
 async function saveData(){if(!uid)return;try{
 /* Nettoyer les données avant sauvegarde */
@@ -162,9 +162,6 @@ async function yQBatch(tickers){
 }
 const YM={"EPA:AI":"AI.PA","EPA:DCAM":"DCAM.PA","EPA:PUST":"PUST.PA","EPA:GTT":"GTT.PA","EPA:DG":"DG.PA","EPA:EL":"EL.PA","EPA:SU":"SU.PA","EPA:ALMIB":"ALMIB.PA","GOOGL":"GOOGL","AMBA":"AMBA","NET":"NET","DXCM":"DXCM","ON":"ON","NU":"NU","RKLB":"RKLB","TOST":"TOST","AMZN":"AMZN","SNOW":"SNOW","SOFI":"SOFI","SYM":"SYM","TER":"TER","TTD":"TTD","TMDX":"TMDX","CELH":"CELH","PATH":"PATH","VRT":"VRT","ZS":"ZS","EPA:BNKE":"BNKE.PA","LON:HNSC":"HNSC.L","XDGU":"XDGU.DE","BTC":"BTC-EUR","ETH":"ETH-EUR","NEAR":"NEAR-EUR","SOL":"SOL-EUR","USDC":"USDC-EUR"};
 let rStat="",rL=false,eurUsd=.85,spM={};
-/* Cache cours local */
-let courseCache={};try{courseCache=JSON.parse(localStorage.getItem('courseCache')||'{}')}catch(e){courseCache={}}
-function saveCourseCache(){try{localStorage.setItem('courseCache',JSON.stringify(courseCache))}catch(e){}}
 const _F=n=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
 const _F2=n=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
 const F=n=>hiddenMode?'***':_F(n);
@@ -440,11 +437,6 @@ window.cmRevMois=function(inp,id,annee,mois){const v=parseFloat(inp.value.replac
 window.edCD=function(el,id,field,mi){const b=S.immo.find(x=>x.id===id);if(!b)return;el.outerHTML='<input class="ci" style="width:45px" value="'+(b[field][mi]||0)+'" onkeydown="if(event.key===\'Enter\')cmCD(this,\''+id+'\',\''+field+'\','+mi+');if(event.key===\'Escape\')R(true)" onblur="cmCD(this,\''+id+'\',\''+field+'\','+mi+')" autofocus>'};
 window.cmCD=function(inp,id,field,mi){const v=parseFloat(inp.value.replace(',','.'));const b=S.immo.find(x=>x.id===id);if(b&&!isNaN(v))b[field][mi]=v;autoSave();R(true)};
 
-/* ETF Assurance Vie */
-window.addAVetf=function(){const ticker=prompt('Ticker Yahoo (ex: MWRD.PA, CW8.PA)','');if(!ticker)return;const nom=prompt('Nom','');const qte=parseFloat(prompt('Nombre de parts','0'))||0;const pru=parseFloat(prompt('PRU (prix d\'achat moyen)','0'))||0;if(!S.avEtf)S.avEtf=[];S.avEtf.push({id:'av'+nid(),ticker:ticker.trim(),nom:nom||ticker.trim(),qte,pru,prix:0,var:0});YM[ticker.trim()]=ticker.trim();autoSave();R(true)};
-window.edAVetf=function(el,id,f){const e=S.avEtf.find(x=>x.id===id);if(!e)return;el.outerHTML='<input class="ci" style="width:80px" value="'+(e[f]||0)+'" onkeydown="if(event.key===\'Enter\')cmAVetf(this,\''+id+'\',\''+f+'\');if(event.key===\'Escape\')R(true)" onblur="cmAVetf(this,\''+id+'\',\''+f+'\')" autofocus>'};
-window.cmAVetf=function(inp,id,f){const v=parseFloat(inp.value.replace(',','.'));const e=S.avEtf.find(x=>x.id===id);if(e&&!isNaN(v))e[f]=v;autoSave();R(true)};
-window.delAVetf=function(id){S.avEtf=S.avEtf.filter(x=>x.id!==id);autoSave();R(true)};
 
 /* ====== RENDER ====== */
 function R(dc){
@@ -914,10 +906,7 @@ function moisEcoules(dateDebut){if(!dateDebut)return 0;const parts=dateDebut.spl
 document.getElementById('dk').innerHTML='<div class="kpi"><div class="kl">Dettes</div><div class="kv" style="color:var(--red)">'+F(t.de)+'</div></div><div class="kpi"><div class="kl">Mensualités</div><div class="kv">'+F(S.dettes.reduce((a,d)=>a+cAm(d.emprunte,d.taux||0,d.dureeMois||0,d.differe||0).m,0))+'</div><div class="ks">/mois</div></div>';
 let dH='';S.dettes.forEach(d=>{
   const am=cAm(d.emprunte,d.taux||0,d.dureeMois||0,d.differe||0);
-  /* Calcul auto du restant si date début renseignée */
   const me=moisEcoules(d.dateDebut);
-  if(me>0&&am.t.length>0){const idx=Math.min(me,am.t.length)-1;d.restant=am.t[idx].r}
-  else{d.restant=d.emprunte}/* Prêt pas commencé ou pas de date = restant = emprunté */
   const p=d.emprunte>0?((d.emprunte-d.restant)/d.emprunte*100).toFixed(1):'0';
   dH+='<div class="card"><div style="display:flex;justify-content:space-between"><div style="font-weight:700">'+d.nom+'</div><button class="db" onclick="dI(\'dettes\',\''+d.id+'\')">✕</button></div>';
   dH+='<div class="lr"><span>Emprunté</span><span class="ed" onclick="eI(this,\'dettes\',\''+d.id+'\',\'emprunte\')" style="font-weight:600">'+F(d.emprunte)+'</span></div>';
