@@ -313,7 +313,10 @@ c+="\nBUDGET\n";if(S.budget){c+="Revenus\n";S.budget.revenus.forEach(r=>{c+=r.no
 const blob=new Blob(["\uFEFF"+c],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download="patrimoine_"+now+".csv";a.click();URL.revokeObjectURL(url)};
 
 function cPf(pf){const isUSD=pf.cur==='USD';let tv=0,tp=0,dT=0,dayPnl=0;const e=pf.l.map(x=>{const va=x.co*x.p;let cp=isUSD?(x.usd||x.co):x.co;const vp=x.pr*x.p,vap=cp*x.p,g=vap-vp,gp=vp>0?(g/vp)*100:0,da=(x.div||0)*x.p;dT+=da;tv+=va;tp+=x.pr*x.p*(isUSD?eurUsd:1);if(x.var&&x.co){const prevCo=x.co/(1+x.var/100);dayPnl+=(x.co-prevCo)*x.p}return{...x,vaEur:va,g,gp,divAn:da}});const tot=tv+(pf.esp||0);e.forEach(x=>x.w=tot>0?(x.vaEur/tot)*100:0);const pv=tot-pf.ver;const dayPct=tv>0?(dayPnl/tv*100):0;return{l:e,v:tot,pv:tv-tp,pp:tp>0?((tv-tp)/tp)*100:0,pvVer:pv,ppVer:pf.ver>0?(pv/pf.ver)*100:0,divTot:dT,isUSD,dayPnl:Math.round(dayPnl*100)/100,dayPct:Math.round(dayPct*100)/100}}
-function Tot(){const p=cPf(S.pf.pea),s=cPf(S.pf.ctosb),i=cPf(S.pf.ctoibkr),a=cPf(S.pf.avl||{esp:0,ver:0,cur:'EUR',l:[]});const co=S.comptes.reduce((a,c)=>a+c.montant,0),eL=S.epLibre.reduce((a,c)=>a+c.montant,0),eB=S.epBloq.reduce((a,c)=>a+c.montant,0),ep=eL+eB,bo=p.v+s.v+i.v+a.v;S.crypto.forEach(c=>{if(c.prix>0)c.montant=Math.round(c.prix*c.qte*100)/100;else if(!c.montant&&c.pru>0)c.montant=Math.round(c.pru*c.qte*100)/100});const cr=S.crypto.reduce((a,c)=>a+(c.montant||0),0),crI=S.crypto.reduce((a,c)=>a+c.pru*c.qte,0),im=S.immo.reduce((a,x)=>a+x.valeur*(x.partsPct/100),0),de=S.dettes.reduce((a,d)=>a+d.restant,0);return{co,eL,eB,ep,bo,cr,crI,im,de,br:im+co+ep+bo+cr,ne:im+co+ep+bo+cr-de,lq:co+eL,p,s,i,a}}
+function Tot(){const p=cPf(S.pf.pea),s=cPf(S.pf.ctosb),i=cPf(S.pf.ctoibkr),a=cPf(S.pf.avl||{esp:0,ver:0,cur:'EUR',l:[]});const co=S.comptes.reduce((a,c)=>a+c.montant,0),eL=S.epLibre.reduce((a,c)=>a+c.montant,0),eB=S.epBloq.reduce((a,c)=>a+c.montant,0),ep=eL+eB,bo=p.v+s.v+i.v+a.v;S.crypto.forEach(c=>{if(c.prix>0)c.montant=Math.round(c.prix*c.qte*100)/100;else if(!c.montant&&c.pru>0)c.montant=Math.round(c.pru*c.qte*100)/100});const cr=S.crypto.reduce((a,c)=>a+(c.montant||0),0),crI=S.crypto.reduce((a,c)=>a+c.pru*c.qte,0),im=S.immo.reduce((a,x)=>a+x.valeur*((x.partsPct||100)/100),0);
+/* Dettes: appliquer le % de détention du bien associé */
+let de=0;S.dettes.forEach(d=>{const bienLie=S.immo.find(b=>b.creditId===d.id);const pct=bienLie?(bienLie.partsPct||100)/100:1;de+=d.restant*pct});
+return{co,eL,eB,ep,bo,cr,crI,im,de,br:im+co+ep+bo+cr,ne:im+co+ep+bo+cr-de,lq:co+eL,p,s,i,a}}
 
 window.doSave=function(){const t=Tot(),lb=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});snaps.push({date:lb,ts:Date.now(),immobilier:t.im,comptes:t.co,epargne:t.ep,bourse:t.bo,crypto:t.cr,dettes:t.de,brut:t.br,net:t.ne});autoSave();const b=document.getElementById('sbtn');b.classList.add('btn-ok');b.textContent='✓';setTimeout(()=>{b.classList.remove('btn-ok');b.textContent='📸'},1500);R(true)};
 window.dS=ts=>{snaps=snaps.filter(s=>s.ts!==ts);autoSave();R(true)};
@@ -427,7 +430,8 @@ window.addBgtP=function(cid){const c=S.budget.categories.find(x=>x.id===cid);if(
 /* Fonctions Immo */
 window.addImmo=function(){const nom=prompt('Nom du bien','');if(!nom)return;S.immo.push({id:'i'+nid(),nom,type:'',prixAchat:0,valeur:0,sci:false,partsPct:100,adresse:'',surface:0,typeLocation:'',loyer:0,charges:0,taxeFonciere:0,assurance:0,gestion:0,travaux:[],creditId:'',cdRevenus:new Array(12).fill(0),cdNuits:new Array(12).fill(0)});autoSave();R(true)};
 window.edImmoType=function(id){const b=S.immo.find(x=>x.id===id);if(!b)return;const c=parseInt(prompt('Type de location :\n1. Longue durée\n2. Courte durée\n3. Résidence principale','1'));if(c===1)b.typeLocation='longue';else if(c===2)b.typeLocation='courte';else if(c===3)b.typeLocation='rp';autoSave();R(true)};
-window.togSCI=function(id){const b=S.immo.find(x=>x.id===id);if(!b)return;b.sci=!b.sci;if(b.sci){const p=parseInt(prompt('% de parts que tu détiens','50'));if(!isNaN(p))b.partsPct=p}else b.partsPct=100;autoSave();R(true)};
+window.togSCI=function(id){const b=S.immo.find(x=>x.id===id);if(!b)return;b.sci=!b.sci;autoSave();R(true)};
+window.edPct=function(el,id){const b=S.immo.find(x=>x.id===id);if(!b)return;const v=parseInt(prompt('% de détention (ta part)\nExemple: 50 si tu détiens la moitié',b.partsPct||100));if(isNaN(v)||v<1||v>100)return;b.partsPct=v;autoSave();R(true)};
 window.edImmoCredit=function(id){const b=S.immo.find(x=>x.id===id);if(!b)return;const dettes=S.dettes;if(dettes.length===0){alert('Aucune dette. Ajoute un crédit dans l\'onglet Dettes.');return}let menu='0. Aucun\n';dettes.forEach((d,i)=>{menu+=(i+1)+'. '+d.nom+' ('+F(d.restant)+')\n'});const c=parseInt(prompt('Lier un crédit :\n'+menu,'0'));if(c===0)b.creditId='';else if(c>0&&c<=dettes.length)b.creditId=dettes[c-1].id;autoSave();R(true)};
 window.addTravaux=function(id){const b=S.immo.find(x=>x.id===id);if(!b)return;const desc=prompt('Description','');if(!desc)return;const montant=parseFloat(prompt('Montant €','0'));if(isNaN(montant))return;const date=new Date().toLocaleDateString('fr-FR');if(!b.travaux)b.travaux=[];b.travaux.push({desc,montant,date});autoSave();R(true)};
 window.delTravaux=function(id,i){const b=S.immo.find(x=>x.id===id);if(b&&b.travaux)b.travaux.splice(i,1);autoSave();R(true)};
@@ -753,20 +757,23 @@ const imH2=H.filter(h=>h.immobilier);
 window._cImN=new Chart(cImEl,{type:'line',data:{labels:imH2.map(h=>h.date),datasets:[{label:'Valeur immo',data:imH2.map(h=>h.immobilier||0),borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.08)',fill:true,tension:.3,pointRadius:3,borderWidth:2},{label:'Dettes immo',data:imH2.map(h=>h.dettes||0),borderColor:'#ef4444',borderDash:[4,4],tension:.3,pointRadius:2,borderWidth:2,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},usePointStyle:true}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+F(c.raw)}}},scales:{x:{ticks:{color:'#7a8699',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#7a8699',font:{size:10},callback:v=>(v/1000).toFixed(0)+'k'},grid:{color:'#f0f2f5'}}}}})}}
 
 /* Tableau récap mensuel — hors RP */
-const immoLoc=S.immo.filter(b=>b.typeLocation&&b.typeLocation!=='rp');
+const isRP=b=>b.typeLocation==='rp'||b.type==='RP'||(b.typeLocation||'').toLowerCase()==='rp';
+const immoLoc=S.immo.filter(b=>!isRP(b)&&(b.loyer>0||b.typeLocation));
 let rcH='<table><thead><tr><th class="l">Bien</th><th>Loyer</th><th>Charges</th><th>Crédit</th><th>Cashflow</th><th>Rdt brut</th></tr></thead><tbody>';
 let totLoy=0,totCh=0,totCr=0,totCf=0,totValLoc=0;
 immoLoc.forEach(b=>{
+  const pct=(b.partsPct||100)/100;
   const cr=b.creditId?S.dettes.find(d=>d.id===b.creditId):null;
   const me2=cr?moisEcoules(cr.dateDebut):0;
   const am2=cr?cAm(cr.emprunte,cr.taux||0,cr.dureeMois||0,cr.differe||0):null;
   const enDiff=cr&&me2>0&&me2<=(cr.differe||0);
-  const mensC=am2?(enDiff?am2.mDiff:am2.m):0;
-  const chM=(b.charges||0)+(b.taxeFonciere||0)/12+(b.assurance||0)/12+(b.gestion||0);
-  const cf=(b.loyer||0)-chM-mensC;
+  const mensC=(am2?(enDiff?am2.mDiff:am2.m):0)*pct;
+  const chM=((b.charges||0)+(b.taxeFonciere||0)/12+(b.assurance||0)/12+(b.gestion||0))*pct;
+  const loyM=(b.loyer||0)*pct;
+  const cf=loyM-chM-mensC;
   const rb=b.valeur>0?((b.loyer||0)*12/b.valeur*100).toFixed(1):0;
-  totLoy+=b.loyer||0;totCh+=chM;totCr+=mensC;totCf+=cf;totValLoc+=b.valeur;
-  rcH+='<tr><td class="l" style="font-weight:600">'+b.nom+'</td><td style="color:var(--green);font-weight:600">'+F(b.loyer||0)+'</td><td style="color:var(--red)">'+F(Math.round(chM))+'</td><td style="color:var(--red)">'+F(Math.round(mensC))+'</td><td style="font-weight:700;color:'+(cf>=0?'var(--green)':'var(--red)')+'">'+F(Math.round(cf))+'</td><td>'+rb+'%</td></tr>';
+  totLoy+=loyM;totCh+=chM;totCr+=mensC;totCf+=cf;totValLoc+=b.valeur*pct;
+  rcH+='<tr><td class="l" style="font-weight:600">'+b.nom+(pct<1?' <span style="font-size:10px;color:var(--muted)">('+b.partsPct+'%)</span>':'')+'</td><td style="color:var(--green);font-weight:600">'+F(Math.round(loyM))+'</td><td style="color:var(--red)">'+F(Math.round(chM))+'</td><td style="color:var(--red)">'+F(Math.round(mensC))+'</td><td style="font-weight:700;color:'+(cf>=0?'var(--green)':'var(--red)')+'">'+F(Math.round(cf))+'</td><td>'+rb+'%</td></tr>';
 });
 if(immoLoc.length===0)rcH+='<tr><td colspan="6" style="text-align:center;color:var(--muted)">Aucun bien locatif. Change le type de location d\'un bien.</td></tr>';
 rcH+='<tr style="background:rgba(45,36,24,.03);font-weight:800"><td class="l">Total</td><td style="color:var(--green)">'+F(Math.round(totLoy))+'</td><td style="color:var(--red)">'+F(Math.round(totCh))+'</td><td style="color:var(--red)">'+F(Math.round(totCr))+'</td><td style="color:'+(totCf>=0?'var(--green)':'var(--red)')+'">'+F(Math.round(totCf))+'</td><td>'+(totValLoc>0?(totLoy*12/totValLoc*100).toFixed(1):0)+'%</td></tr>';
@@ -808,7 +815,9 @@ let imH='';S.immo.forEach(b=>{
   imH+='<div class="lr"><span>Surface m²</span><span class="ed" onclick="eI(this,\'immo\',\''+b.id+'\',\'surface\')">'+(b.surface||'—')+'</span></div>';
   imH+='<div class="lr"><span>Adresse</span><span class="ed" onclick="edTxt(this,\'immo\',\''+b.id+'\',\'adresse\')">'+(b.adresse||'—')+'</span></div>';
   imH+='<div class="lr"><span>Type location</span><span class="ed" onclick="edImmoType(\''+b.id+'\')">'+(b.typeLocation||'—')+'</span></div>';
-  imH+='<div class="lr"><span>SCI</span><span class="ed" onclick="togSCI(\''+b.id+'\')">'+(b.sci?'Oui ('+b.partsPct+'%)':'Non')+'</span></div>';
+  imH+='<div class="lr"><span>SCI</span><span class="ed" onclick="togSCI(\''+b.id+'\')">'+(b.sci?'Oui':'Non')+'</span></div>';
+  imH+='<div class="lr"><span>% détention (ta part)</span><span class="ed" onclick="edPct(this,\''+b.id+'\')" style="font-weight:700;color:var(--accent)">'+(b.partsPct||100)+'%</span></div>';
+  imH+='<div class="lr"><span>Ta part (valeur)</span><span style="font-weight:700;color:var(--orange)">'+F(Math.round(b.valeur*((b.partsPct||100)/100)))+'</span></div>';
   imH+='<div class="lr"><span>Crédit lié</span><span class="ed" onclick="edImmoCredit(\''+b.id+'\')">'+(cr?cr.nom:'—')+'</span></div>';
   imH+='</div><div>';
   imH+='<div class="lr"><span>Loyer/mois</span><span class="ed" onclick="eI(this,\'immo\',\''+b.id+'\',\'loyer\')" style="color:var(--green);font-weight:700">'+F(b.loyer||0)+'</span></div>';
