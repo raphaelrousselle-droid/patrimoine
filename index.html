@@ -764,10 +764,16 @@ let totLoy=0,totCh=0,totCr=0,totCf=0,totValLoc=0;
 immoLoc.forEach(b=>{
   const pct=(b.partsPct||100)/100;
   const cr=b.creditId?S.dettes.find(d=>d.id===b.creditId):null;
-  const me2=cr?moisEcoules(cr.dateDebut):0;
-  const am2=cr?cAm(cr.emprunte,cr.taux||0,cr.dureeMois||0,cr.differe||0):null;
-  const enDiff=cr&&me2>0&&me2<=(cr.differe||0);
-  const mensC=am2?(enDiff?am2.mDiff:am2.m):0;
+  let mensC=0;
+  if(cr){
+    const me2=moisEcoules(cr.dateDebut);
+    if(me2>0){/* Prêt en cours */
+      const am2=cAm(cr.emprunte,cr.taux||0,cr.dureeMois||0,cr.differe||0);
+      const enDiff=me2<=(cr.differe||0);
+      mensC=enDiff?(am2.mDiff||0):am2.m;
+    }/* sinon prêt pas commencé = 0€ */
+  }
+  mensC=Math.abs(mensC);/* toujours positif */
   const chM=(b.charges||0)+(b.taxeFonciere||0)/12+(b.assurance||0)/12+(b.gestion||0);
   const loyM=(b.loyer||0);
   const cf=loyM-chM-mensC;
