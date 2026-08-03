@@ -313,7 +313,7 @@ const blob=new Blob(["\uFEFF"+c],{type:"text/csv;charset=utf-8"});const url=URL.
 function cPf(pf){const isUSD=pf.cur==='USD';let tv=0,tp=0,dT=0,dayPnl=0;const e=pf.l.map(x=>{const va=x.co*x.p;let cp=isUSD?(x.usd||x.co):x.co;const vp=x.pr*x.p,vap=cp*x.p,g=vap-vp,gp=vp>0?(g/vp)*100:0,da=(x.div||0)*x.p;dT+=da;tv+=va;tp+=x.pr*x.p*(isUSD?eurUsd:1);if(x.var&&x.co){const prevCo=x.co/(1+x.var/100);dayPnl+=(x.co-prevCo)*x.p}return{...x,vaEur:va,g,gp,divAn:da}});const tot=tv+(pf.esp||0);e.forEach(x=>x.w=tot>0?(x.vaEur/tot)*100:0);const pv=tot-pf.ver;const dayPct=tv>0?(dayPnl/tv*100):0;return{l:e,v:tot,pv:tv-tp,pp:tp>0?((tv-tp)/tp)*100:0,pvVer:pv,ppVer:pf.ver>0?(pv/pf.ver)*100:0,divTot:dT,isUSD,dayPnl:Math.round(dayPnl*100)/100,dayPct:Math.round(dayPct*100)/100}}
 function Tot(){const p=cPf(S.pf.pea),s=cPf(S.pf.ctosb),i=cPf(S.pf.ctoibkr),a=cPf(S.pf.avl||{esp:0,ver:0,cur:'EUR',l:[]});const co=S.comptes.reduce((a,c)=>a+c.montant,0),eL=S.epLibre.reduce((a,c)=>a+c.montant,0),eB=S.epBloq.reduce((a,c)=>a+c.montant,0),ep=eL+eB,bo=p.v+s.v+i.v+a.v;S.crypto.forEach(c=>{if(c.prix>0)c.montant=Math.round(c.prix*c.qte*100)/100;else if(!c.montant&&c.pru>0)c.montant=Math.round(c.pru*c.qte*100)/100});const cr=S.crypto.reduce((a,c)=>a+(c.montant||0),0),crI=S.crypto.reduce((a,c)=>a+c.pru*c.qte,0),im=S.immo.reduce((a,x)=>a+x.valeur*((x.partsPct||100)/100),0);
 /* Dettes: appliquer le % de détention du bien associé */
-let de=0;S.dettes.forEach(d=>{const bienLie=S.immo.find(b=>b.creditId===d.id);const pct=bienLie?(bienLie.partsPct||100)/100:1;de+=d.restant*pct});
+let de=0;S.dettes.forEach(d=>{const bienLie=S.immo.find(b=>b.creditId===d.id);const pct=(d.partsPct!=null?d.partsPct:(bienLie?(bienLie.partsPct||100):100))/100;de+=d.restant*pct});
 return{co,eL,eB,ep,bo,cr,crI,im,de,br:im+co+ep+bo+cr,ne:im+co+ep+bo+cr-de,lq:co+eL,p,s,i,a}}
 
 window.doSave=function(){const t=Tot(),lb=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});snaps.push({date:lb,ts:Date.now(),immobilier:t.im,comptes:t.co,epargne:t.ep,bourse:t.bo,crypto:t.cr,dettes:t.de,brut:t.br,net:t.ne});autoSave();const b=document.getElementById('sbtn');b.classList.add('btn-ok');b.textContent='✓';setTimeout(()=>{b.classList.remove('btn-ok');b.textContent='📸'},1500);R(true)};
@@ -433,6 +433,8 @@ window.edPct=function(el,id){const b=S.immo.find(x=>x.id===id);if(!b)return;cons
 window.edImmoCredit=function(id){const b=S.immo.find(x=>x.id===id);if(!b)return;const dettes=S.dettes;if(dettes.length===0){alert('Aucune dette. Ajoute un crédit dans l\'onglet Dettes.');return}let menu='0. Aucun\n';dettes.forEach((d,i)=>{menu+=(i+1)+'. '+d.nom+' ('+F(d.restant)+')\n'});const c=parseInt(prompt('Lier un crédit :\n'+menu,'0'));if(c===0)b.creditId='';else if(c>0&&c<=dettes.length)b.creditId=dettes[c-1].id;autoSave();R(true)};
 window.addTravaux=function(id){const b=S.immo.find(x=>x.id===id);if(!b)return;const desc=prompt('Description','');if(!desc)return;const montant=parseFloat(prompt('Montant €','0'));if(isNaN(montant))return;const date=new Date().toLocaleDateString('fr-FR');if(!b.travaux)b.travaux=[];b.travaux.push({desc,montant,date});autoSave();R(true)};
 window.delTravaux=function(id,i){const b=S.immo.find(x=>x.id===id);if(b&&b.travaux)b.travaux.splice(i,1);autoSave();R(true)};
+window.edDettePct=function(el,id){const d=S.dettes.find(x=>x.id===id);if(!d)return;const bienLie=S.immo.find(b=>b.creditId===id);const actuel=d.partsPct!=null?d.partsPct:(bienLie?(bienLie.partsPct||100):100);const v=parseInt(prompt('Quelle part de ce prêt est à ta charge ?\n\n100 = tu paies tout\n50 = moitié (achat à deux)',actuel));if(isNaN(v)||v<1||v>100)return;d.partsPct=v;autoSave();R(true)};
+
 /* Projets d'achat */
 window.addProjet=function(){const nom=prompt('Nom du projet (ex: Lot 3 maisons Rouen)','');if(!nom)return;const prix=parseFloat(prompt('Prix visé (€)','200000'))||0;if(!S.projets)S.projets=[];S.projets.push({id:'pj'+nid(),nom,prix,fraisNotaire:Math.round(prix*0.08),travaux:0,apport:0,taux:3.5,dureeMois:240,differe:0,loyer:0,charges:0,taxeFonciere:0});autoSave();R(true)};
 window.edProjet=function(el,id,f){const p=S.projets.find(x=>x.id===id);if(!p)return;const v=parseFloat(prompt('Nouvelle valeur',p[f]||0));if(isNaN(v))return;p[f]=v;autoSave();R(true)};
@@ -848,23 +850,24 @@ S.immo.forEach(b=>{
   if(!b.creditId)b.creditId='';
 });
 
-const imT=S.immo.reduce((a,x)=>a+x.valeur*(x.partsPct/100),0);
-const imBrut=S.immo.reduce((a,x)=>a+x.valeur,0);
+const imT=S.immo.reduce((a,x)=>a+x.valeur*((x.partsPct||100)/100),0);
+const imBrut=imT;/* Valeur au prorata de tes parts */
+const imBrut100=S.immo.reduce((a,x)=>a+x.valeur,0);/* Valeur totale des biens (info) */
 const loyerTotal=S.immo.reduce((a,x)=>a+(x.loyer||0),0);
 const chargesTotal=S.immo.reduce((a,x)=>a+(x.charges||0)+(x.taxeFonciere||0)/12+(x.assurance||0)/12+(x.gestion||0),0);
 const mensCredImmo=S.dettes.filter(d=>d.type==='Immo').reduce((a,d)=>a+cAm(d.emprunte,d.taux||0,d.dureeMois||0,d.differe||0).m,0);
 const cashflowTotal=loyerTotal-chargesTotal-mensCredImmo;
-const rendBrut=imBrut>0?Math.round(loyerTotal*12/imBrut*10000)/100:0;
-const rendNet=imBrut>0?Math.round((loyerTotal-chargesTotal)*12/imBrut*10000)/100:0;
-/* Dettes immo = toutes les dettes liées à un bien */
+const rendBrut=imBrut100>0?Math.round(loyerTotal*12/imBrut100*10000)/100:0;
+const rendNet=imBrut100>0?Math.round((loyerTotal-chargesTotal)*12/imBrut100*10000)/100:0;
+/* Dettes immo = dettes liées à un bien, au prorata */
 const creditIds=S.immo.map(b=>b.creditId).filter(x=>x);
 const imDettes=S.dettes.filter(d=>creditIds.includes(d.id)).reduce((a,d)=>{
   const bienLie=S.immo.find(b=>b.creditId===d.id);
-  const pct=bienLie?(bienLie.partsPct||100)/100:1;
+  const pct=(d.partsPct!=null?d.partsPct:(bienLie?(bienLie.partsPct||100):100))/100;
   return a+d.restant*pct;
 },0);
 
-document.getElementById('ik').innerHTML='<div class="kpi"><div class="kl">Valeur brute</div><div class="kv" style="color:#f59e0b">'+F(imBrut)+'</div></div><div class="kpi"><div class="kl">Dettes immo</div><div class="kv" style="color:var(--red)">'+F(imDettes)+'</div></div><div class="kpi"><div class="kl">Net (tes parts)</div><div class="kv" style="color:'+(imT-imDettes>=0?'var(--green)':'var(--red)')+'">'+F(imT-imDettes)+'</div></div><div class="kpi"><div class="kl">Loyers/mois</div><div class="kv" style="color:var(--accent)">'+F(loyerTotal)+'</div></div><div class="kpi"><div class="kl">Cashflow net</div><div class="kv" style="color:'+(cashflowTotal>=0?'var(--green)':'var(--red)')+'">'+F(Math.round(cashflowTotal))+'</div><div class="ks">/mois</div></div><div class="kpi"><div class="kl">Rdt brut / net</div><div class="kv">'+rendBrut+'% / '+rendNet+'%</div></div>';
+document.getElementById('ik').innerHTML='<div class="kpi"><div class="kl">Valeur (tes parts)</div><div class="kv" style="color:#f59e0b">'+F(imBrut)+'</div>'+(imBrut100!==imBrut?'<div class="ks">sur '+F(imBrut100)+' au total</div>':'')+'</div><div class="kpi"><div class="kl">Dettes immo (tes parts)</div><div class="kv" style="color:var(--red)">'+F(imDettes)+'</div></div><div class="kpi"><div class="kl">Net (tes parts)</div><div class="kv" style="color:'+(imT-imDettes>=0?'var(--green)':'var(--red)')+'">'+F(imT-imDettes)+'</div></div><div class="kpi"><div class="kl">Loyers/mois</div><div class="kv" style="color:var(--accent)">'+F(loyerTotal)+'</div></div><div class="kpi"><div class="kl">Cashflow net</div><div class="kv" style="color:'+(cashflowTotal>=0?'var(--green)':'var(--red)')+'">'+F(Math.round(cashflowTotal))+'</div><div class="ks">/mois</div></div><div class="kpi"><div class="kl">Rdt brut / net</div><div class="kv">'+rendBrut+'% / '+rendNet+'%</div></div>';
 
 /* Graphique immo net */
 if(dc){
@@ -1028,7 +1031,11 @@ let dH='';S.dettes.forEach(d=>{
   dH+='<div class="lr"><span>Différé (mois)</span><span class="ed" onclick="eI(this,\'dettes\',\''+d.id+'\',\'differe\')">'+(d.differe||0)+' mois</span></div>';
   const enDiffere=me>0&&me<=(d.differe||0);
   dH+='<div class="lr"><span>Mensualité'+(enDiffere?' <span style="color:var(--orange);font-size:10px">(différé)</span>':'')+'</span><span style="font-weight:700">'+(enDiffere?F2(am.mDiff||0):F2(am.m))+'</span></div>';
-  dH+='<div class="lr"><span>Restant dû</span><span style="font-weight:700;color:var(--red)">'+F(d.restant)+'</span></div>';
+  dH+='<div class="lr"><span>Restant dû (total)</span><span style="font-weight:700;color:var(--red)">'+F(d.restant)+'</span></div>';
+  const bienLieD=S.immo.find(b=>b.creditId===d.id);
+  const pctD=d.partsPct!=null?d.partsPct:(bienLieD?(bienLieD.partsPct||100):100);
+  dH+='<div class="lr"><span>Ta part du prêt</span><span class="ed" onclick="edDettePct(this,\''+d.id+'\')" style="font-weight:700;color:var(--accent)">'+pctD+'%</span></div>';
+  if(pctD<100)dH+='<div class="lr"><span>Restant dû (ta part)</span><span style="font-weight:800;color:var(--red)">'+F(Math.round(d.restant*pctD/100))+'</span></div>';
   if(me>0)dH+='<div class="lr"><span>Échéances payées</span><span>'+me+' / '+(d.dureeMois||0)+'</span></div>';
   else if(d.dateDebut)dH+='<div class="lr"><span>Statut</span><span style="color:var(--orange);font-weight:600">⏳ Pas encore commencé</span></div>';
   dH+='<div class="pg"><div class="pf" style="width:'+p+'%"></div></div>';
