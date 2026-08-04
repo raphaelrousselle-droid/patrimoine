@@ -153,7 +153,7 @@ if(clean.journal&&clean.journal.length>100)clean.journal=clean.journal.slice(-10
 await db.collection('users').doc(uid).set({patrimoine:clean,snapshots:snaps,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true})}catch(e){}}
 
 const AV="P3CLMM04M63LQ42M";let nxId=Date.now();const nid=()=>++nxId;
-const GAS="https://script.google.com/macros/s/AKfycbyCHFGQXLm41G4NtjKszogsAOCAwPYlTmpL7w6Q8hPuiAOuh1zdus3qtVh4Rpf8NH7taA/exec";
+const GAS="https://script.google.com/macros/s/AKfycbySDqQl7z2Gf-qRdAziSXAU0c4pnq09aUDHYwiNOCJcrnxz3jq0Q7oKW_Q86bqmqLXFvA/exec";
 async function yQ(t){try{const r=await fetch(GAS+"?t="+encodeURIComponent(t));if(!r.ok)return null;const j=await r.json();const d=j[t]||j;if(d.error||!d.price)return null;return{price:d.price,prev:d.prev||0,chg:d.chg||0,cur:d.cur||'USD'}}catch(e){return null}}
 async function yQBatch(tickers){
   const results={};
