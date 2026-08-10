@@ -875,12 +875,25 @@ S.immo.forEach(b=>{
 const imT=S.immo.reduce((a,x)=>a+x.valeur*((x.partsPct||100)/100),0);
 const imBrut=imT;/* Valeur au prorata de tes parts */
 const imBrut100=S.immo.reduce((a,x)=>a+x.valeur,0);/* Valeur totale des biens (info) */
-const loyerTotal=S.immo.reduce((a,x)=>a+(x.loyer||0),0);
-const chargesTotal=S.immo.reduce((a,x)=>a+(x.charges||0)+(x.taxeFonciere||0)/12+(x.assurance||0)/12+(x.gestion||0),0);
-const mensCredImmo=S.dettes.filter(d=>d.type==='Immo').reduce((a,d)=>a+cAm(d.emprunte,d.taux||0,d.dureeMois||0,d.differe||0).m,0);
+/* Mensualité réellement payée aujourd'hui pour une dette */
+const mensDette=d=>{
+  if(!d)return 0;
+  const am=cAm(d.emprunte,d.taux||0,d.dureeMois||0,d.differe||0);
+  if(!d.dateDebut)return Math.abs(am.m);/* pas de date = prêt considéré en cours */
+  const me=moisEcoules(d.dateDebut);
+  if(me<=0)return 0;/* démarre plus tard */
+  return Math.abs(me<=(d.differe||0)?(am.mDiff||0):am.m);
+};
+/* Biens locatifs (hors résidence principale) */
+const isRP=b=>b.typeLocation==='rp'||b.type==='RP'||(b.typeLocation||'').toLowerCase()==='rp';
+const immoLoc=S.immo.filter(b=>!isRP(b)&&(b.loyer>0||b.typeLocation));
+const loyerTotal=immoLoc.reduce((a,x)=>a+(x.loyer||0),0);
+const chargesTotal=immoLoc.reduce((a,x)=>a+(x.charges||0)+(x.taxeFonciere||0)/12+(x.assurance||0)/12+(x.gestion||0),0);
+const mensCredImmo=immoLoc.reduce((a,b)=>a+mensDette(b.creditId?S.dettes.find(d=>d.id===b.creditId):null),0);
 const cashflowTotal=loyerTotal-chargesTotal-mensCredImmo;
-const rendBrut=imBrut100>0?Math.round(loyerTotal*12/imBrut100*10000)/100:0;
-const rendNet=imBrut100>0?Math.round((loyerTotal-chargesTotal)*12/imBrut100*10000)/100:0;
+const valLoc=immoLoc.reduce((a,x)=>a+x.valeur,0);
+const rendBrut=valLoc>0?Math.round(loyerTotal*12/valLoc*10000)/100:0;
+const rendNet=valLoc>0?Math.round((loyerTotal-chargesTotal)*12/valLoc*10000)/100:0;
 /* Dettes immo = dettes liées à un bien, au prorata */
 const creditIds=S.immo.map(b=>b.creditId).filter(x=>x);
 const imDettes=S.dettes.filter(d=>creditIds.includes(d.id)).reduce((a,d)=>{
@@ -899,29 +912,18 @@ const imH2=H.filter(h=>h.immobilier);
 window._cImN=new Chart(cImEl,{type:'line',data:{labels:imH2.map(h=>h.date),datasets:[{label:'Valeur immo',data:imH2.map(h=>h.immobilier||0),borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.08)',fill:true,tension:.3,pointRadius:3,borderWidth:2},{label:'Dettes immo',data:imH2.map(h=>h.dettes||0),borderColor:'#ef4444',borderDash:[4,4],tension:.3,pointRadius:2,borderWidth:2,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},usePointStyle:true}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+F(c.raw)}}},scales:{x:{ticks:{color:'#7a8699',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#7a8699',font:{size:10},callback:v=>(v/1000).toFixed(0)+'k'},grid:{color:'#f0f2f5'}}}}})}}
 
 /* Tableau récap mensuel — hors RP */
-const isRP=b=>b.typeLocation==='rp'||b.type==='RP'||(b.typeLocation||'').toLowerCase()==='rp';
-const immoLoc=S.immo.filter(b=>!isRP(b)&&(b.loyer>0||b.typeLocation));
 let rcH='<table><thead><tr><th class="l">Bien</th><th>Loyer</th><th>Charges</th><th>Crédit</th><th>Cashflow</th><th>Rdt brut</th></tr></thead><tbody>';
 let totLoy=0,totCh=0,totCr=0,totCf=0,totValLoc=0;
 immoLoc.forEach(b=>{
   const pct=(b.partsPct||100)/100;
   const cr=b.creditId?S.dettes.find(d=>d.id===b.creditId):null;
-  let mensC=0;
-  if(cr){
-    const me2=moisEcoules(cr.dateDebut);
-    if(me2>0){/* Prêt en cours */
-      const am2=cAm(cr.emprunte,cr.taux||0,cr.dureeMois||0,cr.differe||0);
-      const enDiff=me2<=(cr.differe||0);
-      mensC=enDiff?(am2.mDiff||0):am2.m;
-    }/* sinon prêt pas commencé = 0€ */
-  }
-  mensC=Math.abs(mensC);/* toujours positif */
+  const mensC=mensDette(cr);
   const chM=(b.charges||0)+(b.taxeFonciere||0)/12+(b.assurance||0)/12+(b.gestion||0);
   const loyM=(b.loyer||0);
   const cf=loyM-chM-mensC;
   const rb=b.valeur>0?((b.loyer||0)*12/b.valeur*100).toFixed(1):0;
   totLoy+=loyM;totCh+=chM;totCr+=mensC;totCf+=cf;totValLoc+=b.valeur*pct;
-  rcH+='<tr><td class="l" style="font-weight:600">'+b.nom+(pct<1?' <span style="font-size:10px;color:var(--muted)">('+b.partsPct+'%)</span>':'')+'</td><td style="color:var(--green);font-weight:600">'+F(Math.round(loyM))+'</td><td style="color:var(--red)">'+F(Math.round(chM))+'</td><td style="color:var(--red)">'+F(Math.round(mensC))+'</td><td style="font-weight:700;color:'+(cf>=0?'var(--green)':'var(--red)')+'">'+F(Math.round(cf))+'</td><td>'+rb+'%</td></tr>';
+  rcH+='<tr><td class="l" style="font-weight:600">'+b.nom+(pct<1?' <span style="font-size:10px;color:var(--muted)">('+b.partsPct+'%)</span>':'')+'</td><td style="color:var(--green);font-weight:600">'+F(Math.round(loyM))+'</td><td style="color:var(--red)">'+F(Math.round(chM))+'</td><td style="color:var(--red)">'+(cr?F(Math.round(mensC)):'<span style="color:var(--orange)" title="Aucun prêt rattaché à ce bien">⚠ aucun</span>')+'</td><td style="font-weight:700;color:'+(cf>=0?'var(--green)':'var(--red)')+'">'+F(Math.round(cf))+'</td><td>'+rb+'%</td></tr>';
 });
 if(immoLoc.length===0)rcH+='<tr><td colspan="6" style="text-align:center;color:var(--muted)">Aucun bien locatif. Change le type de location d\'un bien.</td></tr>';
 rcH+='<tr style="background:rgba(45,36,24,.03);font-weight:800"><td class="l">Total</td><td style="color:var(--green)">'+F(Math.round(totLoy))+'</td><td style="color:var(--red)">'+F(Math.round(totCh))+'</td><td style="color:var(--red)">'+F(Math.round(totCr))+'</td><td style="color:'+(totCf>=0?'var(--green)':'var(--red)')+'">'+F(Math.round(totCf))+'</td><td>'+(totValLoc>0?(totLoy*12/totValLoc*100).toFixed(1):0)+'%</td></tr>';
