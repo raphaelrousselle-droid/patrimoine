@@ -323,7 +323,9 @@ function cTWR(key){
      Fin du mois = valeur de la ligne courante
      Versement du mois = versement de la ligne courante */
   const vm=S.versMensuels||[];if(vm.length<2)return vm.map(v=>({mois:v.mois,twr:0}));
-  const bk=key||'bourse',vk=key?'v_'+key:'versement';
+  const bk=key||'bourse';
+  /* La colonne globale s'appelle 'versement', les autres 'v_pea', 'v_ctosb'... */
+  const vk=(!key||key==='bourse')?'versement':'v_'+key;
   const r=[{mois:vm[0].mois,twr:0}];let c=1;
   for(let i=1;i<vm.length;i++){
     const debut=vm[i-1][bk]||0;
