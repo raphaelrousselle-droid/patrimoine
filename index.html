@@ -183,6 +183,7 @@ details summary{color:var(--text2)}
 <div class="side-sec">Outils</div>
 <button class="tab" data-page="budget"><span class="ti">▤</span>Budget</button>
 <button class="tab" data-page="objectifs"><span class="ti">◎</span>Objectifs</button>
+<button class="tab" data-page="alloc"><span class="ti">◕</span>Allocation cible</button>
 <button class="tab" data-page="revenus"><span class="ti">↗</span>Revenus</button>
 <button class="tab" data-page="resume"><span class="ti">▦</span>Résumé</button>
 <button class="tab" data-page="brokers"><span class="ti">⊞</span>Brokers</button>
@@ -213,6 +214,7 @@ details summary{color:var(--text2)}
 <div class="page" id="page-crypto"><div class="kr" id="ck"></div><div id="rstatc" class="rs" style="margin-bottom:8px"></div><div class="card"><div class="ct">Portefeuille Crypto</div><div class="tw" id="crt"></div><div id="cra"></div></div></div>
 <div class="page" id="page-dettes"><div class="kr" id="dk"></div><div id="dl2"></div></div>
 <div class="page" id="page-budget"><div class="kr" id="budgetKpi"></div><div class="card"><div class="ct">Flux mensuel</div><div id="sankeyDiv" style="width:100%;overflow-x:auto"><svg id="sankeySvg"></svg></div></div><div class="card"><div class="ct">Détail du budget</div><div id="budgetDetail"></div></div></div>
+<div class="page" id="page-alloc"><div class="card"><div class="fb" style="margin-bottom:16px"><div class="ct" style="margin:0">Allocation du patrimoine</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="allocSum" style="font-size:12px;color:var(--muted)"></span><button class="pb" onclick="cibleEgalActuel()">Cible = actuel</button><button class="pb" onclick="resetCibles()">↺ Réinitialiser</button></div></div><div class="g21"><div class="tw" id="allocTable"></div><div><div class="cbs"><canvas id="cAlloc"></canvas></div><div id="allocLeg" style="padding:10px 4px 0"></div></div></div><div style="font-size:11px;color:var(--muted);margin-top:14px">Clique sur une cible en % pour la modifier. Les écarts et les montants à ajuster se recalculent aussitôt.</div></div></div>
 <div class="page" id="page-objectifs"><div id="objContent"></div></div>
 <div class="page" id="page-revenus"><div class="kr" id="revKpi"></div><div class="g2"><div class="card"><div class="ct">Revenus passifs mensuels</div><div class="cbs"><canvas id="cRevPie"></canvas></div><div id="revLeg" style="padding:8px 12px 0"></div></div><div class="card"><div class="ct">Projection revenus passifs</div><div class="cbs"><canvas id="cRevProj"></canvas></div></div></div><div class="card"><div class="ct">Détail des sources</div><div id="revDetail"></div></div></div>
 <div class="page" id="page-brokers"><div class="kr" id="brokersKpi"></div><div class="card"><div class="ct">🏦 Comparateur de brokers</div><div class="tw" id="brokersTable"></div></div><div class="card"><div class="ct">💱 Impact devises EUR/USD</div><div id="devisesInfo"></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">📊 Benchmark personnalisé</div><div style="display:flex;gap:4px" id="benchBtns"></div></div><div class="cb"><canvas id="cBench"></canvas></div></div></div>
@@ -254,7 +256,7 @@ const D={comptes:[{id:'c1',nom:"Compte courant",banque:"BP",montant:0},{id:'c2',
 let S,snaps=[];
 const SEED=[{date:"Juin 25",immobilier:125000,comptes:2665,epargne:9178,bourse:4300,crypto:500,dettes:134708,brut:141643,net:6935},{date:"Juil 25",immobilier:125000,comptes:8760,epargne:9446,bourse:5134,crypto:521,dettes:134708,brut:148861,net:14153},{date:"Août 25",immobilier:125000,comptes:2460,epargne:12818,bourse:8826,crypto:684,dettes:134575,brut:149788,net:15213},{date:"Sep 25",immobilier:125000,comptes:2042,epargne:11440,bourse:9164,crypto:756,dettes:134444,brut:148402,net:13958},{date:"Oct 25",immobilier:125000,comptes:31654,epargne:42869,bourse:22562,crypto:730,dettes:134311,brut:222815,net:88504},{date:"Nov 25",immobilier:125000,comptes:7539,epargne:61970,bourse:25829,crypto:2249,dettes:134179,brut:222587,net:88408},{date:"Déc 25",immobilier:125000,comptes:2520,epargne:59927,bourse:27200,crypto:1791,dettes:132098,brut:216438,net:84340},{date:"Jan 26",immobilier:125000,comptes:3925,epargne:51101,bourse:27112,crypto:1730,dettes:131702,brut:208868,net:77166},{date:"Fév 26",immobilier:125000,comptes:19651,epargne:28844,bourse:29223,crypto:1648,dettes:131309,brut:204365,net:73056},{date:"Mar 26",immobilier:125000,comptes:3404,epargne:44069,bourse:29564,crypto:1324,dettes:130915,brut:203361,net:72446}];
 
-async function loadData(){try{const doc=await db.collection('users').doc(uid).get();if(doc.exists){S=doc.data().patrimoine||JSON.parse(JSON.stringify(D));snaps=doc.data().snapshots||[]}else{let ls=localStorage.getItem('patrimoine_data');if(ls){S=JSON.parse(ls);snaps=JSON.parse(localStorage.getItem('patrimoine_snaps')||'[]');await saveData()}else{S=JSON.parse(JSON.stringify(D));snaps=[]}}if(!S.versMensuels)S.versMensuels=D.versMensuels.map(x=>({...x}));if(!S.objectifs)S.objectifs=D.objectifs.map(x=>({...x}));S.objectifs.forEach(o=>{if(o.actuel===undefined)o.actuel=0});if(!S.budget)S.budget=JSON.parse(JSON.stringify(BDEF));if(!S.pf.avl)S.pf.avl={esp:0,ver:0,cur:'EUR',l:[]};if(!S.simParams)S.simParams={age:30,dep:25000,rend:7,ep:500};if(!S.notes)S.notes={};if(!S.histJour)S.histJour=[];if(!S.bourseGoals)S.bourseGoals=[];if(!S.watchlist)S.watchlist=[];if(!S.journal)S.journal=[];if(!S.revSources)S.revSources=[];if(!S.etfGoals)S.etfGoals={pea:60,ctosb:0,ctoibkr:0};if(!S.benchCours)S.benchCours={};if(!S.projets)S.projets=[];if(!S.divMois)S.divMois={}}catch(e){S=JSON.parse(JSON.stringify(D));snaps=[]}}
+async function loadData(){try{const doc=await db.collection('users').doc(uid).get();if(doc.exists){S=doc.data().patrimoine||JSON.parse(JSON.stringify(D));snaps=doc.data().snapshots||[]}else{let ls=localStorage.getItem('patrimoine_data');if(ls){S=JSON.parse(ls);snaps=JSON.parse(localStorage.getItem('patrimoine_snaps')||'[]');await saveData()}else{S=JSON.parse(JSON.stringify(D));snaps=[]}}if(!S.versMensuels)S.versMensuels=D.versMensuels.map(x=>({...x}));if(!S.objectifs)S.objectifs=D.objectifs.map(x=>({...x}));S.objectifs.forEach(o=>{if(o.actuel===undefined)o.actuel=0});if(!S.budget)S.budget=JSON.parse(JSON.stringify(BDEF));if(!S.pf.avl)S.pf.avl={esp:0,ver:0,cur:'EUR',l:[]};if(!S.simParams)S.simParams={age:30,dep:25000,rend:7,ep:500};if(!S.notes)S.notes={};if(!S.histJour)S.histJour=[];if(!S.bourseGoals)S.bourseGoals=[];if(!S.watchlist)S.watchlist=[];if(!S.journal)S.journal=[];if(!S.revSources)S.revSources=[];if(!S.etfGoals)S.etfGoals={pea:60,ctosb:0,ctoibkr:0};if(!S.benchCours)S.benchCours={};if(!S.projets)S.projets=[];if(!S.divMois)S.divMois={};if(!S.allocCible)S.allocCible={...ALLOC_DEF}}catch(e){S=JSON.parse(JSON.stringify(D));snaps=[]}}
 let sT=null;function autoSave(){if(sT)clearTimeout(sT);sT=setTimeout(saveData,2000)}
 async function saveData(){if(!uid)return;try{
 /* Nettoyer les données avant sauvegarde */
@@ -637,6 +639,78 @@ function renderSidePerf(){
   h+='<div class="sp-r sp-tot"><span>Cumul</span><span style="color:'+cc+'">'+(cum>=0?'+':'')+cum.toFixed(1)+'%</span><span style="color:'+cc+';min-width:52px;text-align:right">'+(hiddenMode?'***':(cumE>=0?'+':'')+Math.round(cumE)+' €')+'</span></div>';
   el.innerHTML=h;
 }
+
+
+/* ====== ALLOCATION CIBLE ====== */
+const ALLOC_DEF={actions:25,etf:40,crypto:5,liq:10,bloq:5,immo:15};
+function allocCats(t){
+  let actV=0,actI=0,nAct=0,etfV=0,etfI=0,nEtf=0,esp=0;
+  ['pea','ctosb','ctoibkr','avl'].forEach(pk=>{
+    const c=pk==='pea'?t.p:pk==='ctosb'?t.s:pk==='ctoibkr'?t.i:t.a;
+    const pf=S.pf[pk];if(!pf)return;
+    esp+=pf.esp||0;
+    c.l.forEach(l=>{
+      const val=l.vaEur||0;
+      const inv=(l.pr||0)*(l.p||0)*(c.isUSD?eurUsd:1);
+      if((SECTORS[l.c]||'')==='ETF'){etfV+=val;etfI+=inv;nEtf++}
+      else{actV+=val;actI+=inv;nAct++}
+    });
+  });
+  const crI=S.crypto.reduce((a,c)=>a+(c.pru||0)*(c.qte||0),0);
+  const immoV=S.immo.reduce((a,x)=>a+x.valeur*((x.partsPct||100)/100),0);
+  const immoI=S.immo.reduce((a,x)=>a+(x.prixAchat||x.valeur)*((x.partsPct||100)/100),0);
+  return[
+    {k:'actions',n:'Actions',ic:'📈',c:CV('--c1'),v:actV,i:actI,nb:nAct},
+    {k:'etf',n:'ETF & Fonds',ic:'🗂️',c:CV('--c2'),v:etfV,i:etfI,nb:nEtf},
+    {k:'crypto',n:'Crypto',ic:'🪙',c:CV('--c3'),v:t.cr,i:crI,nb:S.crypto.length},
+    {k:'liq',n:'Liquidités',ic:'💰',c:CV('--c5'),v:t.co+t.eL+esp,i:t.co+t.eL+esp,nb:S.comptes.length+S.epLibre.length},
+    {k:'bloq',n:'Épargne bloquée',ic:'🔒',c:CV('--c6'),v:t.eB,i:t.eB,nb:S.epBloq.length},
+    {k:'immo',n:'Immobilier',ic:'🏠',c:CV('--c4'),v:immoV,i:immoI,nb:S.immo.length}
+  ];
+}
+function renderAlloc(t,dc){
+  const el=document.getElementById('allocTable');if(!el)return;
+  if(!S.allocCible)S.allocCible={...ALLOC_DEF};
+  const cats=allocCats(t);
+  const tot=cats.reduce((a,c)=>a+c.v,0);
+  const sumC=cats.reduce((a,c)=>a+(S.allocCible[c.k]||0),0);
+  const sEl=document.getElementById('allocSum');
+  if(sEl)sEl.innerHTML='Somme des cibles : <b style="color:'+(Math.round(sumC)===100?'var(--green)':'var(--orange)')+'">'+sumC+'%</b>'+(Math.round(sumC)===100?' ✓':' ⚠');
+  let h='<table><thead><tr><th class="l">Nom</th><th>Valeur / investi</th><th>Gain</th><th>Allocation actuel / cible</th></tr></thead><tbody>';
+  cats.forEach(c=>{
+    const pct=tot>0?c.v/tot*100:0;
+    const cible=S.allocCible[c.k]||0;
+    const gain=c.v-c.i;
+    const gainP=c.i>0?gain/c.i*100:0;
+    const ecart=pct-cible;
+    const montant=Math.abs(tot*ecart/100);
+    const aligne=Math.abs(ecart)<0.5;
+    h+='<tr><td class="l" style="border-left:3px solid '+c.c+'"><div style="display:flex;align-items:center;gap:9px"><span style="font-size:15px">'+c.ic+'</span><div><div class="ln">'+c.n+'</div><div class="ls">'+c.nb+' ligne'+(c.nb>1?'s':'')+'</div></div></div></td>';
+    h+='<td><div style="font-weight:600">'+F(Math.round(c.v))+'</div><div class="ls">'+F(Math.round(c.i))+'</div></td>';
+    h+='<td>'+(Math.abs(gain)<1?'<span style="color:var(--muted)">—</span>':'<div style="color:'+(gain>=0?'var(--green)':'var(--red)')+';font-weight:600">'+(gain>=0?'+':'')+F(Math.round(gain))+'</div><div style="color:'+(gain>=0?'var(--green)':'var(--red)')+';font-size:11px">'+(gain>=0?'▲ ':'▼ ')+Math.abs(gainP).toFixed(1)+'%</div>')+'</td>';
+    h+='<td><div style="font-size:16px;font-weight:600">'+pct.toFixed(1)+'%</div>';
+    h+='<div style="font-size:11px;color:var(--muted);margin:3px 0">cible <span class="ed" onclick="edCible(this,\''+c.k+'\')" style="font-weight:600;color:var(--text)">'+cible+'</span> %</div>';
+    h+='<div style="font-size:10.5px;color:'+(aligne?'var(--muted)':(ecart>0?'var(--red)':'var(--green)'))+'">'+(ecart>=0?'+':'')+ecart.toFixed(1)+' pt · '+(aligne?'aligné':(ecart>0?'alléger ':'renforcer ')+(aligne?'':F(Math.round(montant))))+'</div></td></tr>';
+  });
+  h+='<tr class="total-row"><td class="l">Total</td><td style="font-weight:700">'+F(Math.round(tot))+'</td><td></td><td style="font-weight:700">100%</td></tr>';
+  h+='</tbody></table>';
+  el.innerHTML=h;
+  document.getElementById('allocLeg').innerHTML=cats.map(c=>{
+    const pct=tot>0?c.v/tot*100:0;const cible=S.allocCible[c.k]||0;
+    return '<div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:6px"><div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:2px;background:'+c.c+'"></span>'+c.n+'</div><span style="color:var(--muted)">'+pct.toFixed(1)+'% <span style="opacity:.6">/ '+cible+'%</span></span></div>'}).join('');
+  if(dc){
+    const cv=document.getElementById('cAlloc');
+    if(cv){if(window._cAl)window._cAl.destroy();
+      window._cAl=new Chart(cv,{type:'doughnut',data:{labels:cats.map(c=>c.n),datasets:[
+        {data:cats.map(c=>c.v),backgroundColor:cats.map(c=>c.c),borderWidth:2,borderColor:CV('--card'),weight:2},
+        {data:cats.map(c=>S.allocCible[c.k]||0),backgroundColor:cats.map(c=>hexA(c.c,.35)),borderWidth:2,borderColor:CV('--card'),weight:1}
+      ]},options:{responsive:true,maintainAspectRatio:false,cutout:'52%',plugins:{legend:{display:false},tooltip:tipOpts(c=>c.datasetIndex===0?'Actuel : '+F(Math.round(c.raw)):'Cible : '+c.raw+'%')}}});
+    }
+  }
+}
+window.edCible=function(el,k){const v=parseFloat(prompt('Cible en % pour cette catégorie',S.allocCible[k]||0));if(isNaN(v)||v<0||v>100)return;S.allocCible[k]=Math.round(v*10)/10;autoSave();R(true)};
+window.cibleEgalActuel=function(){const t=Tot();const cats=allocCats(t);const tot=cats.reduce((a,c)=>a+c.v,0);if(tot<=0)return;cats.forEach(c=>{S.allocCible[c.k]=Math.round(c.v/tot*1000)/10});autoSave();R(true)};
+window.resetCibles=function(){if(!confirm('Remettre les cibles par défaut ?'))return;S.allocCible={...ALLOC_DEF};autoSave();R(true)};
 
 /* ====== RENDER ====== */
 function R(dc){
@@ -1308,6 +1382,7 @@ const oc=[CV('--green'),CV('--c1'),CV('--accent'),CV('--c4'),CV('--accent')];
   oH+='<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b><span class="ed" onclick="edObj(this,\''+o.id+'\',\'nom\')">'+o.nom+'</span></b><button class="db" onclick="delObj(\''+o.id+'\')">✕</button></div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:18px;font-weight:800;color:'+color+'">'+curDisp+'</span><span style="color:var(--muted)">/ <span class="ed" onclick="edObj(this,\''+o.id+'\',\'cible\')" style="font-weight:700">'+F(o.cible)+'</span></span></div><div class="obj-bar"><div class="obj-fill" style="width:'+pct+'%;background:'+color+'"></div></div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)"><span>'+pct.toFixed(1)+'%</span><span>'+(tl[o.type]||o.type)+'</span></div></div>';
 });
 document.getElementById('objContent').innerHTML=oH;
+renderAlloc(t,dc);
 
 /* ====== WIDGET RÉSUMÉ ====== */
 const wColors=[{l:'Bourse',v:t.bo,c:CV('--c1'),icon:'📈',page:'bourse'},{l:'Épargne',v:t.ep,c:CV('--accent'),icon:'🏦',page:'epargne'},{l:'Immobilier',v:t.im,c:CV('--accent'),icon:'🏠',page:'immo'},{l:'Crypto',v:t.cr,c:CV('--c4'),icon:'₿',page:'crypto'}];
