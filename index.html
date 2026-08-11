@@ -1323,7 +1323,7 @@ if(window._cProj)window._cProj.destroy();
 if(projCanvas){
   const dsProj=[
     {label:'Optimiste (10%)',data:simOpti.data.map(d=>d.val),borderColor:CV('--green'),backgroundColor:gradFill(CV('--green'),.18),fill:true,tension:.35,pointRadius:0,pointHoverRadius:5,borderWidth:1.8},
-    {label:'Réaliste ('+sp.rend+'%)',data:simReal.data.map(d=>d.val),borderColor:CV('--c1'),tension:.35,pointRadius:0,pointHoverRadius:5,borderWidth:1.5.5},
+    {label:'Réaliste ('+sp.rend+'%)',data:simReal.data.map(d=>d.val),borderColor:CV('--c1'),tension:.35,pointRadius:0,pointHoverRadius:5,borderWidth:2.5},
     {label:'Pessimiste (4%)',data:simPessi.data.map(d=>d.val),borderColor:CV('--red'),backgroundColor:gradFill(CV('--red'),.18),fill:true,tension:.35,pointRadius:0,pointHoverRadius:5,borderWidth:1.8},
     {label:'Réaliste (€ constants)',data:simInfla.data.map(d=>d.val),borderColor:CV('--c1'),borderDash:[6,3],tension:.35,pointRadius:0,pointHoverRadius:5,borderWidth:1.4},
     {label:'FIRE',data:simReal.data.map(()=>fireTarget),borderColor:CV('--accent'),borderDash:[4,4],borderWidth:1.5,pointRadius:0}
