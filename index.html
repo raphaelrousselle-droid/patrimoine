@@ -256,7 +256,7 @@ const D={comptes:[{id:'c1',nom:"Compte courant",banque:"BP",montant:0},{id:'c2',
 let S,snaps=[];
 const SEED=[{date:"Juin 25",immobilier:125000,comptes:2665,epargne:9178,bourse:4300,crypto:500,dettes:134708,brut:141643,net:6935},{date:"Juil 25",immobilier:125000,comptes:8760,epargne:9446,bourse:5134,crypto:521,dettes:134708,brut:148861,net:14153},{date:"Août 25",immobilier:125000,comptes:2460,epargne:12818,bourse:8826,crypto:684,dettes:134575,brut:149788,net:15213},{date:"Sep 25",immobilier:125000,comptes:2042,epargne:11440,bourse:9164,crypto:756,dettes:134444,brut:148402,net:13958},{date:"Oct 25",immobilier:125000,comptes:31654,epargne:42869,bourse:22562,crypto:730,dettes:134311,brut:222815,net:88504},{date:"Nov 25",immobilier:125000,comptes:7539,epargne:61970,bourse:25829,crypto:2249,dettes:134179,brut:222587,net:88408},{date:"Déc 25",immobilier:125000,comptes:2520,epargne:59927,bourse:27200,crypto:1791,dettes:132098,brut:216438,net:84340},{date:"Jan 26",immobilier:125000,comptes:3925,epargne:51101,bourse:27112,crypto:1730,dettes:131702,brut:208868,net:77166},{date:"Fév 26",immobilier:125000,comptes:19651,epargne:28844,bourse:29223,crypto:1648,dettes:131309,brut:204365,net:73056},{date:"Mar 26",immobilier:125000,comptes:3404,epargne:44069,bourse:29564,crypto:1324,dettes:130915,brut:203361,net:72446}];
 
-async function loadData(){try{const doc=await db.collection('users').doc(uid).get();if(doc.exists){S=doc.data().patrimoine||JSON.parse(JSON.stringify(D));snaps=doc.data().snapshots||[]}else{let ls=localStorage.getItem('patrimoine_data');if(ls){S=JSON.parse(ls);snaps=JSON.parse(localStorage.getItem('patrimoine_snaps')||'[]');await saveData()}else{S=JSON.parse(JSON.stringify(D));snaps=[]}}if(!S.versMensuels)S.versMensuels=D.versMensuels.map(x=>({...x}));if(!S.objectifs)S.objectifs=D.objectifs.map(x=>({...x}));S.objectifs.forEach(o=>{if(o.actuel===undefined)o.actuel=0});if(!S.budget)S.budget=JSON.parse(JSON.stringify(BDEF));if(!S.pf.avl)S.pf.avl={esp:0,ver:0,cur:'EUR',l:[]};if(!S.simParams)S.simParams={age:30,dep:25000,rend:7,ep:500};if(!S.notes)S.notes={};if(!S.histJour)S.histJour=[];if(!S.bourseGoals)S.bourseGoals=[];if(!S.watchlist)S.watchlist=[];if(!S.journal)S.journal=[];if(!S.revSources)S.revSources=[];if(!S.etfGoals)S.etfGoals={pea:60,ctosb:0,ctoibkr:0};if(!S.benchCours)S.benchCours={};if(!S.projets)S.projets=[];if(!S.divMois)S.divMois={};if(!S.allocCible)S.allocCible={...ALLOC_DEF}}catch(e){S=JSON.parse(JSON.stringify(D));snaps=[]}}
+async function loadData(){try{const doc=await db.collection('users').doc(uid).get();if(doc.exists){S=doc.data().patrimoine||JSON.parse(JSON.stringify(D));snaps=doc.data().snapshots||[]}else{let ls=localStorage.getItem('patrimoine_data');if(ls){S=JSON.parse(ls);snaps=JSON.parse(localStorage.getItem('patrimoine_snaps')||'[]');await saveData()}else{S=JSON.parse(JSON.stringify(D));snaps=[]}}if(!S.versMensuels)S.versMensuels=D.versMensuels.map(x=>({...x}));if(!S.objectifs)S.objectifs=D.objectifs.map(x=>({...x}));S.objectifs.forEach(o=>{if(o.actuel===undefined)o.actuel=0});if(!S.budget)S.budget=JSON.parse(JSON.stringify(BDEF));if(!S.pf.avl)S.pf.avl={esp:0,ver:0,cur:'EUR',l:[]};if(!S.simParams)S.simParams={age:30,dep:25000,rend:7,ep:500};if(!S.notes)S.notes={};if(!S.histJour)S.histJour=[];if(!S.bourseGoals)S.bourseGoals=[];if(!S.watchlist)S.watchlist=[];if(!S.journal)S.journal=[];if(!S.revSources)S.revSources=[];if(!S.etfGoals)S.etfGoals={pea:60,ctosb:0,ctoibkr:0};if(!S.benchCours)S.benchCours={};if(!S.projets)S.projets=[];if(!S.divMois)S.divMois={};if(!S.allocCible)S.allocCible={...ALLOC_DEF};['bloq','immo'].forEach(k=>delete S.allocCible[k])}catch(e){S=JSON.parse(JSON.stringify(D));snaps=[]}}
 let sT=null;function autoSave(){if(sT)clearTimeout(sT);sT=setTimeout(saveData,2000)}
 async function saveData(){if(!uid)return;try{
 /* Nettoyer les données avant sauvegarde */
@@ -642,7 +642,9 @@ function renderSidePerf(){
 
 
 /* ====== ALLOCATION CIBLE ====== */
-const ALLOC_DEF={actions:25,etf:40,crypto:5,liq:10,bloq:5,immo:15};
+const ALLOC_DEF={actions:45,etf:45,crypto:5,liq:5};
+/* Une ligne compte comme ETF si son secteur le dit, si elle est dans l'AV, ou si son nom l'indique */
+const estETF=(l,pk)=>(SECTORS[l.c]||'')==='ETF'||pk==='avl'||/\betf\b|msci|world|nasdaq|s&p|stoxx|amundi|ishares|lyxor|vanguard|spdr|tracker/i.test(l.n||'');
 function allocCats(t){
   let actV=0,actI=0,nAct=0,etfV=0,etfI=0,nEtf=0,esp=0;
   ['pea','ctosb','ctoibkr','avl'].forEach(pk=>{
@@ -652,21 +654,18 @@ function allocCats(t){
     c.l.forEach(l=>{
       const val=l.vaEur||0;
       const inv=(l.pr||0)*(l.p||0)*(c.isUSD?eurUsd:1);
-      if((SECTORS[l.c]||'')==='ETF'){etfV+=val;etfI+=inv;nEtf++}
+      if(estETF(l,pk)){etfV+=val;etfI+=inv;nEtf++}
       else{actV+=val;actI+=inv;nAct++}
     });
   });
   const crI=S.crypto.reduce((a,c)=>a+(c.pru||0)*(c.qte||0),0);
-  const immoV=S.immo.reduce((a,x)=>a+x.valeur*((x.partsPct||100)/100),0);
-  const immoI=S.immo.reduce((a,x)=>a+(x.prixAchat||x.valeur)*((x.partsPct||100)/100),0);
   return[
     {k:'actions',n:'Actions',ic:'📈',c:CV('--c1'),v:actV,i:actI,nb:nAct},
     {k:'etf',n:'ETF & Fonds',ic:'🗂️',c:CV('--c2'),v:etfV,i:etfI,nb:nEtf},
     {k:'crypto',n:'Crypto',ic:'🪙',c:CV('--c3'),v:t.cr,i:crI,nb:S.crypto.length},
-    {k:'liq',n:'Liquidités',ic:'💰',c:CV('--c5'),v:t.co+t.eL+esp,i:t.co+t.eL+esp,nb:S.comptes.length+S.epLibre.length},
-    {k:'bloq',n:'Épargne bloquée',ic:'🔒',c:CV('--c6'),v:t.eB,i:t.eB,nb:S.epBloq.length},
-    {k:'immo',n:'Immobilier',ic:'🏠',c:CV('--c4'),v:immoV,i:immoI,nb:S.immo.length}
+    {k:'liq',n:'Liquidités',ic:'💰',c:CV('--c5'),v:t.co+t.eL+esp,i:t.co+t.eL+esp,nb:S.comptes.length+S.epLibre.length}
   ];
+
 }
 function renderAlloc(t,dc){
   const el=document.getElementById('allocTable');if(!el)return;
