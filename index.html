@@ -828,8 +828,10 @@ _cPf=new Chart(document.getElementById('cPf'),{type:'line',data:{labels:twrGloba
 }/* end dc */
 
 /* VM table */
-let vmH='<div class="tw"><table class="vm-table"><thead><tr><th class="l">Mois</th><th colspan="2" style="text-align:center;color:var(--text)">Global</th><th colspan="2" style="text-align:center;color:'+CV('--c1')+'">PEA</th><th colspan="2" style="text-align:center;color:'+CV('--c3')+'">CTO Saxo</th><th colspan="2" style="text-align:center;color:'+CV('--c4')+'">CTO IBKR</th><th colspan="2" style="text-align:center;color:'+CV('--c2')+'">AV Linxea</th><th>TWR</th><th></th></tr><tr><th></th><th>Val.</th><th>Vers.</th><th>Val.</th><th>Vers.</th><th>Val.</th><th>Vers.</th><th>Val.</th><th>Vers.</th><th>Val.</th><th>Vers.</th><th></th><th></th></tr></thead><tbody>';
-const tw2=cTWR('bourse');(S.versMensuels||[]).forEach((v,i)=>{const tw=tw2[i]?tw2[i].twr:0;
+let vmH='<div class="tw"><table class="vm-table"><thead><tr><th class="l">Mois</th><th colspan="2" style="text-align:center;color:var(--text)">Global</th><th colspan="2" style="text-align:center;color:'+CV('--c1')+'">PEA</th><th colspan="2" style="text-align:center;color:'+CV('--c3')+'">CTO Saxo</th><th colspan="2" style="text-align:center;color:'+CV('--c4')+'">CTO IBKR</th><th colspan="2" style="text-align:center;color:'+CV('--c2')+'">AV Linxea</th><th colspan="2" style="text-align:center">Performance</th><th></th></tr><tr><th></th><th>Val.</th><th>Vers.</th><th>Val.</th><th>Vers.</th><th>Val.</th><th>Vers.</th><th>Val.</th><th>Vers.</th><th>Val.</th><th>Vers.</th><th>Du mois</th><th>Cumul</th><th></th></tr></thead><tbody>';
+const tw2=cTWR('bourse');const vmL=S.versMensuels||[];vmL.forEach((v,i)=>{const tw=tw2[i]?tw2[i].twr:0;
+/* Performance du mois seul : (valeur - versement - valeur du mois précédent) / valeur du mois précédent */
+let pm=0;if(i>0){const deb=vmL[i-1].bourse||0;if(deb>0)pm=((v.bourse||0)-(v.versement||0)-deb)/deb*100}
 vmH+='<tr><td class="l" style="font-weight:600">'+v.mois+'</td>';
 vmH+='<td><span class="ed" onclick="edVM(this,'+i+',\'bourse\')">'+F(v.bourse||0)+'</span></td>';
 vmH+='<td><span class="ed" onclick="edVM(this,'+i+',\'versement\')" style="color:var(--bourse)">'+F(v.versement||0)+'</span></td>';
@@ -841,7 +843,8 @@ vmH+='<td><span class="ed" onclick="edVM(this,'+i+',\'ctoibkr\')">'+F(v.ctoibkr|
 vmH+='<td><span class="ed" onclick="edVM(this,'+i+',\'v_ctoibkr\')" style="color:'+CV('--c4')+'">'+F(v.v_ctoibkr||0)+'</span></td>';
 vmH+='<td><span class="ed" onclick="edVM(this,'+i+',\'avl\')">'+F(v.avl||0)+'</span></td>';
 vmH+='<td><span class="ed" onclick="edVM(this,'+i+',\'v_avl\')" style="color:'+CV('--c2')+'">'+F(v.v_avl||0)+'</span></td>';
-vmH+='<td style="color:'+(tw>=0?'var(--green)':'var(--red)')+';font-weight:700">'+(tw>=0?'+':'')+tw.toFixed(2)+'%</td>';
+vmH+='<td style="color:'+(pm>=0?'var(--green)':'var(--red)')+';font-weight:700">'+(i===0?'<span style="color:var(--muted)">—</span>':(pm>=0?'+':'')+pm.toFixed(2)+'%')+'</td>';
+vmH+='<td style="color:'+(tw>=0?'var(--green)':'var(--red)')+';font-weight:600;opacity:.85">'+(tw>=0?'+':'')+tw.toFixed(2)+'%</td>';
 vmH+='<td><button class="sd" onclick="delVM('+i+')">✕</button></td></tr>'});
 vmH+='</tbody></table></div>';document.getElementById('vmList').innerHTML=vmH;
 
