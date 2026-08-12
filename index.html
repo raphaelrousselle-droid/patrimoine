@@ -361,6 +361,7 @@ for(let i=1;i<=diffMois;i++){const int=rest*r;t.push({n:i,m:Math.round(int*100)/
 const dAmort=d-diffMois;let m;if(r===0)m=e/Math.max(1,dAmort);else m=e*r*Math.pow(1+r,dAmort)/(Math.pow(1+r,dAmort)-1);
 for(let i=diffMois+1;i<=d&&rest>0;i++){const int=rest*r;const cap=Math.min(m-int,rest);rest=Math.max(0,rest-cap);t.push({n:i,m:Math.round(m*100)/100,i:Math.round(int*100)/100,c:Math.round(cap*100)/100,r:Math.round(rest*100)/100})}
 return{m:Math.round(m*100)/100,mDiff:diffMois>0?Math.round(e*r*100)/100:0,t}}
+function moisEcoules(dateDebut){if(!dateDebut)return 0;const parts=dateDebut.split('-');if(parts.length!==2)return 0;const y=parseInt(parts[0]),m=parseInt(parts[1]);const now=new Date();const diff=(now.getFullYear()-y)*12+(now.getMonth()+1-m);return Math.max(0,diff)}
 function cTWR(key){
   /* Ligne i : valeur = relevée au 1er du mois SUIVANT, versement = viré pendant ce mois
      Perf du mois i = (valeur_i - versement_i - valeur_(i-1)) / valeur_(i-1)
@@ -1614,7 +1615,6 @@ crH+='</tbody></table>';document.getElementById('crt').innerHTML=crH;
 document.getElementById('cra').innerHTML=addB('cra',[{k:'nom',label:'Nom',w:2},{k:'symbol',label:'Symbol'},{k:'qte',label:'Qté',num:true},{k:'pru',label:'PRU',num:true}],'crypto',{prix:0,var:0,pru:0,montant:0});
 
 /* Dettes — avec calcul auto du restant basé sur date début */
-function moisEcoules(dateDebut){if(!dateDebut)return 0;const parts=dateDebut.split('-');if(parts.length!==2)return 0;const y=parseInt(parts[0]),m=parseInt(parts[1]);const now=new Date();const diff=(now.getFullYear()-y)*12+(now.getMonth()+1-m);return Math.max(0,diff)}
 document.getElementById('dk').innerHTML='<div class="kpi"><div class="kl">Dettes</div><div class="kv" style="color:var(--red)">'+F(t.de)+'</div></div><div class="kpi"><div class="kl">Mensualités</div><div class="kv">'+F(S.dettes.reduce((a,d)=>a+cAm(d.emprunte,d.taux||0,d.dureeMois||0,d.differe||0).m,0))+'</div><div class="ks">/mois</div></div>';
 let dH='';S.dettes.forEach(d=>{
   const am=cAm(d.emprunte,d.taux||0,d.dureeMois||0,d.differe||0);
