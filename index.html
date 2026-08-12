@@ -236,7 +236,8 @@ details summary{color:var(--text2)}
 </header>
 <main>
 <div class="page active" id="page-home"><div id="homeAlerts"></div><div class="kr" id="hk"></div><div id="widgetResume" style="margin-bottom:20px"></div><div class="hc"><div><span style="font-size:12px;color:var(--muted)">💡 Règle des 4%</span><div style="font-size:20px;font-weight:800;color:var(--accent);margin-top:2px" id="k4"></div></div><div style="font-size:13px;color:var(--muted)" id="k4m"></div></div><div class="g21"><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution Patrimoine Net</div><div style="display:flex;gap:4px" id="netPs"></div></div><div class="cb"><canvas id="cN"></canvas></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">Répartition</div><div style="display:flex;gap:4px"><button class="ctb active" id="pieMode_brut" onclick="setPieMode('brut')">Brut</button><button class="ctb" id="pieMode_net" onclick="setPieMode('net')">Net</button></div></div><div class="cbs" style="height:230px"><canvas id="cP"></canvas></div><div id="pl" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution par catégorie</div><div style="display:flex;gap:4px" id="evoPs"></div></div><div class="cto" id="et"></div><div class="cb"><canvas id="cE"></canvas></div></div><div class="card"><div class="ct">📊 Rendement par poche</div><div id="rdtPoches"></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">📸 Historique</div><button class="reset-btn" onclick="if(confirm('Reset?'))doReset()">🔄 Reset</button></div><div id="sl" style="margin-top:12px"></div></div></div>
-<div class="page" id="page-bourse"><div class="kr" id="bk"></div><div class="wb" id="bw"></div><div id="rstat" class="rs" style="margin:12px 0"></div><div class="card"><div class="fb"><div class="ct" style="margin:0">PEA — Fortuneo</div></div><div class="kr" id="pk1" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt1"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — Saxo <span style="font-size:11px;color:var(--muted)">(PRU $)</span></div></div><div class="kr" id="pk2" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt2"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — IBKR</div></div><div class="kr" id="pk3" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt3"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">AV — Linxea</div></div><div class="kr" id="pk4" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt4"></div></div><div class="g2" style="margin:16px 0"><div class="card"><div class="ct">📊 Panorama 2026</div><div id="ptw"></div><div class="ss" id="sps"></div></div><div class="card"><div class="ct">Répartition secteur</div><div class="cbs" style="height:230px"><canvas id="cSec"></canvas></div><div id="secLeg" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:8px"><div class="ct" style="margin:0">Perf cumulée TWR vs S&P</div><div style="display:flex;gap:4px" id="ps"></div></div><div class="cb"><canvas id="cPf"></canvas></div><div class="cl"><span style="color:#7c3aed">● Portf.</span><span style="color:#e8a33d">- - S&P</span></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">💰 Versements mensuels</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addVM()">+ Mois</button></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Valeur = relevée au 1er du mois suivant. Versement = viré pendant le mois.</div><div id="vmList"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">🎯 Objectifs Bourse</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addBourseGoal()">+ Objectif</button></div><div id="bourseGoals" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">👀 Watchlist</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addWatch()">+ Suivre</button></div><div id="watchlist" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">📓 Journal d'investissement</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addJournal()">+ Entrée</button></div><div id="journal" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb" style="margin-bottom:14px"><div class="ct" style="margin:0">💰 Dividendes perçus</div><div style="display:flex;gap:4px" id="divVueBtns"></div></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Note ici les dividendes que tu reçois réellement chaque mois (tous portefeuilles confondus). Clique sur un montant pour le modifier.</div><div class="tw" id="divMoisTable"></div><div class="cbs" style="margin-top:16px"><canvas id="cDivMois"></canvas></div></div></div>
+<div class="page" id="page-bourse"><div class="kr" id="bk"></div><div class="wb" id="bw"></div><div id="rstat" class="rs" style="margin:12px 0"></div><div class="card"><div class="fb"><div class="ct" style="margin:0">PEA — Fortuneo</div></div><div class="kr" id="pk1" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt1"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — Saxo <span style="font-size:11px;color:var(--muted)">(PRU $)</span></div></div><div class="kr" id="pk2" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt2"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — IBKR</div></div><div class="kr" id="pk3" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt3"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">AV — Linxea</div></div><div class="kr" id="pk4" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt4"></div></div><div class="g2" style="margin:16px 0"><div class="card"><div class="ct">📊 Panorama 2026</div><div id="ptw"></div><div class="ss" id="sps"></div></div><div class="card"><div class="ct">Répartition secteur</div><div class="cbs" style="height:230px"><canvas id="cSec"></canvas></div><div id="secLeg" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:8px"><div class="ct" style="margin:0">Perf cumulée TWR vs S&P</div><div style="display:flex;gap:4px" id="ps"></div></div><div class="cb"><canvas id="cPf"></canvas></div><div class="cl"><span style="color:#7c3aed">● Portf.</span><span style="color:#e8a33d">- - S&P</span></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">💰 Versements mensuels</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addVM()">+ Mois</button></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Valeur = relevée au 1er du mois suivant. Versement = viré pendant le mois.</div><div id="vmList"></div></div><div class="card" style="margin-top:16px"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">⚖️ Poids des lignes</div><div style="font-size:11.5px;color:var(--muted)">Alerte au-delà de <span class="ed" onclick="edSeuilPoids()" id="seuilPoidsVal"></span> par ligne</div></div><div id="poidsResume" style="margin-bottom:14px"></div><div class="tw" id="poidsList"></div></div>
+<div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">🎯 Objectifs Bourse</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addBourseGoal()">+ Objectif</button></div><div id="bourseGoals" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">👀 Watchlist</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addWatch()">+ Suivre</button></div><div id="watchlist" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">📓 Journal d'investissement</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addJournal()">+ Entrée</button></div><div id="journal" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb" style="margin-bottom:14px"><div class="ct" style="margin:0">💰 Dividendes perçus</div><div style="display:flex;gap:4px" id="divVueBtns"></div></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Note ici les dividendes que tu reçois réellement chaque mois (tous portefeuilles confondus). Clique sur un montant pour le modifier.</div><div class="tw" id="divMoisTable"></div><div class="cbs" style="margin-top:16px"><canvas id="cDivMois"></canvas></div></div></div>
 <div class="page" id="page-epargne"><div class="kr" id="ek"></div><div class="g2"><div class="card"><div class="ct" id="ct1"></div><div id="cl1"></div><div id="af1"></div></div><div class="card"><div class="ct" id="ct2"></div><div id="cl2"></div><div id="af2"></div></div><div class="card sf"><div class="ct" id="ct3"></div><div id="cl3"></div><div id="af3"></div></div></div></div>
 <div class="page" id="page-immo"><div class="kr" id="ik"></div><div class="g2" style="margin-bottom:16px"><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Patrimoine Immo Net</div><div style="display:flex;gap:4px" id="immoPs"></div></div><div class="cb"><canvas id="cImmoNet"></canvas></div></div><div class="card"><div class="ct">Tableau récapitulatif mensuel</div><div class="tw" id="immoRecap"></div></div></div><div class="card" id="immoSCI" style="display:none"><div class="ct">🏢 Tableau de bord SCI</div><div id="sciDash"></div></div><div id="ic"></div>
 <div class="card"><div class="fb" style="margin-bottom:14px"><div class="ct" style="margin:0">⚖️ Comparatif des biens</div><div style="font-size:11.5px;color:var(--muted)">TMI : <span class="ed" onclick="edTMI()" id="tmiVal"></span></div></div><div class="tw" id="immoCompare"></div><div style="font-size:11px;color:var(--muted);margin-top:12px">Effort d'épargne : ce que le bien te coûte (négatif) ou te rapporte (positif) chaque mois, impôts déduits.</div></div>
@@ -260,7 +261,7 @@ details summary{color:var(--text2)}
 <div class="page" id="page-budget"><div class="kr" id="budgetKpi"></div><div class="card"><div class="ct">Flux mensuel</div><div id="sankeyDiv" style="width:100%;overflow-x:auto"><svg id="sankeySvg"></svg></div></div><div class="card"><div class="ct">Détail du budget</div><div id="budgetDetail"></div></div></div>
 <div class="page" id="page-alloc"><div class="card"><div class="fb" style="margin-bottom:16px"><div class="ct" style="margin:0">Allocation du patrimoine</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="allocSum" style="font-size:12px;color:var(--muted)"></span><button class="pb" onclick="cibleEgalActuel()">Cible = actuel</button><button class="pb" onclick="resetCibles()">↺ Réinitialiser</button></div></div><div class="g21"><div class="tw" id="allocTable"></div><div><div class="cbs" style="height:230px"><canvas id="cAlloc"></canvas></div><div id="allocLeg" style="padding:10px 4px 0"></div></div></div><div style="font-size:11px;color:var(--muted);margin-top:14px">Clique sur une cible en % pour la modifier. Les écarts et les montants à ajuster se recalculent aussitôt.</div></div></div>
 <div class="page" id="page-objectifs"><div id="objContent"></div></div>
-<div class="page" id="page-revenus"><div class="kr" id="revKpi"></div><div class="g2"><div class="card"><div class="ct">Revenus passifs mensuels</div><div class="cbs" style="height:230px"><canvas id="cRevPie"></canvas></div><div id="revLeg" style="padding:8px 12px 0"></div></div><div class="card"><div class="ct">Projection revenus passifs</div><div class="cbs"><canvas id="cRevProj"></canvas></div></div></div><div class="card"><div class="ct">Détail des sources</div><div id="revDetail"></div></div></div>
+<div class="page" id="page-revenus"><div class="kr" id="revKpi"></div><div class="g2"><div class="card"><div class="ct">Revenus passifs mensuels</div><div class="cbs" style="height:230px"><canvas id="cRevPie"></canvas></div><div id="revLeg" style="padding:8px 12px 0"></div></div><div class="card"><div class="ct">Projection revenus passifs</div><div class="cbs"><canvas id="cRevProj"></canvas></div></div></div><div class="card"><div class="ct">🎯 Couverture de tes dépenses</div><div id="couvKpi"></div><div id="couvDetail" style="margin-top:16px"></div></div><div class="card"><div class="ct">Détail des sources</div><div id="revDetail"></div></div></div>
 <div class="page" id="page-brokers"><div class="kr" id="brokersKpi"></div><div class="card"><div class="ct">🏦 Comparateur de brokers</div><div class="tw" id="brokersTable"></div></div><div class="card"><div class="ct">💱 Impact devises EUR/USD</div><div id="devisesInfo"></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">📊 Benchmark personnalisé</div><div style="display:flex;gap:4px" id="benchBtns"></div></div><div class="cb"><canvas id="cBench"></canvas></div></div></div>
 <div class="page" id="page-resume"><div class="kr" id="resumeKpi"></div><div class="card"><div class="ct">Heatmap portefeuille</div><div id="heatmap" style="width:100%;overflow:hidden"></div></div><div class="card"><div class="ct">📋 Résumé du mois</div><div id="resumeDetail"></div></div></div>
 <div class="page" id="page-simulator"><div id="simContent"></div></div>
@@ -792,6 +793,7 @@ window.edRegime=function(id){
   const c=parseInt(prompt(m,'1'));if(isNaN(c)||c<1||c>ks.length)return;
   b.regime=ks[c-1];autoSave();R(true);
 };
+window.edSeuilPoids=function(){const cur=(S.fiscParams&&S.fiscParams.seuilPoids)||10;const v=parseFloat(prompt('Alerte quand une ligne dépasse ce pourcentage de ta bourse.\n\nUsage courant : 5 à 10 %',cur));if(isNaN(v)||v<1||v>100)return;if(!S.fiscParams)S.fiscParams={};S.fiscParams.seuilPoids=v;autoSave();R(true)};
 window.edTMI=function(){
   const cur=(S.fiscParams&&S.fiscParams.tmi)||30;
   const m='Ta tranche marginale d\'imposition :\n\n0 %  · non imposable\n11 % · jusqu\'à ~28 800 €\n30 % · jusqu\'à ~82 300 €\n41 % · jusqu\'à ~177 100 €\n45 % · au-delà\n\n(revenu imposable par part)';
@@ -1236,6 +1238,55 @@ if(S.journal.length>0){
   });
 }else jlH='<div style="color:var(--muted);font-size:12px">Aucune entrée. Note tes décisions d\'investissement ici.</div>';
 document.getElementById('journal').innerHTML=jlH;
+
+/* Poids de chaque ligne dans l'ensemble de la bourse */
+const seuilP=(S.fiscParams&&S.fiscParams.seuilPoids)||10;
+const elSP=document.getElementById('seuilPoidsVal');if(elSP)elSP.textContent=seuilP+'%';
+const lignes=[];
+[['pea',t.p],['ctosb',t.s],['ctoibkr',t.i],['avl',t.a]].forEach(([pk,c])=>{
+  c.l.forEach(l=>lignes.push({n:l.n,c:l.c,pk,v:l.vaEur||0,gp:l.gp||0,
+    etf:(SECTORS[l.c]||'')==='ETF'||pk==='avl',sec:SECTORS[l.c]||'Autre'}));
+});
+const totL=lignes.reduce((a,x)=>a+x.v,0);
+lignes.sort((a,b)=>b.v-a.v);
+const depasse=lignes.filter(x=>totL>0&&x.v/totL*100>seuilP);
+/* Concentration : part des 5 plus grosses lignes */
+const top5=lignes.slice(0,5).reduce((a,x)=>a+x.v,0);
+const top5p=totL>0?top5/totL*100:0;
+/* Indice de concentration (Herfindahl, ramené sur 100) */
+const hhi=totL>0?lignes.reduce((a,x)=>a+Math.pow(x.v/totL*100,2),0):0;
+const eq=hhi>0?10000/hhi:0;/* équivalent en nombre de lignes également réparties */
+
+let prH='<div class="kr">';
+prH+='<div class="kpi sm"><div class="kl">Lignes</div><div class="kv">'+lignes.length+'</div><div class="ks">équivalent '+eq.toFixed(1)+' réparties</div></div>';
+prH+='<div class="kpi sm"><div class="kl">Top 5</div><div class="kv" style="color:'+(top5p>60?'var(--red)':top5p>45?'var(--orange)':'var(--green)')+'">'+top5p.toFixed(1)+'%</div><div class="ks">'+(top5p>60?'très concentré':top5p>45?'concentré':'bien réparti')+'</div></div>';
+prH+='<div class="kpi sm"><div class="kl">Au-dessus du seuil</div><div class="kv" style="color:'+(depasse.length?'var(--orange)':'var(--green)')+'">'+depasse.length+'</div><div class="ks">ligne'+(depasse.length>1?'s':'')+' > '+seuilP+'%</div></div>';
+const plusGrosse=lignes[0];
+prH+='<div class="kpi sm"><div class="kl">Plus grosse ligne</div><div class="kv">'+(plusGrosse?(plusGrosse.v/totL*100).toFixed(1)+'%':'—')+'</div><div class="ks">'+(plusGrosse?plusGrosse.n:'')+'</div></div>';
+prH+='</div>';
+document.getElementById('poidsResume').innerHTML=prH;
+
+let poH='';
+if(lignes.length===0)poH='<div style="color:var(--muted);font-size:12px">Aucune ligne en portefeuille.</div>';
+else{
+  const mxP=totL>0?lignes[0].v/totL*100:1;
+  poH='<table><thead><tr><th class="l">Titre</th><th class="l">Enveloppe</th><th>Type</th><th>Valeur</th><th>Poids</th><th style="width:120px"></th><th>+/-</th></tr></thead><tbody>';
+  lignes.forEach(x=>{
+    const p=totL>0?x.v/totL*100:0;
+    const alerte=p>seuilP;
+    poH+='<tr'+(alerte?' style="background:var(--card2)"':'')+'>';
+    poH+='<td class="l"><b style="font-size:12px">'+(alerte?'⚠ ':'')+x.n+'</b><div class="tk">'+x.c+'</div></td>';
+    poH+='<td class="l" style="color:var(--muted);font-size:11.5px">'+(PFN[x.pk]||x.pk)+'</td>';
+    poH+='<td><span class="badge '+(x.etf?'pos':'neg')+'">'+(x.etf?'ETF':x.sec)+'</span></td>';
+    poH+='<td style="font-weight:600">'+F(Math.round(x.v))+'</td>';
+    poH+='<td style="font-weight:700;color:'+(alerte?'var(--orange)':'var(--text)')+'">'+p.toFixed(1)+'%</td>';
+    poH+='<td><div class="dbar"><i style="width:'+(mxP>0?p/mxP*100:0)+'%;background:'+(alerte?CV('--orange'):CV('--c1'))+'"></i></div></td>';
+    poH+='<td>'+BG(x.gp)+'</td></tr>';
+  });
+  poH+='</tbody></table>';
+  if(depasse.length)poH+='<div style="font-size:11.5px;color:var(--orange);margin-top:12px">⚠ '+depasse.length+' ligne'+(depasse.length>1?'s dépassent':' dépasse')+' '+seuilP+' % de ta bourse : '+depasse.map(x=>x.n).join(', ')+'.</div>';
+}
+document.getElementById('poidsList').innerHTML=poH;
 
 
 
@@ -1841,6 +1892,56 @@ rvH+='<div style="font-weight:700;margin-top:16px;margin-bottom:8px">Top dividen
 const allStocks=[];['pea','ctosb','ctoibkr','avl'].forEach(pk=>{S.pf[pk].l.forEach(l=>{if(l.div>0)allStocks.push({n:l.n,div:l.div,p:l.p,total:l.div*l.p,co:l.co,yield:l.co>0?(l.div/l.co*100).toFixed(2):0})})});
 allStocks.sort((a,b)=>b.total-a.total).forEach(s=>{rvH+='<div class="lr"><div><div class="ln">'+s.n+'</div><div class="ls">'+s.yield+'% yield</div></div><span style="font-weight:700;color:var(--orange)">'+F2(s.total)+'/an</span></div>'});
 document.getElementById('revDetail').innerHTML=rvH;
+/* Couverture des dépenses par les revenus passifs */
+(function(){
+  const B2=S.budget;
+  const depM=B2?B2.categories.reduce((a,c)=>a+c.postes.reduce((b,p)=>b+p.montant,0),0):0;
+  const investM=B2?B2.categories.filter(c=>c.nom.toLowerCase().includes('invest')).reduce((a,c)=>a+c.postes.reduce((b,p)=>b+p.montant,0),0):0;
+  const vraiesDep=Math.max(0,depM-investM);
+  /* Revenus passifs : dividendes, intérêts, sources manuelles, cashflow immobilier net */
+  let cashImmo=0;
+  S.immo.filter(b=>!(b.typeLocation==='rp'||b.type==='RP')).forEach(b=>{
+    const cr=b.creditId?S.dettes.find(d=>d.id===b.creditId):null;
+    let m=0;if(cr){const me=moisEcoules(cr.dateDebut);if(me>0){const am=cAm(cr.emprunte,cr.taux||0,cr.dureeMois||0,cr.differe||0);m=Math.abs(me<=(cr.differe||0)?(am.mDiff||0):am.m)}}
+    cashImmo+=fiscBien(b,m).effort;
+  });
+  const totPassif=totRevPassif+Math.max(0,cashImmo);
+  const couv=vraiesDep>0?totPassif/vraiesDep*100:0;
+  const manque=Math.max(0,vraiesDep-totPassif);
+  /* Capital nécessaire pour combler l'écart, à 4 % de retrait */
+  const capNec=manque*12*25;
+  /* Projection : dans combien d'années au rythme actuel */
+  const rend=(S.simParams&&S.simParams.rend)||7;
+  const dca=(S.simParams&&S.simParams.ep)||0;
+  let capital=t.bo+t.ep+t.cr, annees=0;
+  const cible=vraiesDep*12*25;
+  if(capital<cible&&(dca>0||rend>0)){
+    let c=capital;
+    while(c<cible&&annees<60){c=c*(1+rend/100)+dca*12;annees++}
+  }
+  const couvC=couv>=100?'var(--green)':couv>=50?'var(--orange)':'var(--red)';
+
+  let h='<div class="kr">';
+  h+='<div class="kpi sm"><div class="kl">Couverture</div><div class="kv" style="color:'+couvC+'">'+couv.toFixed(1)+'%</div><div class="ks">de tes dépenses</div></div>';
+  h+='<div class="kpi sm"><div class="kl">Revenus passifs</div><div class="kv" style="color:var(--green)">'+F2(totPassif)+'</div><div class="ks">par mois</div></div>';
+  h+='<div class="kpi sm"><div class="kl">Dépenses réelles</div><div class="kv" style="color:var(--red)">'+F(Math.round(vraiesDep))+'</div><div class="ks">hors investissement</div></div>';
+  h+='<div class="kpi sm"><div class="kl">Il manque</div><div class="kv">'+(manque>0?F(Math.round(manque)):'—')+'</div><div class="ks">'+(manque>0?'par mois':'objectif atteint')+'</div></div>';
+  h+='</div>';
+  document.getElementById('couvKpi').innerHTML=h;
+
+  let d='<div class="obj-bar" style="height:22px"><div class="obj-fill" style="width:'+Math.min(100,couv)+'%;background:'+couvC+'"></div></div>';
+  d+='<div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-bottom:16px"><span>0 %</span><span>indépendance financière</span><span>100 %</span></div>';
+  d+='<div class="lr"><span>Dividendes et intérêts</span><span style="font-weight:600;color:var(--green)">'+F2(totRevPassif)+'/mois</span></div>';
+  if(Math.abs(cashImmo)>1)d+='<div class="lr"><span>Cashflow immobilier net d\'impôts</span><span style="font-weight:600;color:'+(cashImmo>=0?'var(--green)':'var(--red)')+'">'+(cashImmo>=0?'+':'')+F2(cashImmo)+'/mois</span></div>';
+  d+='<div class="lr"><span>Dépenses mensuelles (hors investissement)</span><span style="font-weight:600;color:var(--red)">'+F(Math.round(vraiesDep))+'</span></div>';
+  if(manque>0){
+    d+='<div class="lr"><span>Capital à constituer pour combler l\'écart</span><span style="font-weight:700">'+F(Math.round(capNec))+'</span></div>';
+    d+='<div class="lr"><span>Au rythme actuel ('+rend+' %/an, '+F(dca)+'/mois)</span><span style="font-weight:700;color:var(--accent)">'+(annees>=60?'au-delà de 60 ans':'environ '+annees+' an'+(annees>1?'s':''))+'</span></div>';
+  }
+  d+='<div style="font-size:10.5px;color:var(--muted);margin-top:12px">Le capital nécessaire suit la règle des 4 % : 25 fois les dépenses annuelles restant à couvrir.</div>';
+  document.getElementById('couvDetail').innerHTML=d;
+})();
+
 
 /* ====== HEATMAP + RÉSUMÉ MENSUEL ====== */
 const allPos=[];['pea','ctosb','ctoibkr','avl'].forEach(pk=>{const c=pk==='pea'?t.p:pk==='ctosb'?t.s:pk==='ctoibkr'?t.i:t.a;c.l.forEach(l=>{allPos.push({n:l.n,c:l.c,val:l.vaEur,gp:l.gp,var:l.var||0,pk})})});
