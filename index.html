@@ -2109,7 +2109,6 @@ function sortIcon(pk,col){const key=pk+'_'+col;if(sortState[key]==='asc')return 
 function rPT(cid,calc,pk){let h=noteDisp(pk)+noteBtn(pk);
 h+='<table><thead><tr>';
 h+='<th class="l" style="cursor:pointer" onclick="sortPf(\''+pk+'\',\'name\')">Titre'+sortIcon(pk,'name')+'</th>';
-h+='<th class="l">Secteur</th>';
 h+='<th>Qté</th>';
 h+='<th>PRU'+(calc.isUSD?' $':'')+'</th>';
 h+='<th>Cours</th>';
@@ -2120,6 +2119,7 @@ h+='<th style="cursor:pointer" onclick="sortPf(\''+pk+'\',\'pv\')">%'+sortIcon(p
 h+='<th>Div</th>';
 h+='<th style="cursor:pointer" onclick="sortPf(\''+pk+'\',\'poids\')">Poids'+sortIcon(pk,'poids')+'</th>';
 h+='<th style="width:50px"></th>';
+h+='<th class="l">Secteur</th>';
 h+='<th></th></tr></thead><tbody>';
 
 /* Appliquer le tri */
