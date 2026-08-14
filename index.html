@@ -381,7 +381,9 @@ function cTWR(key){
   }return r
 }
 function cPan(){const vm=S.versMensuels||[],ml=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"],mn=["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"],ym=["2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09","2026-10","2026-11","2026-12"],r=[];for(let i=1;i<vm.length;i++){const m=vm[i].mois||'',p=m.split(' ');if(!p[1]||!p[1].startsWith('26'))continue;const mi=mn.indexOf(p[0]);if(mi<0)continue;const debut=vm[i-1].bourse||0;const fin=vm[i].bourse||0;const vers=vm[i].versement||0;const perf=debut>0?((fin-vers-debut)/debut)*100:0;r.push({l:ml[mi],perf:Math.round(perf*100)/100,pv:Math.round((fin-vers-debut)*100)/100,sp:spM[ym[mi]]!=null?Math.round(spM[ym[mi]]*100)/100:null})}return r}
-function cSec(){const s={};['pea','ctosb','ctoibkr','avl'].forEach(pk=>{S.pf[pk].l.forEach(l=>{const k=SECTORS[l.c]||'Autre';s[k]=(s[k]||0)+l.co*l.p})});return Object.entries(s).sort((a,b)=>b[1]-a[1])}
+/* Une ligne compte comme ETF si son secteur le dit, si elle est dans l'AV, ou si son nom l'indique */
+const estETF=(l,pk)=>(SECTORS[l.c]||'')==='ETF'||pk==='avl'||l._avl||/\betf\b|msci|world|nasdaq|s&p|stoxx|amundi|ishares|lyxor|vanguard|spdr|tracker/i.test(l.n||'');
+function cSec(){const s={};['pea','ctosb','ctoibkr','avl'].forEach(pk=>{const pf=S.pf[pk];if(!pf)return;pf.l.forEach(l=>{const k=SECTORS[l.c]||(estETF(l,pk)?'ETF':'Autre');s[k]=(s[k]||0)+l.co*l.p})});return Object.entries(s).sort((a,b)=>b[1]-a[1])}
 
 async function doRef(){if(rL)return;rL=true;const b=document.getElementById('rbtn');b.innerHTML='⏳';b.disabled=true;
 const allT=['SPY','EURUSD=X'];const taskMap=[];
@@ -839,8 +841,6 @@ function infoSauve(msg,col){const e=document.getElementById('sauveInfo');if(e){e
 
 /* ====== ALLOCATION CIBLE ====== */
 const ALLOC_DEF={actions:45,etf:45,crypto:5,liq:5};
-/* Une ligne compte comme ETF si son secteur le dit, si elle est dans l'AV, ou si son nom l'indique */
-const estETF=(l,pk)=>(SECTORS[l.c]||'')==='ETF'||pk==='avl'||l._avl||/\betf\b|msci|world|nasdaq|s&p|stoxx|amundi|ishares|lyxor|vanguard|spdr|tracker/i.test(l.n||'');
 function allocCats(t){
   let actV=0,actI=0,nAct=0,etfV=0,etfI=0,nEtf=0,esp=0;
   ['pea','ctosb','ctoibkr','avl'].forEach(pk=>{
