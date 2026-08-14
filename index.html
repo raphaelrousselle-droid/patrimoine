@@ -840,7 +840,7 @@ function infoSauve(msg,col){const e=document.getElementById('sauveInfo');if(e){e
 /* ====== ALLOCATION CIBLE ====== */
 const ALLOC_DEF={actions:45,etf:45,crypto:5,liq:5};
 /* Une ligne compte comme ETF si son secteur le dit, si elle est dans l'AV, ou si son nom l'indique */
-const estETF=(l,pk)=>(SECTORS[l.c]||'')==='ETF'||pk==='avl'||/\betf\b|msci|world|nasdaq|s&p|stoxx|amundi|ishares|lyxor|vanguard|spdr|tracker/i.test(l.n||'');
+const estETF=(l,pk)=>(SECTORS[l.c]||'')==='ETF'||pk==='avl'||l._avl||/\betf\b|msci|world|nasdaq|s&p|stoxx|amundi|ishares|lyxor|vanguard|spdr|tracker/i.test(l.n||'');
 function allocCats(t){
   let actV=0,actI=0,nAct=0,etfV=0,etfI=0,nEtf=0,esp=0;
   ['pea','ctosb','ctoibkr','avl'].forEach(pk=>{
@@ -1072,8 +1072,8 @@ document.getElementById('rstat').innerHTML=rStat?'<span class="'+rc+'">'+rStat+'
 document.getElementById('rstatc').innerHTML=rStat?'<span class="'+rc+'">'+rStat+'</span>':'';
 
 /* Portfolio KPIs + répartition ETF/Actions */
-function etfRatio(pf){let etfVal=0,actVal=0;pf.l.forEach(l=>{const sec=SECTORS[l.c]||'Autre';if(sec==='ETF')etfVal+=l.vaEur;else actVal+=l.vaEur});const tot=etfVal+actVal;return{etf:etfVal,act:actVal,pctEtf:tot>0?Math.round(etfVal/tot*100):0}}
-const mk=(c,pf,pk)=>{const er=etfRatio(c);let h='<div class="kpi sm"><div class="kl">Valeur</div><div class="kv" style="color:var(--bourse)">'+F2(c.v)+'</div></div><div class="kpi sm"><div class="kl">Jour</div><div class="kv" style="color:'+(c.dayPnl>=0?'var(--green)':'var(--red)')+'">'+((c.dayPnl>=0?'+':'')+F2(c.dayPnl))+'</div><div class="ks">'+(c.dayPct>=0?'+':'')+c.dayPct.toFixed(2)+'%</div></div><div class="kpi sm"><div class="kl">Versé</div><div class="kv"><span class="ed" onclick="edVer(this,\''+pk+'\')">'+F(pf.ver)+'</span></div></div><div class="kpi sm"><div class="kl">Perf</div><div class="kv" style="color:'+(c.pvVer>=0?'var(--green)':'var(--red)')+'">'+FP(c.ppVer)+'</div></div><div class="kpi sm"><div class="kl">Espèces</div><div class="kv"><span class="ed" onclick="edEsp(this,\''+pk+'\')">'+F(pf.esp)+'</span></div></div><div class="kpi sm"><div class="kl">Div/an</div><div class="kv" style="color:var(--orange)">'+F2(c.divTot)+'</div></div>';
+function etfRatio(pf,pk){let etfVal=0,actVal=0;pf.l.forEach(l=>{if(estETF(l,pk))etfVal+=l.vaEur;else actVal+=l.vaEur});const tot=etfVal+actVal;return{etf:etfVal,act:actVal,pctEtf:tot>0?Math.round(etfVal/tot*100):0}}
+const mk=(c,pf,pk)=>{const er=etfRatio(c,pk);let h='<div class="kpi sm"><div class="kl">Valeur</div><div class="kv" style="color:var(--bourse)">'+F2(c.v)+'</div></div><div class="kpi sm"><div class="kl">Jour</div><div class="kv" style="color:'+(c.dayPnl>=0?'var(--green)':'var(--red)')+'">'+((c.dayPnl>=0?'+':'')+F2(c.dayPnl))+'</div><div class="ks">'+(c.dayPct>=0?'+':'')+c.dayPct.toFixed(2)+'%</div></div><div class="kpi sm"><div class="kl">Versé</div><div class="kv"><span class="ed" onclick="edVer(this,\''+pk+'\')">'+F(pf.ver)+'</span></div></div><div class="kpi sm"><div class="kl">Perf</div><div class="kv" style="color:'+(c.pvVer>=0?'var(--green)':'var(--red)')+'">'+FP(c.ppVer)+'</div></div><div class="kpi sm"><div class="kl">Espèces</div><div class="kv"><span class="ed" onclick="edEsp(this,\''+pk+'\')">'+F(pf.esp)+'</span></div></div><div class="kpi sm"><div class="kl">Div/an</div><div class="kv" style="color:var(--orange)">'+F2(c.divTot)+'</div></div>';
 h+='<div style="grid-column:1/-1;margin-top:4px"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span style="color:#0891b2;font-weight:600">ETF '+er.pctEtf+'%</span><span style="color:#7c3aed;font-weight:600">Actions '+(100-er.pctEtf)+'%</span></div><div style="display:flex;height:8px;border-radius:4px;overflow:hidden;background:#1b2745"><div style="width:'+er.pctEtf+'%;background:#0891b2"></div><div style="width:'+(100-er.pctEtf)+'%;background:#7c3aed"></div></div></div>';
 return h};
 document.getElementById('pk1').innerHTML=mk(t.p,S.pf.pea,'pea');document.getElementById('pk2').innerHTML=mk(t.s,S.pf.ctosb,'ctosb');document.getElementById('pk3').innerHTML=mk(t.i,S.pf.ctoibkr,'ctoibkr');document.getElementById('pk4').innerHTML=mk(t.a,S.pf.avl||{esp:0,ver:0,cur:'EUR',l:[]},'avl');
@@ -1083,7 +1083,7 @@ rPT('pt1',t.p,'pea');rPT('pt2',t.s,'ctosb');rPT('pt3',t.i,'ctoibkr');rPT('pt4',t
 if(!S.bourseGoals)S.bourseGoals=[];
 let bgH='';
 const goalTypes={
-  'etf_pct':{label:'% ETF',calc:(g)=>{const er=etfRatio(g.pk==='pea'?t.p:g.pk==='ctosb'?t.s:g.pk==='ctoibkr'?t.i:g.pk==='avl'?t.a:{l:[...t.p.l,...t.s.l,...t.i.l,...t.a.l]});return{cur:er.pctEtf,unit:'%'}},fmt:v=>v+'%'},
+  'etf_pct':{label:'% ETF',calc:(g)=>{const er=etfRatio(g.pk==='pea'?t.p:g.pk==='ctosb'?t.s:g.pk==='ctoibkr'?t.i:g.pk==='avl'?t.a:{l:[...t.p.l,...t.s.l,...t.i.l,...t.a.l.map(x=>({...x,_avl:1}))]},g.pk);return{cur:er.pctEtf,unit:'%'}},fmt:v=>v+'%'},
   'valeur':{label:'Valeur',calc:(g)=>{const pf=g.pk==='pea'?t.p:g.pk==='ctosb'?t.s:g.pk==='ctoibkr'?t.i:g.pk==='avl'?t.a:{v:t.bo};return{cur:Math.round(pf.v),unit:'€'}},fmt:v=>F(v)},
   'dividendes':{label:'Dividendes/an',calc:(g)=>{const pf=g.pk==='pea'?t.p:g.pk==='ctosb'?t.s:g.pk==='ctoibkr'?t.i:g.pk==='avl'?t.a:{divTot:t.p.divTot+t.s.divTot+t.i.divTot+t.a.divTot};return{cur:Math.round(pf.divTot*100)/100,unit:'€'}},fmt:v=>F2(v)},
   'nb_positions':{label:'Nb positions',calc:(g)=>{const l=g.pk==='pea'?S.pf.pea.l:g.pk==='ctosb'?S.pf.ctosb.l:g.pk==='ctoibkr'?S.pf.ctoibkr.l:g.pk==='avl'?(S.pf.avl?S.pf.avl.l:[]):[...S.pf.pea.l,...S.pf.ctosb.l,...S.pf.ctoibkr.l,...(S.pf.avl?S.pf.avl.l:[])];return{cur:l.length,unit:''}},fmt:v=>v}
@@ -1181,7 +1181,7 @@ btH+='<tr><td class="l">+/- value</td>';brokers.forEach(b=>{btH+='<td style="col
 btH+='<tr><td class="l">Perf %</td>';brokers.forEach(b=>{btH+='<td>'+FP(b.calc.ppVer)+'</td>'});btH+='</tr>';
 btH+='<tr><td class="l">Perf jour</td>';brokers.forEach(b=>{btH+='<td style="color:'+(b.calc.dayPnl>=0?'var(--green)':'var(--red)')+'">'+F2(b.calc.dayPnl)+'</td>'});btH+='</tr>';
 btH+='<tr><td class="l">Positions</td>';brokers.forEach(b=>{btH+='<td>'+b.calc.l.length+'</td>'});btH+='</tr>';
-btH+='<tr><td class="l">ETF %</td>';brokers.forEach(b=>{const er=etfRatio(b.calc);btH+='<td>'+er.pctEtf+'%</td>'});btH+='</tr>';
+btH+='<tr><td class="l">ETF %</td>';brokers.forEach(b=>{const er=etfRatio(b.calc,b.pk);btH+='<td>'+er.pctEtf+'%</td>'});btH+='</tr>';
 btH+='<tr><td class="l">Dividendes/an</td>';brokers.forEach(b=>{btH+='<td style="color:var(--orange)">'+F2(b.calc.divTot)+'</td>'});btH+='</tr>';
 btH+='<tr><td class="l">Espèces</td>';brokers.forEach(b=>{btH+='<td>'+F(b.pf.esp)+'</td>'});btH+='</tr>';
 /* Nb secteurs */
