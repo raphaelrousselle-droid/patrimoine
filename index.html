@@ -108,6 +108,11 @@ main{max-width:1240px;margin:0 auto;padding:26px 22px 60px}
 .ks{font-size:11.5px;color:var(--muted);margin-top:3px}
 .kpi.sm .kv{font-size:18px}.kpi.sm{padding:14px 16px}
 td,th,.vc,.kv,.ks,.drow-v{font-variant-numeric:tabular-nums}
+
+/* Apparition des blocs au défilement */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .55s cubic-bezier(.22,.61,.36,1),transform .55s cubic-bezier(.22,.61,.36,1)}
+.reveal.vu{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px 24px;margin-bottom:18px;box-shadow:var(--shadow)}
 .ct{font-size:14px;font-weight:550;margin-bottom:18px;letter-spacing:-.01em}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
@@ -542,7 +547,7 @@ window.doSave=function(){const t=Tot(),lb=new Date().toLocaleDateString('fr-FR',
 window.dS=ts=>{snaps=snaps.filter(s=>s.ts!==ts);autoSave();R(true)};
 window.doReset=async()=>{S=JSON.parse(JSON.stringify(D));snaps=[];await saveData();R(true)};
 function gH(){const a=[...SEED];snaps.forEach(s=>a.push(s));return a}
-document.getElementById('tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t||!t.dataset.page)return;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.getElementById('page-'+t.dataset.page).classList.add('active');if(window.innerWidth<=900)toggleSide()};
+document.getElementById('tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t||!t.dataset.page)return;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.getElementById('page-'+t.dataset.page).classList.add('active');setTimeout(initReveal,30);if(window.innerWidth<=900)toggleSide()};
 /* Fermer dropdown quand on clique ailleurs */
 
 
@@ -948,6 +953,36 @@ function renderAlloc(t,dc){
 window.edCible=function(el,k){const v=parseFloat(prompt('Cible en % pour cette catégorie',S.allocCible[k]||0));if(isNaN(v)||v<0||v>100)return;S.allocCible[k]=Math.round(v*10)/10;autoSave();R(true)};
 window.cibleEgalActuel=function(){const t=Tot();const cats=allocCats(t);const tot=cats.reduce((a,c)=>a+c.v,0);if(tot<=0)return;cats.forEach(c=>{S.allocCible[c.k]=Math.round(c.v/tot*1000)/10});autoSave();R(true)};
 window.resetCibles=function(){if(!confirm('Remettre les cibles par défaut ?'))return;S.allocCible={...ALLOC_DEF};autoSave();R(true)};
+
+
+/* ====== APPARITION AU DÉFILEMENT ====== */
+let _obs=null;
+function initReveal(){
+  if(!('IntersectionObserver' in window))return;
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  if(!_obs)_obs=new IntersectionObserver(es=>{
+    es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vu');_obs.unobserve(e.target)}});
+  },{rootMargin:'0px 0px -8% 0px',threshold:.06});
+  const page=document.querySelector('.page.active');if(!page)return;
+  const blocs=page.querySelectorAll('.card, .g2, .g21, .kr, .hc');
+  let i=0;
+  blocs.forEach(b=>{
+    if(b.closest('.card')&&!b.classList.contains('card'))return;/* pas les blocs imbriqués */
+    if(b.dataset.rev)return;
+    b.dataset.rev='1';
+    const r=b.getBoundingClientRect();
+    if(r.top<window.innerHeight*0.92){
+      /* déjà visible : apparition en cascade au chargement */
+      b.classList.add('reveal');
+      b.style.transitionDelay=(i*70)+'ms';i++;
+      requestAnimationFrame(()=>requestAnimationFrame(()=>b.classList.add('vu')));
+      setTimeout(()=>{b.style.transitionDelay=''},900);
+    }else{
+      b.classList.add('reveal');
+      _obs.observe(b);
+    }
+  });
+}
 
 /* ====== RENDER ====== */
 function R(dc){
@@ -2119,6 +2154,7 @@ S.projets.forEach(p=>{
 if(S.projets.length===0)pjH='<div style="color:var(--muted);font-size:12px">Aucun projet. Clique + Projet pour simuler un futur achat.</div>';
 document.getElementById('projetsList').innerHTML=pjH;
 
+setTimeout(initReveal,30);
 }catch(err){console.error('Erreur rendu R():',err)}
 }/* end R */
 
