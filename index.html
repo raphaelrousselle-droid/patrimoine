@@ -306,7 +306,7 @@ function hexA(h,a){h=(h||'#888').trim();if(h.startsWith('#')){const n=h.length==
 /* Halo lumineux sous les courbes, façon écran de trading */
 const glowLine={id:'glowLine',beforeDatasetDraw(chart,args){
   const ds=chart.data.datasets[args.index];
-  if(!ds||ds.type==='bar'||chart.config.type==='bar'||chart.config.type==='pie'||chart.config.type==='doughnut')return;
+  if(!ds||ds.type==='bar'||['bar','pie','doughnut','radar'].includes(chart.config.type))return;
   if(document.body.classList.contains('light'))return;
   const c=chart.ctx;c.save();
   c.shadowColor=typeof ds.borderColor==='string'?ds.borderColor:'rgba(255,255,255,.4)';
@@ -1017,16 +1017,19 @@ function radarMarche(cle,cid,lid){
   const el=document.getElementById(cid);if(!el)return;
   if(window['_r_'+cle])window['_r_'+cle].destroy();
   const vert=CV('--green'),rouge=CV('--red');
+  /* Teinte d'ensemble : moyenne pondérée du groupe */
+  const moy=vals.reduce((a,b)=>a+b,0)/vals.length;
+  const teinte=moy>=0?vert:rouge;
   window['_r_'+cle]=new Chart(el,{type:'radar',
     data:{labels:dispo.map(x=>x.n),datasets:[{
       data:vals,
-      borderColor:c=>{const v=c.raw;return v>=0?vert:rouge},
-      backgroundColor:hexA(vals.reduce((a,b)=>a+b,0)>=0?vert:rouge,.22),
+      borderColor:teinte,
+      backgroundColor:hexA(teinte,.20),
       borderWidth:2,
       pointBackgroundColor:vals.map(v=>v>=0?vert:rouge),
       pointBorderColor:vals.map(v=>v>=0?vert:rouge),
-      pointRadius:4,pointHoverRadius:6,
-      segment:{borderColor:c=>{const a=c.p0.parsed.r,b=c.p1.parsed.r;return (a+b)/2>=0?vert:rouge}}
+      pointBorderWidth:1,
+      pointRadius:4,pointHoverRadius:6
     }]},
     options:{responsive:true,maintainAspectRatio:false,
       animation:{duration:800,easing:'easeOutQuart'},
@@ -1034,7 +1037,8 @@ function radarMarche(cle,cid,lid){
         ticks:{display:false},
         grid:{color:CV('--grid'),circular:true},
         angleLines:{color:CV('--grid')},
-        pointLabels:{color:CV('--muted'),font:{size:10.5},
+        pointLabels:{font:{size:10.5},
+          color:c=>{const v=vals[c.index];return v>=0?vert:rouge},
           callback:(l,i)=>{const v=vals[i];return [l,(v>=0?'+':'')+v.toFixed(1)+'%']}}
       }},
       plugins:{legend:{display:false},
