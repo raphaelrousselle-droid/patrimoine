@@ -79,6 +79,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 .side{position:fixed;top:0;left:0;width:224px;height:100vh;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:18px 12px;z-index:40;transition:transform .25s}
 .side-head{display:flex;align-items:center;gap:10px;padding:4px 8px 20px}
 .side-sec{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.13em;font-weight:600;padding:20px 10px 8px}
+.tab-grp{margin-top:10px;justify-content:flex-start;position:relative}
+.tab-grp .chev{position:absolute;right:10px;font-size:10px;transition:transform .2s;opacity:.6}
+.tab-grp.ouvert .chev{transform:rotate(90deg)}
+.sous{display:none;flex-direction:column;gap:1px;padding-left:9px;margin-left:11px;border-left:1px solid var(--border)}
+.sous.ouvert{display:flex}
+.sous .tab{font-size:12.5px;padding:7px 10px}
 .side-perf{margin-top:auto;border:1px solid var(--border);border-radius:10px;padding:12px 13px;font-size:11px;background:var(--card2)}
 .side-perf .sp-t{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.11em;font-weight:600;margin-bottom:9px}
 .side-perf .sp-r{display:flex;justify-content:space-between;gap:8px;padding:2.5px 0;color:var(--text2)}
@@ -218,7 +224,8 @@ details summary{color:var(--text2)}
 <button class="tab" data-page="immo"><span class="ti">⌂</span>Immo</button>
 <button class="tab" data-page="crypto"><span class="ti">◇</span>Crypto</button>
 <button class="tab" data-page="dettes"><span class="ti">◑</span>Dettes</button>
-<div class="side-sec">Outils</div>
+<button class="tab tab-grp" id="btnOutils" onclick="toggleOutils()"><span class="ti">⋯</span>Outils<span class="chev" id="chevOutils">▸</span></button>
+<div class="sous" id="sousOutils">
 <button class="tab" data-page="budget"><span class="ti">▤</span>Budget</button>
 <button class="tab" data-page="objectifs"><span class="ti">◎</span>Objectifs</button>
 <button class="tab" data-page="alloc"><span class="ti">◕</span>Allocation cible</button>
@@ -229,6 +236,7 @@ details summary{color:var(--text2)}
 <button class="tab" data-page="bilan"><span class="ti">▣</span>Bilan annuel</button>
 <button class="tab" data-page="simulator"><span class="ti">◔</span>Simulateur</button>
 <button class="tab" data-page="reglages"><span class="ti">⚙</span>Réglages</button>
+</div>
 </div>
 <div class="side-perf" id="sidePerf"></div>
 </aside>
@@ -288,6 +296,20 @@ details summary{color:var(--text2)}
 /* Thème clair / sombre */
 let themeMode=localStorage.getItem('theme')||'dark';
 function applyTheme(){document.body.classList.toggle('light',themeMode==='light');const b=document.getElementById('themeBtn');if(b)b.textContent=themeMode==='light'?'☀':'☾'}
+function toggleOutils(force){
+  const b=document.getElementById('btnOutils'),s=document.getElementById('sousOutils');
+  if(!b||!s)return;
+  const ouvrir=force!==undefined?force:!s.classList.contains('ouvert');
+  s.classList.toggle('ouvert',ouvrir);b.classList.toggle('ouvert',ouvrir);
+  try{localStorage.setItem('outils',ouvrir?'1':'0')}catch(e){}
+}
+function majOutils(){
+  const s=document.getElementById('sousOutils');if(!s)return;
+  /* Ouvert si une page Outils est active, ou si l'utilisateur l'avait laissé ouvert */
+  const actif=[...s.querySelectorAll('.tab')].some(x=>x.classList.contains('active'));
+  let garde=false;try{garde=localStorage.getItem('outils')==='1'}catch(e){}
+  toggleOutils(actif||garde);
+}
 function toggleSide(){const s=document.getElementById('side'),o=document.getElementById('sideOv');s.classList.toggle('open');o.classList.toggle('on',s.classList.contains('open'))}
 function toggleTheme(){themeMode=themeMode==='light'?'dark':'light';localStorage.setItem('theme',themeMode);applyTheme();if(typeof R==='function')R(true)}
 applyTheme();
@@ -555,7 +577,7 @@ window.doSave=function(){const t=Tot(),lb=new Date().toLocaleDateString('fr-FR',
 window.dS=ts=>{snaps=snaps.filter(s=>s.ts!==ts);autoSave();R(true)};
 window.doReset=async()=>{S=JSON.parse(JSON.stringify(D));snaps=[];await saveData();R(true)};
 function gH(){const a=[...SEED];snaps.forEach(s=>a.push(s));return a}
-document.getElementById('tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t||!t.dataset.page)return;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.getElementById('page-'+t.dataset.page).classList.add('active');setTimeout(initReveal,30);if(t.dataset.page==='marches'&&(!S.marches||!S.marches._maj))fetchMarches();if(window.innerWidth<=900)toggleSide()};
+document.getElementById('tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t||!t.dataset.page)return;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.getElementById('page-'+t.dataset.page).classList.add('active');majOutils();setTimeout(initReveal,30);if(t.dataset.page==='marches'&&(!S.marches||!S.marches._maj))fetchMarches();if(window.innerWidth<=900)toggleSide()};
 /* Fermer dropdown quand on clique ailleurs */
 
 
@@ -1009,7 +1031,7 @@ async function fetchMarches(force){
 function radarMarche(cle,cid,lid){
   const g=MARCHES[cle];if(!g)return;
   const d=marchesData&&Object.keys(marchesData).length?marchesData:(S.marches||{});
-  const dispo=g.items.filter(x=>d[x.t]&&d[x.t].sem!=null);
+  const dispo=g.items.filter(x=>d[x.t]&&d[x.t].sem!=null).sort((a,b)=>d[b.t].sem-d[a.t].sem);
   const leg=document.getElementById(lid);
   if(dispo.length<3){if(leg)leg.innerHTML='<div style="color:var(--muted);font-size:12px">Clique sur Actualiser pour charger les données.</div>';return}
   const vals=dispo.map(x=>d[x.t].sem);
@@ -1080,7 +1102,7 @@ function radarMarche(cle,cid,lid){
   });
 
   if(leg){
-    const tri=[...dispo].sort((a,b)=>d[b.t].sem-d[a.t].sem);
+    const tri=dispo;
     leg.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:5px 14px">'+
       tri.map(x=>{const v=d[x.t].sem;const c=v>=0?'var(--green)':'var(--red)';
         return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:11.5px;padding:2px 0"><span style="color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+x.e+' '+x.n+'</span><span style="font-weight:600;color:'+c+'">'+(v>=0?'+':'')+v.toFixed(1)+'%</span></div>'}).join('')+'</div>';
@@ -2385,7 +2407,7 @@ window.edNote=function(section){if(!S||!S.notes)return;const cur=S.notes[section
 function noteBtn(section){const has=S&&S.notes&&S.notes[section];return ' <button style="font-size:10px;background:none;border:1px solid '+(has?'var(--accent)':'var(--border)')+';border-radius:4px;padding:2px 6px;cursor:pointer;color:'+(has?'var(--accent)':'var(--muted)')+'" onclick="edNote(\''+section+'\')">📝'+(has?' ✓':'')+'</button>'}
 function noteDisp(section){if(!S||!S.notes)return '';const n=S.notes[section];return n?'<div style="background:rgba(62,207,142,.05);border:1px solid rgba(62,207,142,.15);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text);margin-bottom:12px">📝 '+n+'</div>':''}
 
-function initApp(){R(true);fSP();setTimeout(doRef,2000);setInterval(function(){if(!rL)doRef()},300000)}
+function initApp(){R(true);majOutils();fSP();setTimeout(doRef,2000);setInterval(function(){if(!rL)doRef()},300000)}
 </script>
 </body>
 </html>
