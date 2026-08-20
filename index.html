@@ -1017,38 +1017,73 @@ function radarMarche(cle,cid,lid){
   const el=document.getElementById(cid);if(!el)return;
   if(window['_r_'+cle])window['_r_'+cle].destroy();
   const vert=CV('--green'),rouge=CV('--red');
-  /* Teinte d'ensemble : moyenne pondérée du groupe */
-  const moy=vals.reduce((a,b)=>a+b,0)/vals.length;
-  const teinte=moy>=0?vert:rouge;
+
+  /* Chaque segment prend la couleur du signe de ses deux extrémités */
+  const segments={id:'segRadar'+cle,
+    beforeDatasetDraw(chart,args){args.meta.hidden=true},/* on masque le tracé natif */
+    afterDatasetsDraw(chart){
+      const meta=chart.getDatasetMeta(0);
+      const pts=meta.data;if(!pts||!pts.length)return;
+      const c=chart.ctx;
+      /* Remplissage : deux passes, une par couleur */
+      [vert,rouge].forEach(col=>{
+        const pos=col===vert;
+        c.save();c.beginPath();
+        const cx=chart.scales.r.xCenter,cy=chart.scales.r.yCenter;
+        let ouvert=false;
+        pts.forEach((p,k)=>{
+          const v=vals[k],vn=vals[(k+1)%vals.length];
+          const pn=pts[(k+1)%pts.length];
+          const concerne=(pos?v>=0:v<0)||(pos?vn>=0:vn<0);
+          if(!concerne)return;
+          c.moveTo(cx,cy);c.lineTo(p.x,p.y);c.lineTo(pn.x,pn.y);c.closePath();ouvert=true;
+        });
+        if(ouvert){c.fillStyle=hexA(col,.22);c.fill()}
+        c.restore();
+      });
+      /* Tracé segment par segment */
+      c.save();c.lineWidth=2;c.lineJoin='round';
+      pts.forEach((p,k)=>{
+        const pn=pts[(k+1)%pts.length];
+        const moy=(vals[k]+vals[(k+1)%vals.length])/2;
+        c.beginPath();c.strokeStyle=moy>=0?vert:rouge;
+        c.moveTo(p.x,p.y);c.lineTo(pn.x,pn.y);c.stroke();
+      });
+      /* Points */
+      pts.forEach((p,k)=>{
+        c.beginPath();c.fillStyle=vals[k]>=0?vert:rouge;
+        c.arc(p.x,p.y,4,0,Math.PI*2);c.fill();
+      });
+      c.restore();
+    }};
+
   window['_r_'+cle]=new Chart(el,{type:'radar',
     data:{labels:dispo.map(x=>x.n),datasets:[{
-      data:vals,
-      borderColor:teinte,
-      backgroundColor:hexA(teinte,.20),
-      borderWidth:2,
-      pointBackgroundColor:vals.map(v=>v>=0?vert:rouge),
-      pointBorderColor:vals.map(v=>v>=0?vert:rouge),
-      pointBorderWidth:1,
-      pointRadius:4,pointHoverRadius:6
+      data:vals,borderColor:'transparent',backgroundColor:'transparent',
+      borderWidth:0,pointRadius:0,pointHoverRadius:7,
+      pointHoverBackgroundColor:vals.map(v=>v>=0?vert:rouge),
+      pointHoverBorderColor:CV('--card')
     }]},
     options:{responsive:true,maintainAspectRatio:false,
-      animation:{duration:800,easing:'easeOutQuart'},
+      animation:{duration:700,easing:'easeOutQuart'},
       scales:{r:{min:-mx*1.15,max:mx*1.15,
         ticks:{display:false},
         grid:{color:CV('--grid'),circular:true},
         angleLines:{color:CV('--grid')},
-        pointLabels:{font:{size:10.5},
+        pointLabels:{font:{size:10.5,weight:'500'},
           color:c=>{const v=vals[c.index];return v>=0?vert:rouge},
           callback:(l,i)=>{const v=vals[i];return [l,(v>=0?'+':'')+v.toFixed(1)+'%']}}
       }},
       plugins:{legend:{display:false},
-        tooltip:tipOpts(c=>c.label+' : '+(c.raw>=0?'+':'')+c.raw.toFixed(2)+'%')}}
+        tooltip:tipOpts(c=>c.label+' : '+(c.raw>=0?'+':'')+c.raw.toFixed(2)+'%')}},
+    plugins:[segments]
   });
+
   if(leg){
     const tri=[...dispo].sort((a,b)=>d[b.t].sem-d[a.t].sem);
     leg.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:5px 14px">'+
       tri.map(x=>{const v=d[x.t].sem;const c=v>=0?'var(--green)':'var(--red)';
-        return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:11.5px;padding:2px 0"><span style="color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+x.e+' '+x.n+'</span><span class="'+(v>=0?'cg':'cr')+'" style="font-weight:600;color:'+c+'">'+(v>=0?'+':'')+v.toFixed(1)+'%</span></div>'}).join('')+'</div>';
+        return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:11.5px;padding:2px 0"><span style="color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+x.e+' '+x.n+'</span><span style="font-weight:600;color:'+c+'">'+(v>=0?'+':'')+v.toFixed(1)+'%</span></div>'}).join('')+'</div>';
   }
 }
 
