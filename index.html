@@ -378,7 +378,7 @@ await db.collection('users').doc(uid).set({patrimoine:clean,snapshots:snaps,upda
 const AV="P3CLMM04M63LQ42M";let nxId=Date.now();const nid=()=>++nxId;
 const INDICES=[{t:'^GSPC',n:'S&P 500'},{t:'^IXIC',n:'Nasdaq'},{t:'^DJI',n:'Dow Jones'},{t:'^FCHI',n:'CAC 40'},{t:'^GDAXI',n:'DAX'},{t:'^STOXX50E',n:'Euro Stoxx 50'},{t:'^FTSE',n:'FTSE 100'},{t:'^N225',n:'Nikkei'},{t:'^HSI',n:'Hang Seng'},{t:'BTC-EUR',n:'Bitcoin'}];
 let idxData={};
-const GAS="https://script.google.com/macros/s/AKfycbxOgA79Vk5iI9JCpvij2Ft_dGpnaQgqpe6BJTmlGpfuJx9U4la5TpqOmS1gXXiHErED0Q/exec";
+const GAS="https://script.google.com/macros/s/AKfycbxi1R7DyOr9_1hxyeHJusxPWcVhDdDAHOZflPqD_Y47xpupqfVtixGqbdDd8PJhYy57sg/exec";
 async function yQ(t){try{const r=await fetch(GAS+"?t="+encodeURIComponent(t));if(!r.ok)return null;const j=await r.json();const d=j[t]||j;if(d.error||!d.price)return null;return{price:d.price,prev:d.prev||0,chg:d.chg||0,cur:d.cur||'USD'}}catch(e){return null}}
 async function yQBatch(tickers){
   const results={};
@@ -452,17 +452,32 @@ function cSec(){const s={};['pea','ctosb','ctoibkr','avl'].forEach(pk=>{const pf
 async function doRef(){if(rL)return;rL=true;const b=document.getElementById('rbtn');b.innerHTML='⏳';b.disabled=true;
 const allT=['SPY','EURUSD=X'];const taskMap=[];
 ['pea','ctosb','ctoibkr','avl'].forEach(pk=>{S.pf[pk].l.forEach(x=>{const yt=YM[x.c]||x.c;if(yt&&yt!=='—'){allT.push(yt);taskMap.push({t:'s',pk,id:x.id,yt})}})});
-S.crypto.forEach(x=>{const yt=YM[x.symbol];if(yt){allT.push(yt);taskMap.push({t:'c',id:x.id,yt})}});
+/* Les cryptos se négocient en continu : variation sur 24 h glissantes */
+const cryptoT=[];S.crypto.forEach(x=>{const yt=YM[x.symbol];if(yt)cryptoT.push({yt,id:x.id})});
 /* Watchlist */
 if(S.watchlist)S.watchlist.forEach(w=>{allT.push(w.ticker);taskMap.push({t:'w',id:w.id,yt:w.ticker})});
 INDICES.forEach(x=>allT.push(x.t));
 const data=await yQBatch(allT);
+let ok=0;
+/* Cryptos en 24 h glissantes */
+if(cryptoT.length){
+  const lots=[];for(let i=0;i<cryptoT.length;i+=8)lots.push(cryptoT.slice(i,i+8));
+  await Promise.all(lots.map(lot=>
+    fetch(GAS+"?h24=1&t="+encodeURIComponent(lot.map(x=>x.yt).join(",")))
+      .then(r=>r.ok?r.json():{})
+      .then(j=>{lot.forEach(x=>{const d=(j||{})[x.yt];if(d&&d.price){
+        const cr=S.crypto.find(c=>c.id===x.id);
+        if(cr){cr.prix=Math.round(d.price*100)/100;cr.var=d.chg||0;ok++}
+      }})})
+      .catch(()=>{})
+  ));
+}
 /* Indices du bandeau */
 INDICES.forEach(x=>{if(data[x.t]&&data[x.t].price)idxData[x.t]=data[x.t]});renderTicker();
 /* Taux euro/dollar issu du même lot */
 if(data['EURUSD=X']&&data['EURUSD=X'].price>0)eurUsd=1/data['EURUSD=X'].price;
 const parisH=new Date().toLocaleString('en-US',{timeZone:'Europe/Paris',hour:'numeric',hour12:false});const usOpen=parseInt(parisH)>=15||parseInt(parisH)<1;
-let ok=0;taskMap.forEach(task=>{const r=data[task.yt];if(!r||r.error||!r.price)return;ok++;
+taskMap.forEach(task=>{const r=data[task.yt];if(!r||r.error||!r.price)return;ok++;
 if(task.t==='s'){const l=S.pf[task.pk].l.find(x=>x.id===task.id);if(l){const isUS=r.cur==='USD';if(isUS){l.usd=Math.round(r.price*100)/100;l.co=Math.round(r.price*eurUsd*100)/100}else if(r.cur==='GBp')l.co=Math.round(r.price*.01*1.17*100)/100;else l.co=Math.round(r.price*100)/100;if(isUS&&!usOpen){l.var=0}else{l.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0}
 /* Sparkline: stocker les 5 derniers prix */
 if(!l.spark)l.spark=[];const today2=new Date().toISOString().slice(0,10);if(l.spark.length===0||l.spark[l.spark.length-1].d!==today2)l.spark.push({d:today2,p:l.co});else l.spark[l.spark.length-1].p=l.co;if(l.spark.length>5)l.spark=l.spark.slice(-5);
