@@ -274,7 +274,9 @@ details summary{color:var(--text2)}
 <button class="btn btn-o" style="border-color:var(--red);color:var(--red)" onclick="if(confirm('Tout effacer et repartir de zéro ?\n\nCette action est irréversible.'))doReset()">Réinitialiser l'application</button></div>
 </div>
 <div class="page" id="page-bilan"><div class="kr" id="bilanKpi"></div><div class="card"><div class="ct">📆 Bilan de l'année</div><div id="bilanDetail"></div></div></div>
-<div class="page" id="page-crypto"><div class="kr" id="ck"></div><div id="rstatc" class="rs" style="margin-bottom:8px"></div><div class="card"><div class="ct">Portefeuille Crypto</div><div class="tw" id="crt"></div><div id="cra"></div></div></div>
+<div class="page" id="page-crypto"><div class="kr" id="ck"></div><div id="rstatc" class="rs" style="margin-bottom:8px"></div>
+<div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Valeur vs montant investi</div><div style="display:flex;gap:4px;align-items:center"><button class="pb" onclick="edCryptoInvest()">Apports</button><span id="cryPs" style="display:flex;gap:4px"></span></div></div><div class="cb"><canvas id="cCry"></canvas></div><div id="cryEcart" style="margin-top:14px"></div></div>
+<div class="card"><div class="ct">Portefeuille Crypto</div><div class="tw" id="crt"></div><div id="cra"></div></div></div>
 <div class="page" id="page-dettes"><div class="kr" id="dk"></div><div id="dl2"></div></div>
 <div class="page" id="page-budget"><div class="kr" id="budgetKpi"></div><div class="card"><div class="ct">Flux mensuel</div><div id="sankeyDiv" style="width:100%;overflow-x:auto"><svg id="sankeySvg"></svg></div></div><div class="card"><div class="ct">Détail du budget</div><div id="budgetDetail"></div></div></div>
 <div class="page" id="page-alloc"><div class="card"><div class="fb" style="margin-bottom:16px"><div class="ct" style="margin:0">Allocation du patrimoine</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="allocSum" style="font-size:12px;color:var(--muted)"></span><button class="pb" onclick="cibleEgalActuel()">Cible = actuel</button><button class="pb" onclick="resetCibles()">↺ Réinitialiser</button></div></div><div class="g21"><div class="tw" id="allocTable"></div><div><div class="cbs" style="height:230px"><canvas id="cAlloc"></canvas></div><div id="allocLeg" style="padding:10px 4px 0"></div></div></div><div style="font-size:11px;color:var(--muted);margin-top:14px">Clique sur une cible en % pour la modifier. Les écarts et les montants à ajuster se recalculent aussitôt.</div></div></div>
@@ -596,11 +598,25 @@ document.getElementById('tabs').onclick=e=>{const t=e.target.closest('.tab');if(
 /* Fermer dropdown quand on clique ailleurs */
 
 
-let _cN,_cP,_cE,_cPf,_cS,cPr=-1,evoPr=999,immoPr=999,netPr=999,pieMode='brut',divVue='annee';
+let _cN,_cP,_cE,_cPf,_cS,cPr=-1,evoPr=999,immoPr=999,netPr=999,cryPr=999,pieMode='brut',divVue='annee';
 const perfLines=[{k:'bourse',l:'Global',c:CV('--c1'),on:true},{k:'pea',l:'PEA',c:CV('--c1'),on:false},{k:'ctosb',l:'CTO Saxo',c:CV('--c3'),on:false},{k:'ctoibkr',l:'CTO IBKR',c:CV('--c4'),on:false},{k:'avl',l:'AV Linxea',c:CV('--c2'),on:false},{k:'sp',l:'S&P 500',c:CV('--muted'),on:true}];
 window.tPL=i=>{perfLines[i].on=!perfLines[i].on;R(true)};
 const evo=[{k:'immobilier',c:CV('--accent'),l:'Immobilier',on:false},{k:'bourse',c:CV('--c1'),l:'Bourse',on:true},{k:'epargne',c:CV('--accent'),l:'Épargne',on:true},{k:'comptes',c:CV('--green'),l:'Comptes',on:true},{k:'crypto',c:CV('--c4'),l:'Crypto',on:true},{k:'brut',c:CV('--text'),l:'Brut',on:false},{k:'net',c:CV('--c1'),l:'Net',on:false}];
-window.tE=i=>{evo[i].on=!evo[i].on;R(true)};window.sP=m=>{cPr=m;R(true)};window.sEP=m=>{evoPr=m;R(true)};window.setPieMode=m=>{pieMode=m;R(true)};window.sIP=m=>{immoPr=m;R(true)};window.sNP=m=>{netPr=m;R(true)};window.setDivVue=v=>{divVue=v;R(true)};
+window.tE=i=>{evo[i].on=!evo[i].on;R(true)};window.sP=m=>{cPr=m;R(true)};window.sEP=m=>{evoPr=m;R(true)};window.setPieMode=m=>{pieMode=m;R(true)};window.sIP=m=>{immoPr=m;R(true)};window.sNP=m=>{netPr=m;R(true)};window.sCP=m=>{cryPr=m;R(true)};
+window.edCryptoInvest=function(){
+  if(!S.cryptoInvest)S.cryptoInvest={};
+  const cles=Object.keys(S.cryptoInvest).sort();
+  let liste=cles.length?cles.map(k=>'  '+k+' : '+S.cryptoInvest[k]+' €').join('\n'):'  aucun';
+  const rep=prompt('Montant total investi en crypto à une date donnée.\nUtile pour que la courbe suive tes apports successifs.\n\nEnregistré :\n'+liste+'\n\nSaisis : AAAA-MM=montant\n(ex: 2026-03=1500)\nLaisse vide pour annuler, ou tape supprimer=AAAA-MM','');
+  if(!rep)return;
+  const s=rep.trim();
+  if(s.toLowerCase().startsWith('supprimer=')){delete S.cryptoInvest[s.split('=')[1].trim()];autoSave();R(true);return}
+  const p=s.split('=');
+  if(p.length!==2||!/^\d{4}-\d{2}$/.test(p[0].trim())){alert('Format attendu : 2026-03=1500');return}
+  const v=parseFloat(p[1].replace(',','.'));
+  if(isNaN(v)){alert('Montant invalide');return}
+  S.cryptoInvest[p[0].trim()]=v;autoSave();R(true);
+};window.setDivVue=v=>{divVue=v;R(true)};
 window.addBourseGoal=function(){
   const types=['etf_pct','valeur','dividendes','nb_positions'];
   const labels=['% ETF dans le portefeuille','Valeur du portefeuille (€)','Dividendes annuels (€)','Nombre de positions'];
@@ -1793,6 +1809,50 @@ document.getElementById('ck').innerHTML='<div class="kpi"><div class="kl">Crypto
 let crH='<table><thead><tr><th class="l">Crypto</th><th>Qté</th><th>PRU</th><th>Prix</th><th>Valeur</th><th>+/-</th><th>Var</th><th></th></tr></thead><tbody>';
 [...S.crypto].sort((a,b)=>(b.montant||0)-(a.montant||0)).forEach(c=>{const mt=c.prix>0?c.prix*c.qte:(c.montant||0),pt=c.pru*c.qte,g=mt-pt;crH+='<tr><td class="l"><b>'+c.nom+'</b><div class="tk">'+c.symbol+'</div></td><td><span class="ed" onclick="eI(this,\'crypto\',\''+c.id+'\',\'qte\')">'+c.qte+'</span></td><td><span class="ed" onclick="eI(this,\'crypto\',\''+c.id+'\',\'pru\')">'+(c.pru?F2(c.pru):'—')+'</span></td><td>'+(c.prix?F2(c.prix):'—')+'</td><td style="font-weight:700">'+F2(mt)+'</td><td style="color:'+(g>=0?'var(--green)':'var(--red)')+'">'+(pt>0?(g>=0?'+':'')+F2(g):'—')+'</td><td>'+VC(c.var)+'</td><td><button class="db" onclick="dI(\'crypto\',\''+c.id+'\')">✕</button></td></tr>'});
 crH+='</tbody></table>';document.getElementById('crt').innerHTML=crH;
+
+/* Valeur vs montant investi */
+document.getElementById('cryPs').innerHTML=[{l:'6M',m:6},{l:'Année',m:-1},{l:'Tout',m:999}]
+  .map(x=>'<button class="pb '+(cryPr===x.m?'on':'')+'" onclick="sCP('+x.m+')">'+x.l+'</button>').join('');
+/* Historique des apports, si renseigné : {"2026-03":1200} = investi cumulé à cette date */
+const apports=S.cryptoInvest||{};
+const moisAbr={"Jan":"01","Fév":"02","Mar":"03","Avr":"04","Mai":"05","Juin":"06","Juil":"07","Août":"08","Sep":"09","Oct":"10","Nov":"11","Déc":"12"};
+function cleMois(lbl){const p=(lbl||'').split(' ');if(p.length<2)return null;const m=moisAbr[p[0]];if(!m)return null;return '20'+p[1]+'-'+m}
+let Hc=H.filter(h=>h.crypto!=null);
+if(cryPr===-1){const an=String(new Date().getFullYear()%100);const ji=Hc.findIndex(h=>h.date&&h.date.includes('Jan '+an));if(ji>=0)Hc=Hc.slice(ji)}
+else if(cryPr<999)Hc=Hc.slice(-cryPr);
+
+if(dc){
+  const cel=document.getElementById('cCry');
+  if(cel){
+    if(window._cCry)window._cCry.destroy();
+    /* Investi à chaque date : dernier apport connu, sinon investi actuel */
+    let dernier=null;
+    const invSerie=Hc.map(h=>{
+      const k=cleMois(h.date);
+      if(k){const dispo=Object.keys(apports).filter(x=>x<=k).sort();if(dispo.length)dernier=apports[dispo[dispo.length-1]]}
+      return dernier!=null?dernier:crI;
+    });
+    window._cCry=new Chart(cel,{type:'line',
+      data:{labels:Hc.map(h=>h.date),datasets:[
+        {label:'Valeur',data:Hc.map(h=>h.crypto||0),borderColor:CV('--crypto'),backgroundColor:gradFill(CV('--crypto')),fill:true,tension:.35,pointRadius:0,pointHoverRadius:5,borderWidth:2},
+        {label:'Montant investi',data:invSerie,borderColor:CV('--muted'),borderDash:[5,4],tension:.2,pointRadius:0,pointHoverRadius:5,borderWidth:1.6,fill:false}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},animation:animConf,
+        plugins:{legend:{display:true,position:'bottom',labels:{font:{size:11},usePointStyle:true,pointStyle:'circle',boxWidth:7,boxHeight:7,padding:16,color:CV('--muted')}},
+          tooltip:tipOpts(c=>c.dataset.label+' : '+F(Math.round(c.raw)))},
+        scales:axeOpts(v=>v>=1000?(v/1000).toFixed(1)+'k':v)}});
+  }
+}
+/* Écart actuel */
+const ecart=tCr-crI;
+const ecartP=crI>0?ecart/crI*100:0;
+let ecH='<div class="lr" style="border:none;padding:0"><div style="display:flex;gap:26px;flex-wrap:wrap">';
+ecH+='<div><div class="kl">Valeur</div><div style="font-size:17px;font-weight:600;color:var(--crypto)">'+F2(tCr)+'</div></div>';
+ecH+='<div><div class="kl">Investi</div><div style="font-size:17px;font-weight:600">'+F2(crI)+'</div></div>';
+ecH+='<div><div class="kl">Écart</div><div style="font-size:17px;font-weight:600;color:'+(ecart>=0?'var(--green)':'var(--red)')+'">'+(ecart>=0?'+':'')+F2(ecart)+' <span style="font-size:12.5px">('+(ecartP>=0?'+':'')+ecartP.toFixed(1)+'%)</span></div></div>';
+ecH+='</div></div>';
+if(!Object.keys(apports).length)ecH+='<div style="font-size:10.5px;color:var(--muted);margin-top:10px">La ligne du montant investi est constante, faute d\'historique d\'apports. Elle correspond à la somme de tes prix de revient.</div>';
+document.getElementById('cryEcart').innerHTML=ecH;
 document.getElementById('cra').innerHTML=addB('cra',[{k:'nom',label:'Nom',w:2},{k:'symbol',label:'Symbol'},{k:'qte',label:'Qté',num:true},{k:'pru',label:'PRU',num:true}],'crypto',{prix:0,var:0,pru:0,montant:0});
 
 /* Dettes — avec calcul auto du restant basé sur date début */
