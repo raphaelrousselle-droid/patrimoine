@@ -598,7 +598,7 @@ document.getElementById('tabs').onclick=e=>{const t=e.target.closest('.tab');if(
 /* Fermer dropdown quand on clique ailleurs */
 
 
-let _cN,_cP,_cE,_cPf,_cS,cPr=-1,evoPr=999,immoPr=999,netPr=999,cryPr=999,pieMode='brut',divVue='annee';
+let _cN,_cP,_cE,_cPf,_cS,cPr=12,evoPr=12,immoPr=12,netPr=12,cryPr=12,pieMode='brut',divVue='annee';
 const perfLines=[{k:'bourse',l:'Global',c:CV('--c1'),on:true},{k:'pea',l:'PEA',c:CV('--c1'),on:false},{k:'ctosb',l:'CTO Saxo',c:CV('--c3'),on:false},{k:'ctoibkr',l:'CTO IBKR',c:CV('--c4'),on:false},{k:'avl',l:'AV Linxea',c:CV('--c2'),on:false},{k:'sp',l:'S&P 500',c:CV('--muted'),on:true}];
 window.tPL=i=>{perfLines[i].on=!perfLines[i].on;R(true)};
 const evo=[{k:'immobilier',c:CV('--accent'),l:'Immobilier',on:false},{k:'bourse',c:CV('--c1'),l:'Bourse',on:true},{k:'epargne',c:CV('--accent'),l:'Épargne',on:true},{k:'comptes',c:CV('--green'),l:'Comptes',on:true},{k:'crypto',c:CV('--c4'),l:'Crypto',on:true},{k:'brut',c:CV('--text'),l:'Brut',on:false},{k:'net',c:CV('--c1'),l:'Net',on:false}];
@@ -1225,8 +1225,10 @@ document.getElementById('homeAlerts').innerHTML=alH;
 document.getElementById('k4').textContent=F(r4)+' / an';document.getElementById('k4m').textContent='soit '+F(Math.round(r4/12))+' / mois';
 
 if(dc){
-const Hf=evoPr>=999?H:H.slice(-evoPr);
-document.getElementById('netPs').innerHTML=[{l:'Année',m:-1},{l:'6M',m:6},{l:'1A',m:12},{l:'Tout',m:999}].map(x=>'<button class="pb '+(netPr===x.m?'on':'')+'" onclick="sNP('+x.m+')">'+x.l+'</button>').join('');
+let Hf=H;
+if(evoPr===-1){const an=String(new Date().getFullYear()%100);const ji=Hf.findIndex(h=>h.date&&h.date.includes('Jan '+an));if(ji>=0)Hf=Hf.slice(ji)}
+else if(evoPr<999)Hf=Hf.slice(-evoPr);
+document.getElementById('netPs').innerHTML=[{l:'6M',m:6},{l:'1A',m:12},{l:'Année',m:-1},{l:'Tout',m:999}].map(x=>'<button class="pb '+(netPr===x.m?'on':'')+'" onclick="sNP('+x.m+')">'+x.l+'</button>').join('');
 let Hn=H;
 if(netPr===-1){const an=String(new Date().getFullYear()%100);const ji=Hn.findIndex(h=>h.date&&h.date.includes('Jan '+an));if(ji>=0)Hn=Hn.slice(ji)}
 else if(netPr<999)Hn=Hn.slice(-netPr);
@@ -1241,7 +1243,7 @@ document.getElementById('pieMode_net').className='ctb'+(pieMode==='net'?' active
 const itP=pL.map((l,k)=>({n:l,v:pV[k],c:PIE()[k%8]}));
 drawPie('cP','_cP',itP);document.getElementById('pl').innerHTML=pieLeg(itP);
 
-document.getElementById('evoPs').innerHTML=[{l:'6M',m:6},{l:'1A',m:12},{l:'Max',m:999}].map(x=>'<button class="pb '+(evoPr===x.m?'on':'')+'" onclick="sEP('+x.m+')">'+x.l+'</button>').join('');
+document.getElementById('evoPs').innerHTML=[{l:'6M',m:6},{l:'1A',m:12},{l:'Année',m:-1},{l:'Max',m:999}].map(x=>'<button class="pb '+(evoPr===x.m?'on':'')+'" onclick="sEP('+x.m+')">'+x.l+'</button>').join('');
 document.getElementById('et').innerHTML=evo.map((s,i)=>'<label class="ctb '+(s.on?'on':'')+'" style="color:'+s.c+'" onclick="tE('+i+')"><span class="dot" style="background:'+(s.on?s.c:'#d4d9e1')+'"></span>'+s.l+'</label>').join('');
 if(_cE)_cE.destroy();_cE=new Chart(document.getElementById('cE'),{type:'line',data:{labels:Hf.map(h=>h.date),datasets:evo.filter(s=>s.on).map(x=>({label:x.l,data:Hf.map(h=>h[x.k]||0),borderColor:x.c,fill:false,tension:.35,pointRadius:0,pointHoverRadius:5,borderWidth:2}))},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},animation:animConf,plugins:{legend:{display:false}},scales:axeOpts(v=>v>=1000?(v/1000).toFixed(0)+'k':v)}});
 
@@ -1251,7 +1253,7 @@ const itS=sd.map((s,k)=>({n:s[0],v:s[1],c:PIE()[k%8]}));
 drawPie('cSec','_cS',itS);document.getElementById('secLeg').innerHTML=pieLeg(itS);
 
 /* TWR chart — multi-courbes */
-document.getElementById('ps').innerHTML=[{l:'YTD',m:-1},{l:'3M',m:3},{l:'6M',m:6},{l:'Max',m:999}].map(x=>'<button class="pb '+(cPr===x.m?'on':'')+'" onclick="sP('+x.m+')">'+x.l+'</button>').join('');
+document.getElementById('ps').innerHTML=[{l:'3M',m:3},{l:'6M',m:6},{l:'1A',m:12},{l:'YTD',m:-1},{l:'Max',m:999}].map(x=>'<button class="pb '+(cPr===x.m?'on':'')+'" onclick="sP('+x.m+')">'+x.l+'</button>').join('');
 
 /* Checkboxes courbes */
 const plDiv=document.getElementById('ps');
@@ -1264,7 +1266,7 @@ if(ptEl)ptEl.remove();
 psParent.insertAdjacentHTML('afterend',cbH);
 
 /* Calculer les TWR pour chaque courbe active */
-function sliceTwr(data){let s;if(cPr===-1){const ji=data.findIndex(d=>d.mois&&d.mois.includes('Jan 26'));s=ji>=0?data.slice(ji):data}else s=cPr>=999?data:data.slice(-cPr);const base=s[0]?.twr||0;return s.map(d=>({mois:d.mois,twr:+(d.twr-base).toFixed(2)}))}
+function sliceTwr(data){let s;if(cPr===-1){const ji=data.findIndex(d=>d.mois&&d.mois.includes('Jan '+String(new Date().getFullYear()%100)));s=ji>=0?data.slice(ji):data}else s=cPr>=999?data:data.slice(-cPr);const base=s[0]?.twr||0;return s.map(d=>({mois:d.mois,twr:+(d.twr-base).toFixed(2)}))}
 
 const ds2=[];const twrGlobal=sliceTwr(cTWR('bourse'));
 
@@ -1273,7 +1275,7 @@ perfLines.forEach(p=>{
   if(p.k==='sp'){
     /* S&P aligné sur les mêmes mois que le TWR */
     const vm=S.versMensuels||[];
-    let spSlice;if(cPr===-1){const ji=vm.findIndex(v=>v.mois&&v.mois.includes('Jan 26'));spSlice=ji>=0?vm.slice(ji):vm}else spSlice=cPr>=999?vm:vm.slice(-cPr);
+    let spSlice;if(cPr===-1){const ji=vm.findIndex(v=>v.mois&&v.mois.includes('Jan '+String(new Date().getFullYear()%100)));spSlice=ji>=0?vm.slice(ji):vm}else spSlice=cPr>=999?vm:vm.slice(-cPr);
     const spBase=spSlice[0]?.spCum||0;
     const spData=spSlice.map(v=>v.spCum!=null?+((v.spCum||0)-spBase).toFixed(2):null);
     if(spData.some(d=>d!=null))ds2.push({label:'S&P 500',data:spData,borderColor:p.c,borderDash:[6,3],tension:.35,pointRadius:0,pointHoverRadius:5,borderWidth:1.5,fill:false,spanGaps:true});
@@ -1614,7 +1616,7 @@ const imDettes=S.dettes.filter(d=>creditIds.includes(d.id)).reduce((a,d)=>{
 document.getElementById('ik').innerHTML='<div class="kpi"><div class="kl">Valeur (tes parts)</div><div class="kv" style="color:#e8a33d">'+F(imBrut)+'</div>'+(imBrut100!==imBrut?'<div class="ks">sur '+F(imBrut100)+' au total</div>':'')+'</div><div class="kpi"><div class="kl">Dettes immo (tes parts)</div><div class="kv" style="color:var(--red)">'+F(imDettes)+'</div></div><div class="kpi"><div class="kl">Net (tes parts)</div><div class="kv" style="color:'+(imT-imDettes>=0?'var(--green)':'var(--red)')+'">'+F(imT-imDettes)+'</div></div><div class="kpi"><div class="kl">Loyers/mois</div><div class="kv" style="color:var(--accent)">'+F(loyerTotal)+'</div></div><div class="kpi"><div class="kl">Cashflow net</div><div class="kv" style="color:'+(cashflowTotal>=0?'var(--green)':'var(--red)')+'">'+F(Math.round(cashflowTotal))+'</div><div class="ks">/mois</div></div><div class="kpi"><div class="kl">Rdt brut / net</div><div class="kv">'+rendBrut+'% / '+rendNet+'%</div></div>';
 
 /* Graphique immo net */
-document.getElementById('immoPs').innerHTML=[{l:'Année',m:-1},{l:'6M',m:6},{l:'1A',m:12},{l:'Tout',m:999}].map(x=>'<button class="pb '+(immoPr===x.m?'on':'')+'" onclick="sIP('+x.m+')">'+x.l+'</button>').join('');
+document.getElementById('immoPs').innerHTML=[{l:'6M',m:6},{l:'1A',m:12},{l:'Année',m:-1},{l:'Tout',m:999}].map(x=>'<button class="pb '+(immoPr===x.m?'on':'')+'" onclick="sIP('+x.m+')">'+x.l+'</button>').join('');
 if(dc){
 const cImEl=document.getElementById('cImmoNet');
 if(cImEl){if(window._cImN)window._cImN.destroy();
@@ -1811,7 +1813,7 @@ let crH='<table><thead><tr><th class="l">Crypto</th><th>Qté</th><th>PRU</th><th
 crH+='</tbody></table>';document.getElementById('crt').innerHTML=crH;
 
 /* Valeur vs montant investi */
-document.getElementById('cryPs').innerHTML=[{l:'6M',m:6},{l:'Année',m:-1},{l:'Tout',m:999}]
+document.getElementById('cryPs').innerHTML=[{l:'6M',m:6},{l:'1A',m:12},{l:'Année',m:-1},{l:'Tout',m:999}]
   .map(x=>'<button class="pb '+(cryPr===x.m?'on':'')+'" onclick="sCP('+x.m+')">'+x.l+'</button>').join('');
 /* Historique des apports, si renseigné : {"2026-03":1200} = investi cumulé à cette date */
 const apports=S.cryptoInvest||{};
