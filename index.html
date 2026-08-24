@@ -254,7 +254,7 @@ details summary{color:var(--text2)}
 </div>
 </header>
 <main>
-<div class="page active" id="page-home"><div id="homeAlerts"></div><div class="kr" id="hk"></div><div id="widgetResume" style="margin-bottom:20px"></div><div class="hc"><div><span style="font-size:12px;color:var(--muted)">💡 Règle des 4%</span><div style="font-size:20px;font-weight:800;color:var(--accent);margin-top:2px" id="k4"></div></div><div style="font-size:13px;color:var(--muted)" id="k4m"></div></div><div class="g21"><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution Patrimoine Net</div><div style="display:flex;gap:4px" id="netPs"></div></div><div class="cb"><canvas id="cN"></canvas></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">Répartition</div><div style="display:flex;gap:4px"><button class="ctb active" id="pieMode_brut" onclick="setPieMode('brut')">Brut</button><button class="ctb" id="pieMode_net" onclick="setPieMode('net')">Net</button></div></div><div class="cbs" style="height:230px"><canvas id="cP"></canvas></div><div id="pl" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution par catégorie</div><div style="display:flex;gap:4px" id="evoPs"></div></div><div class="cto" id="et"></div><div class="cb"><canvas id="cE"></canvas></div></div><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution par poste</div><div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap"><button class="pb" onclick="edPeeHist()">Historique PEE</button><span id="envPs" style="display:flex;gap:4px"></span></div></div><div class="cto" id="envCases"></div><div class="cb" style="height:310px"><canvas id="cEnv"></canvas></div><div id="envLeg" style="margin-top:14px"></div></div><div class="card"><div class="ct">📊 Rendement par poche</div><div id="rdtPoches"></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">📸 Historique</div><button class="reset-btn" onclick="if(confirm('Reset?'))doReset()">🔄 Reset</button></div><div id="sl" style="margin-top:12px"></div></div></div>
+<div class="page active" id="page-home"><div id="homeAlerts"></div><div class="kr" id="hk"></div><div id="widgetResume" style="margin-bottom:20px"></div><div class="hc"><div><span style="font-size:12px;color:var(--muted)">💡 Règle des 4%</span><div style="font-size:20px;font-weight:800;color:var(--accent);margin-top:2px" id="k4"></div></div><div style="font-size:13px;color:var(--muted)" id="k4m"></div></div><div class="g21"><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution Patrimoine Net</div><div style="display:flex;gap:4px" id="netPs"></div></div><div class="cb"><canvas id="cN"></canvas></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">Répartition</div><div style="display:flex;gap:4px"><button class="ctb active" id="pieMode_brut" onclick="setPieMode('brut')">Brut</button><button class="ctb" id="pieMode_net" onclick="setPieMode('net')">Net</button></div></div><div class="cbs" style="height:230px"><canvas id="cP"></canvas></div><div id="pl" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution par catégorie</div><div style="display:flex;gap:4px" id="evoPs"></div></div><div class="cto" id="et"></div><div class="cb"><canvas id="cE"></canvas></div></div><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution par poste</div><div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap"><button class="pb" onclick="edHistPoste()">Historique</button><span id="envPs" style="display:flex;gap:4px"></span></div></div><div class="cto" id="envCases"></div><div class="cb" style="height:310px"><canvas id="cEnv"></canvas></div><div id="envLeg" style="margin-top:14px"></div></div><div class="card"><div class="ct">📊 Rendement par poche</div><div id="rdtPoches"></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">📸 Historique</div><button class="reset-btn" onclick="if(confirm('Reset?'))doReset()">🔄 Reset</button></div><div id="sl" style="margin-top:12px"></div></div></div>
 <div class="page" id="page-bourse"><div class="kr" id="bk"></div><div class="wb" id="bw"></div><div id="rstat" class="rs" style="margin:12px 0"></div><div class="card"><div class="fb"><div class="ct" style="margin:0">PEA — Fortuneo</div></div><div class="kr" id="pk1" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt1"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — Saxo <span style="font-size:11px;color:var(--muted)">(PRU $)</span></div></div><div class="kr" id="pk2" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt2"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — IBKR</div></div><div class="kr" id="pk3" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt3"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">AV — Linxea</div></div><div class="kr" id="pk4" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt4"></div></div><div class="g2" style="margin:16px 0"><div class="card"><div class="ct">📊 Panorama 2026</div><div id="ptw"></div><div class="ss" id="sps"></div></div><div class="card"><div class="ct">Répartition secteur</div><div class="cbs" style="height:230px"><canvas id="cSec"></canvas></div><div id="secLeg" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:8px"><div class="ct" style="margin:0">Perf cumulée TWR vs S&P</div><div style="display:flex;gap:4px" id="ps"></div></div><div class="cb"><canvas id="cPf"></canvas></div><div class="cl"><span style="color:#7c3aed">● Portf.</span><span style="color:#e8a33d">- - S&P</span></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">💰 Versements mensuels</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addVM()">+ Mois</button></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Valeur = relevée au 1er du mois suivant. Versement = viré pendant le mois.</div><div id="vmList"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">🎯 Objectifs Bourse</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addBourseGoal()">+ Objectif</button></div><div id="bourseGoals" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">👀 Watchlist</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addWatch()">+ Suivre</button></div><div id="watchlist" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">📓 Journal d'investissement</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addJournal()">+ Entrée</button></div><div id="journal" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb" style="margin-bottom:14px"><div class="ct" style="margin:0">💰 Dividendes perçus</div><div style="display:flex;gap:4px" id="divVueBtns"></div></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Note ici les dividendes que tu reçois réellement chaque mois (tous portefeuilles confondus). Clique sur un montant pour le modifier.</div><div class="tw" id="divMoisTable"></div><div class="cbs" style="margin-top:16px"><canvas id="cDivMois"></canvas></div></div></div>
 <div class="page" id="page-epargne"><div class="kr" id="ek"></div><div class="g2"><div class="card"><div class="ct" id="ct1"></div><div id="cl1"></div><div id="af1"></div></div><div class="card"><div class="ct" id="ct2"></div><div id="cl2"></div><div id="af2"></div></div><div class="card sf"><div class="ct" id="ct3"></div><div id="cl3"></div><div id="af3"></div></div></div></div>
 <div class="page" id="page-immo"><div class="kr" id="ik"></div><div class="g2" style="margin-bottom:16px"><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Patrimoine Immo Net</div><div style="display:flex;gap:4px" id="immoPs"></div></div><div class="cb"><canvas id="cImmoNet"></canvas></div></div><div class="card"><div class="ct">Tableau récapitulatif mensuel</div><div class="tw" id="immoRecap"></div></div></div><div class="card" id="immoSCI" style="display:none"><div class="ct">🏢 Tableau de bord SCI</div><div id="sciDash"></div></div><div id="ic"></div>
@@ -591,8 +591,9 @@ let de=0;S.dettes.forEach(d=>{const bienLie=S.immo.find(b=>b.creditId===d.id);co
 return{co,eL,eB,ep,bo,cr,crI,im,de,br:im+co+ep+bo+cr,ne:im+co+ep+bo+cr-de,lq:co+eL,p,s,i,a}}
 
 window.doSave=function(){const t=Tot(),lb=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});const pee=S.epBloq.filter(x=>/pee|pere|per\b|épargne salariale/i.test(x.nom||'')).reduce((a,x)=>a+x.montant,0);
+const avScpi=[...S.epLibre,...S.epBloq].filter(x=>/linxea|assurance.?vie|^av /i.test(x.nom||'')).reduce((a,x)=>a+x.montant,0);
 snaps.push({date:lb,ts:Date.now(),immobilier:t.im,comptes:t.co,epargne:t.ep,bourse:t.bo,crypto:t.cr,dettes:t.de,brut:t.br,net:t.ne,
-  pea:t.p.v,ctosb:t.s.v,ctoibkr:t.i.v,avl:t.a.v,pee:pee,immoNet:t.im-t.de});autoSave();const b=document.getElementById('sbtn');b.classList.add('btn-ok');b.textContent='✓';setTimeout(()=>{b.classList.remove('btn-ok');b.textContent='📸'},1500);R(true)};
+  pea:t.p.v,ctosb:t.s.v,ctoibkr:t.i.v,avl:t.a.v,avScpi:avScpi,pee:pee,immoNet:t.im-t.de});autoSave();const b=document.getElementById('sbtn');b.classList.add('btn-ok');b.textContent='✓';setTimeout(()=>{b.classList.remove('btn-ok');b.textContent='📸'},1500);R(true)};
 window.dS=ts=>{snaps=snaps.filter(s=>s.ts!==ts);autoSave();R(true)};
 window.doReset=async()=>{S=JSON.parse(JSON.stringify(D));snaps=[];await saveData();R(true)};
 function gH(){const a=[...SEED];snaps.forEach(s=>a.push(s));return a}
@@ -604,7 +605,25 @@ let _cN,_cP,_cE,_cPf,_cS,cPr=12,evoPr=12,immoPr=12,netPr=12,cryPr=12,envPr=12,pi
 const perfLines=[{k:'bourse',l:'Global',c:CV('--c1'),on:true},{k:'pea',l:'PEA',c:CV('--c1'),on:false},{k:'ctosb',l:'CTO Saxo',c:CV('--c3'),on:false},{k:'ctoibkr',l:'CTO IBKR',c:CV('--c4'),on:false},{k:'avl',l:'AV Linxea',c:CV('--c2'),on:false},{k:'sp',l:'S&P 500',c:CV('--muted'),on:true}];
 window.tPL=i=>{perfLines[i].on=!perfLines[i].on;R(true)};
 const evo=[{k:'immobilier',c:CV('--accent'),l:'Immobilier',on:false},{k:'bourse',c:CV('--c1'),l:'Bourse',on:true},{k:'epargne',c:CV('--accent'),l:'Épargne',on:true},{k:'comptes',c:CV('--green'),l:'Comptes',on:true},{k:'crypto',c:CV('--c4'),l:'Crypto',on:true},{k:'brut',c:CV('--text'),l:'Brut',on:false},{k:'net',c:CV('--c1'),l:'Net',on:false}];
-window.tE=i=>{evo[i].on=!evo[i].on;R(true)};window.sP=m=>{cPr=m;R(true)};window.sEP=m=>{evoPr=m;R(true)};window.setPieMode=m=>{pieMode=m;R(true)};window.sIP=m=>{immoPr=m;R(true)};window.sNP=m=>{netPr=m;R(true)};window.sCP=m=>{cryPr=m;R(true)};window.sEnvP=m=>{envPr=m;R(true)};window.edPeeHist=function(){
+window.tE=i=>{evo[i].on=!evo[i].on;R(true)};window.sP=m=>{cPr=m;R(true)};window.sEP=m=>{evoPr=m;R(true)};window.setPieMode=m=>{pieMode=m;R(true)};window.sIP=m=>{immoPr=m;R(true)};window.sNP=m=>{netPr=m;R(true)};window.sCP=m=>{cryPr=m;R(true)};window.sEnvP=m=>{envPr=m;R(true)};window.edHistPoste=function(){
+  const c=parseInt(prompt('Quel poste veux-tu renseigner ?\n\n1. PEE\n2. Assurance-vie (part SCPI et fonds euros)','1'));
+  if(c===1)edPeeHist();else if(c===2)edAvScpiHist();
+};
+window.edAvScpiHist=function(){
+  if(!S.avScpiHist)S.avScpiHist={};
+  const cles=Object.keys(S.avScpiHist).sort();
+  const liste=cles.length?cles.map(k=>'  '+k+' : '+S.avScpiHist[k]+' €').join('\n'):'  aucune valeur';
+  const rep=prompt('Part SCPI et fonds euros de ton assurance-vie, hors ETF.\nLa valeur saisie s\'applique jusqu\'à la suivante.\n\nEnregistré :\n'+liste+'\n\nSaisis : AAAA-MM=montant\n(ex: 2025-12=14600)\nOu : supprimer=AAAA-MM','');
+  if(!rep)return;
+  const s=rep.trim();
+  if(s.toLowerCase().startsWith('supprimer=')){delete S.avScpiHist[s.split('=')[1].trim()];autoSave();R(true);return}
+  const p=s.split('=');
+  if(p.length!==2||!/^\d{4}-\d{2}$/.test(p[0].trim())){alert('Format attendu : 2025-12=14600');return}
+  const v=parseFloat(p[1].replace(',','.'));
+  if(isNaN(v)){alert('Montant invalide');return}
+  S.avScpiHist[p[0].trim()]=v;autoSave();R(true);
+};
+window.edPeeHist=function(){
   if(!S.peeHist)S.peeHist={};
   const cles=Object.keys(S.peeHist).sort();
   const liste=cles.length?cles.map(k=>'  '+k+' : '+S.peeHist[k]+' €').join('\n'):'  aucune valeur';
@@ -2025,7 +2044,9 @@ document.getElementById('widgetResume').innerHTML=wH;
   ];
   /* Valeurs actuelles, utilisées à défaut d'historique */
   const peeAct=S.epBloq.filter(x=>/pee|pere|per\b|épargne salariale/i.test(x.nom||'')).reduce((a,x)=>a+x.montant,0);
-  const actuel={pea:t.p.v,ctosb:t.s.v,ctoibkr:t.i.v,avl:t.a.v,pee:peeAct,crypto:t.cr,immoNet:t.im-t.de};
+  /* Part non boursière de l'assurance-vie (SCPI, fonds euros) */
+  const avAct=[...S.epLibre,...S.epBloq].filter(x=>/linxea|assurance.?vie|^av /i.test(x.nom||'')).reduce((a,x)=>a+x.montant,0);
+  const actuel={pea:t.p.v,ctosb:t.s.v,ctoibkr:t.i.v,avl:t.a.v+avAct,pee:peeAct,crypto:t.cr,immoNet:t.im-t.de};
   /* Libellé "Mar 26" vers clé "2026-03" */
   const MAB={"Jan":"01","Fév":"02","Mar":"03","Avr":"04","Mai":"05","Juin":"06","Juil":"07","Août":"08","Sep":"09","Oct":"10","Nov":"11","Déc":"12"};
   const cleMoisEnv=lbl=>{const p=(lbl||'').split(' ');if(p.length<2)return null;const m=MAB[p[0]];return m?'20'+p[1]+'-'+m:null};
@@ -2052,6 +2073,16 @@ document.getElementById('widgetResume').innerHTML=wH;
   const MA={"Jan":1,"Fév":2,"Mar":3,"Avr":4,"Mai":5,"Juin":6,"Juil":7,"Août":8,"Sep":9,"Oct":10,"Nov":11,"Déc":12};
   const rang=d=>{const p=(d||'').split(' ');const m=MA[p[0]]||0;const a=parseInt(p[1])||0;return a*100+m};
   base.sort((a,b)=>rang(a.date)-rang(b.date));
+  /* Assurance-vie : ETF + part SCPI et fonds euros */
+  (function(){
+    const h=S.avScpiHist||{};const cles=Object.keys(h).sort();
+    base.forEach(b=>{
+      const k=cleMoisEnv(b.date);
+      let part=avAct;
+      if(k&&cles.length){const av=cles.filter(x=>x<=k);part=av.length?h[av[av.length-1]]:0}
+      b.avl=(b.avl||0)+part;
+    });
+  })();
   /* L'historique saisi à la main prime sur tout le reste */
   if(S.peeHist&&Object.keys(S.peeHist).length){
     const cles=Object.keys(S.peeHist).sort();
@@ -2066,6 +2097,7 @@ document.getElementById('widgetResume').innerHTML=wH;
   /* Le dernier point complète ce qui manque avec la situation actuelle */
   if(base.length){const L=base[base.length-1];POSTES.forEach(p=>{
     if(p.k==='pee'&&S.peeHist&&Object.keys(S.peeHist).length)return;/* saisie prioritaire */
+    if(p.k==='avl')return;/* déjà complété avec la part SCPI */
     if(!L[p.k]&&actuel[p.k])L[p.k]=actuel[p.k];
   })}
   /* Le détail par enveloppe ne commence qu'en décembre 2025 */
