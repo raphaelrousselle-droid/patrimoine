@@ -2047,13 +2047,27 @@ document.getElementById('widgetResume').innerHTML=wH;
   });
   /* Mois des versements absents des relevés */
   vm.forEach(v=>{if(v.mois&&!base.some(b=>b.date===v.mois)&&(v.bourse||0)>0)
-    base.push({date:v.mois,pea:v.pea||0,ctosb:v.ctosb||0,ctoibkr:v.ctoibkr||0,avl:v.avl||0,pee:0,crypto:0,immoNet:0,bourse:v.bourse||0})});
+    base.push({date:v.mois,pea:v.pea||0,ctosb:v.ctosb||0,ctoibkr:v.ctoibkr||0,avl:v.avl||0,pee:0,crypto:null,immoNet:null,bourse:v.bourse||0})});
   /* Ordre chronologique */
   const MA={"Jan":1,"Fév":2,"Mar":3,"Avr":4,"Mai":5,"Juin":6,"Juil":7,"Août":8,"Sep":9,"Oct":10,"Nov":11,"Déc":12};
   const rang=d=>{const p=(d||'').split(' ');const m=MA[p[0]]||0;const a=parseInt(p[1])||0;return a*100+m};
   base.sort((a,b)=>rang(a.date)-rang(b.date));
-  /* Le dernier point reflète la situation actuelle */
-  if(base.length){const L=base[base.length-1];POSTES.forEach(p=>{if(!L[p.k]&&actuel[p.k])L[p.k]=actuel[p.k]})}
+  /* L'historique saisi à la main prime sur tout le reste */
+  if(S.peeHist&&Object.keys(S.peeHist).length){
+    const cles=Object.keys(S.peeHist).sort();
+    base.forEach(b=>{
+      const k=cleMoisEnv(b.date);if(!k)return;
+      const av=cles.filter(x=>x<=k);
+      if(av.length)b.pee=S.peeHist[av[av.length-1]];
+    });
+  }
+  /* Crypto et immobilier : reprendre la dernière valeur connue */
+  ['crypto','immoNet'].forEach(k=>{let d=null;base.forEach(b=>{if(b[k]==null||b[k]===0){if(d!=null)b[k]=d}else d=b[k]})});
+  /* Le dernier point complète ce qui manque avec la situation actuelle */
+  if(base.length){const L=base[base.length-1];POSTES.forEach(p=>{
+    if(p.k==='pee'&&S.peeHist&&Object.keys(S.peeHist).length)return;/* saisie prioritaire */
+    if(!L[p.k]&&actuel[p.k])L[p.k]=actuel[p.k];
+  })}
   /* Le détail par enveloppe ne commence qu'en décembre 2025 */
   const iDeb=base.findIndex(b=>rang(b.date)>=2512);
   if(iDeb>0)base=base.slice(iDeb);
