@@ -283,7 +283,7 @@ details summary{color:var(--text2)}
 <div class="page" id="page-objectifs"><div id="objContent"></div></div>
 <div class="page" id="page-revenus"><div class="kr" id="revKpi"></div><div class="g2"><div class="card"><div class="ct">Revenus passifs mensuels</div><div class="cbs" style="height:230px"><canvas id="cRevPie"></canvas></div><div id="revLeg" style="padding:8px 12px 0"></div></div><div class="card"><div class="ct">Projection revenus passifs</div><div class="cbs"><canvas id="cRevProj"></canvas></div></div></div><div class="card"><div class="ct">🎯 Couverture de tes dépenses</div><div id="couvKpi"></div><div id="couvDetail" style="margin-top:16px"></div></div><div class="card"><div class="ct">Détail des sources</div><div id="revDetail"></div></div></div>
 <div class="page" id="page-marches">
-<div class="card"><div class="fb" style="margin-bottom:6px"><div class="ct" style="margin:0">◉ Revue de marchés</div><div style="display:flex;gap:8px;align-items:center"><span id="marchesMaj" style="font-size:11px;color:var(--muted)"></span><button class="pb" onclick="fetchMarches(true)">Actualiser</button></div></div><div style="font-size:11.5px;color:var(--muted)">Performance depuis la clôture de vendredi dernier. Remise à zéro chaque lundi.</div></div>
+<div class="card"><div class="fb" style="margin-bottom:6px"><div class="ct" style="margin:0">◉ Revue de marchés</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="marPs" style="display:flex;gap:4px"></span><span id="marchesMaj" style="font-size:11px;color:var(--muted)"></span><button class="pb" onclick="fetchMarches(true)">Actualiser</button></div></div><div style="font-size:11.5px;color:var(--muted)" id="marLegende"></div></div>
 <div class="g2"><div class="card"><div class="ct">Indices mondiaux</div><div class="cb" style="height:330px"><canvas id="cRadIdx"></canvas></div><div id="legIdx" style="margin-top:12px"></div></div>
 <div class="card"><div class="ct">Secteurs américains</div><div class="cb" style="height:330px"><canvas id="cRadSec"></canvas></div><div id="legSec" style="margin-top:12px"></div></div></div>
 <div class="g2"><div class="card"><div class="ct">Matières premières & crypto</div><div class="cb" style="height:330px"><canvas id="cRadCom"></canvas></div><div id="legCom" style="margin-top:12px"></div></div>
@@ -380,7 +380,7 @@ await db.collection('users').doc(uid).set({patrimoine:clean,snapshots:snaps,upda
 const AV="P3CLMM04M63LQ42M";let nxId=Date.now();const nid=()=>++nxId;
 const INDICES=[{t:'^GSPC',n:'S&P 500'},{t:'^IXIC',n:'Nasdaq'},{t:'^DJI',n:'Dow Jones'},{t:'^FCHI',n:'CAC 40'},{t:'^GDAXI',n:'DAX'},{t:'^STOXX50E',n:'Euro Stoxx 50'},{t:'^FTSE',n:'FTSE 100'},{t:'^N225',n:'Nikkei'},{t:'^HSI',n:'Hang Seng'},{t:'BTC-EUR',n:'Bitcoin'}];
 let idxData={};
-const GAS="https://script.google.com/macros/s/AKfycbxi1R7DyOr9_1hxyeHJusxPWcVhDdDAHOZflPqD_Y47xpupqfVtixGqbdDd8PJhYy57sg/exec";
+const GAS="https://script.google.com/macros/s/AKfycbz0U012MVfplaKN2itb8MbSLuH_huKTEZekYa4gy9oKOMPOI1l07dzfvIwRiO607ELXaw/exec";
 async function yQ(t){try{const r=await fetch(GAS+"?t="+encodeURIComponent(t));if(!r.ok)return null;const j=await r.json();const d=j[t]||j;if(d.error||!d.price)return null;return{price:d.price,prev:d.prev||0,chg:d.chg||0,cur:d.cur||'USD'}}catch(e){return null}}
 async function yQBatch(tickers){
   const results={};
@@ -594,7 +594,7 @@ window.doSave=function(){const t=Tot(),lb=new Date().toLocaleDateString('fr-FR',
 window.dS=ts=>{snaps=snaps.filter(s=>s.ts!==ts);autoSave();R(true)};
 window.doReset=async()=>{S=JSON.parse(JSON.stringify(D));snaps=[];await saveData();R(true)};
 function gH(){const a=[...SEED];snaps.forEach(s=>a.push(s));return a}
-document.getElementById('tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t||!t.dataset.page)return;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.getElementById('page-'+t.dataset.page).classList.add('active');majOutils();setTimeout(initReveal,30);if(t.dataset.page==='marches'&&(!S.marches||!S.marches._maj))fetchMarches();if(window.innerWidth<=900)toggleSide()};
+document.getElementById('tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t||!t.dataset.page)return;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.getElementById('page-'+t.dataset.page).classList.add('active');majOutils();setTimeout(initReveal,30);if(t.dataset.page==='marches'&&(!S.marches||!S.marches[marPer]||!S.marches[marPer]._maj))fetchMarches();if(window.innerWidth<=900)toggleSide()};
 /* Fermer dropdown quand on clique ailleurs */
 
 
@@ -1042,26 +1042,31 @@ const MARCHES={
 };
 let marchesData={};
 
+const PERIODES=[{k:'sem',l:'Semaine',d:'depuis la clôture de vendredi dernier'},{k:'1m',l:'1 mois',d:'sur un mois glissant'},{k:'3m',l:'3 mois',d:'sur trois mois glissants'},{k:'6m',l:'6 mois',d:'sur six mois glissants'},{k:'ytd',l:'Depuis janvier',d:'depuis le 1er janvier'}];
+let marPer='sem';
 async function fetchMarches(force){
-  const ajd=new Date().toISOString().slice(0,13);/* précision à l'heure */
+  const ajd=new Date().toISOString().slice(0,13);
   if(!S.marches)S.marches={};
-  if(!force&&S.marches._maj===ajd&&Object.keys(S.marches).length>1){marchesData=S.marches;R(true);return}
+  const stock=S.marches[marPer];
+  if(!force&&stock&&stock._maj===ajd&&Object.keys(stock).length>1){marchesData=stock;R(true);return}
   const tous=[];Object.values(MARCHES).forEach(g=>g.items.forEach(x=>tous.push(x.t)));
   const res={};
   for(let i=0;i<tous.length;i+=10){
     const lot=tous.slice(i,i+10);
     try{
-      const r=await fetch(GAS+"?sem=1&t="+encodeURIComponent(lot.join(",")));
+      const r=await fetch(GAS+"?per="+marPer+"&t="+encodeURIComponent(lot.join(",")));
       if(r.ok){const j=await r.json();Object.keys(j||{}).forEach(k=>{if(j[k]&&j[k].sem!=null)res[k]=j[k]})}
     }catch(e){}
   }
-  if(Object.keys(res).length){res._maj=ajd;S.marches=res;marchesData=res;autoSave()}
+  if(Object.keys(res).length){res._maj=ajd;S.marches[marPer]=res;marchesData=res;autoSave()}
   R(true);
 }
+window.setMarPer=function(p){marPer=p;marchesData=(S.marches&&S.marches[p])||{};
+  if(!Object.keys(marchesData).length)fetchMarches();else R(true)};
 
 function radarMarche(cle,cid,lid){
   const g=MARCHES[cle];if(!g)return;
-  const d=marchesData&&Object.keys(marchesData).length?marchesData:(S.marches||{});
+  const d=marchesData&&Object.keys(marchesData).length?marchesData:((S.marches||{})[marPer]||{});
   const dispo=g.items.filter(x=>d[x.t]&&d[x.t].sem!=null).sort((a,b)=>d[b.t].sem-d[a.t].sem);
   const leg=document.getElementById(lid);
   if(dispo.length<3){if(leg)leg.innerHTML='<div style="color:var(--muted);font-size:12px">Clique sur Actualiser pour charger les données.</div>';return}
@@ -2386,11 +2391,17 @@ if(S.projets.length===0)pjH='<div style="color:var(--muted);font-size:12px">Aucu
 document.getElementById('projetsList').innerHTML=pjH;
 
 /* Revue de marchés */
+if(document.getElementById('marPs')){
+  document.getElementById('marPs').innerHTML=PERIODES.map(p=>'<button class="pb '+(marPer===p.k?'on':'')+'" onclick="setMarPer(\''+p.k+'\')">'+p.l+'</button>').join('');
+  const pInfo=PERIODES.find(p=>p.k===marPer);
+  const ml=document.getElementById('marLegende');
+  if(ml)ml.textContent='Performance '+(pInfo?pInfo.d:'')+'.'+(marPer==='sem'?' Remise à zéro chaque lundi.':'');
+}
 if(dc&&document.getElementById('cRadIdx')){
-  if(!marchesData||!Object.keys(marchesData).length)marchesData=S.marches||{};
+  if(!marchesData||!Object.keys(marchesData).length)marchesData=(S.marches&&S.marches[marPer])||{};
   ['idx','sec','com','the'].forEach(k=>radarMarche(k,'cRad'+k.charAt(0).toUpperCase()+k.slice(1),'leg'+k.charAt(0).toUpperCase()+k.slice(1)));
   const mm=document.getElementById('marchesMaj');
-  if(mm){const m=(S.marches||{})._maj;mm.textContent=m?'Mis à jour le '+m.slice(8,10)+'/'+m.slice(5,7)+' à '+m.slice(11,13)+'h':''}
+  if(mm){const m=((S.marches||{})[marPer]||{})._maj;mm.textContent=m?'à jour le '+m.slice(8,10)+'/'+m.slice(5,7)+' à '+m.slice(11,13)+'h':''}
 }
 setTimeout(initReveal,30);
 }catch(err){console.error('Erreur rendu R():',err)}
