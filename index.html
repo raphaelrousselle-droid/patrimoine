@@ -226,10 +226,12 @@ details summary{color:var(--text2)}
 <button class="tab" data-page="dettes"><span class="ti">◑</span>Dettes</button>
 <button class="tab tab-grp" id="btnOutils" onclick="toggleOutils()"><span class="ti">⋯</span>Outils<span class="chev" id="chevOutils">▸</span></button>
 <div class="sous" id="sousOutils">
+<button class="tab" data-page="releve"><span class="ti">✎</span>Relevé du mois</button>
 <button class="tab" data-page="budget"><span class="ti">▤</span>Budget</button>
 <button class="tab" data-page="objectifs"><span class="ti">◎</span>Objectifs</button>
 <button class="tab" data-page="alloc"><span class="ti">◕</span>Allocation cible</button>
 <button class="tab" data-page="revenus"><span class="ti">↗</span>Revenus</button>
+<button class="tab" data-page="analyse"><span class="ti">◫</span>Analyse</button>
 <button class="tab" data-page="resume"><span class="ti">▦</span>Résumé</button>
 <button class="tab" data-page="marches"><span class="ti">◉</span>Revue de marchés</button>
 <button class="tab" data-page="brokers"><span class="ti">⊞</span>Brokers</button>
@@ -254,7 +256,7 @@ details summary{color:var(--text2)}
 </div>
 </header>
 <main>
-<div class="page active" id="page-home"><div id="homeAlerts"></div><div class="kr" id="hk"></div><div id="widgetResume" style="margin-bottom:20px"></div><div class="hc"><div><span style="font-size:12px;color:var(--muted)">💡 Règle des 4%</span><div style="font-size:20px;font-weight:800;color:var(--accent);margin-top:2px" id="k4"></div></div><div style="font-size:13px;color:var(--muted)" id="k4m"></div></div><div class="g21"><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution Patrimoine Net</div><div style="display:flex;gap:4px" id="netPs"></div></div><div class="cb"><canvas id="cN"></canvas></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">Répartition</div><div style="display:flex;gap:4px"><button class="ctb active" id="pieMode_brut" onclick="setPieMode('brut')">Brut</button><button class="ctb" id="pieMode_net" onclick="setPieMode('net')">Net</button></div></div><div class="cbs" style="height:230px"><canvas id="cP"></canvas></div><div id="pl" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution par catégorie</div><div style="display:flex;gap:4px" id="evoPs"></div></div><div class="cto" id="et"></div><div class="cb"><canvas id="cE"></canvas></div></div><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution par poste</div><div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap"><button class="pb" onclick="edHistPoste()">Historique</button><span id="envPs" style="display:flex;gap:4px"></span></div></div><div class="cto" id="envCases"></div><div class="cb" style="height:310px"><canvas id="cEnv"></canvas></div><div id="envLeg" style="margin-top:14px"></div></div><div class="card"><div class="ct">📊 Rendement par poche</div><div id="rdtPoches"></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">📸 Historique</div><button class="reset-btn" onclick="if(confirm('Reset?'))doReset()">🔄 Reset</button></div><div id="sl" style="margin-top:12px"></div></div></div>
+<div class="page active" id="page-home"><div id="homeAlerts"></div><div class="kr" id="hk"></div><div id="widgetResume" style="margin-bottom:20px"></div><div class="hc"><div><span style="font-size:12px;color:var(--muted)">💡 Règle des 4%</span><div style="font-size:20px;font-weight:800;color:var(--accent);margin-top:2px" id="k4"></div></div><div style="font-size:13px;color:var(--muted)" id="k4m"></div></div><div class="g21"><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution Patrimoine Net</div><div style="display:flex;gap:4px" id="netPs"></div></div><div class="cb"><canvas id="cN"></canvas></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">Répartition</div><div style="display:flex;gap:4px"><button class="ctb active" id="pieMode_brut" onclick="setPieMode('brut')">Brut</button><button class="ctb" id="pieMode_net" onclick="setPieMode('net')">Net</button></div></div><div class="cbs" style="height:230px"><canvas id="cP"></canvas></div><div id="pl" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution par catégorie</div><div style="display:flex;gap:4px" id="evoPs"></div></div><div class="cto" id="et"></div><div class="cb"><canvas id="cE"></canvas></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">📸 Historique</div><button class="reset-btn" onclick="if(confirm('Reset?'))doReset()">🔄 Reset</button></div><div id="sl" style="margin-top:12px"></div></div></div>
 <div class="page" id="page-bourse"><div class="kr" id="bk"></div><div class="wb" id="bw"></div><div id="rstat" class="rs" style="margin:12px 0"></div><div class="card"><div class="fb"><div class="ct" style="margin:0">PEA — Fortuneo</div></div><div class="kr" id="pk1" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt1"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — Saxo <span style="font-size:11px;color:var(--muted)">(PRU $)</span></div></div><div class="kr" id="pk2" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt2"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — IBKR</div></div><div class="kr" id="pk3" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt3"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">AV — Linxea</div></div><div class="kr" id="pk4" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt4"></div></div><div class="g2" style="margin:16px 0"><div class="card"><div class="ct">📊 Panorama 2026</div><div id="ptw"></div><div class="ss" id="sps"></div></div><div class="card"><div class="ct">Répartition secteur</div><div class="cbs" style="height:230px"><canvas id="cSec"></canvas></div><div id="secLeg" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:8px"><div class="ct" style="margin:0">Perf cumulée TWR vs S&P</div><div style="display:flex;gap:4px" id="ps"></div></div><div class="cb"><canvas id="cPf"></canvas></div><div class="cl"><span style="color:#7c3aed">● Portf.</span><span style="color:#e8a33d">- - S&P</span></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">💰 Versements mensuels</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addVM()">+ Mois</button></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Valeur = relevée au 1er du mois suivant. Versement = viré pendant le mois.</div><div id="vmList"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">🎯 Objectifs Bourse</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addBourseGoal()">+ Objectif</button></div><div id="bourseGoals" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">👀 Watchlist</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addWatch()">+ Suivre</button></div><div id="watchlist" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">📓 Journal d'investissement</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addJournal()">+ Entrée</button></div><div id="journal" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb" style="margin-bottom:14px"><div class="ct" style="margin:0">💰 Dividendes perçus</div><div style="display:flex;gap:4px" id="divVueBtns"></div></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Note ici les dividendes que tu reçois réellement chaque mois (tous portefeuilles confondus). Clique sur un montant pour le modifier.</div><div class="tw" id="divMoisTable"></div><div class="cbs" style="margin-top:16px"><canvas id="cDivMois"></canvas></div></div></div>
 <div class="page" id="page-epargne"><div class="kr" id="ek"></div><div class="g2"><div class="card"><div class="ct" id="ct1"></div><div id="cl1"></div><div id="af1"></div></div><div class="card"><div class="ct" id="ct2"></div><div id="cl2"></div><div id="af2"></div></div><div class="card sf"><div class="ct" id="ct3"></div><div id="cl3"></div><div id="af3"></div></div></div></div>
 <div class="page" id="page-immo"><div class="kr" id="ik"></div><div class="g2" style="margin-bottom:16px"><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Patrimoine Immo Net</div><div style="display:flex;gap:4px" id="immoPs"></div></div><div class="cb"><canvas id="cImmoNet"></canvas></div></div><div class="card"><div class="ct">Tableau récapitulatif mensuel</div><div class="tw" id="immoRecap"></div></div></div><div class="card" id="immoSCI" style="display:none"><div class="ct">🏢 Tableau de bord SCI</div><div id="sciDash"></div></div><div id="ic"></div>
@@ -278,6 +280,13 @@ details summary{color:var(--text2)}
 <div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Valeur vs montant investi</div><div style="display:flex;gap:4px;align-items:center"><button class="pb" onclick="edCryptoInvest()">Apports</button><span id="cryPs" style="display:flex;gap:4px"></span></div></div><div class="cb"><canvas id="cCry"></canvas></div><div id="cryEcart" style="margin-top:14px"></div></div>
 <div class="card"><div class="ct">Portefeuille Crypto</div><div class="tw" id="crt"></div><div id="cra"></div></div></div>
 <div class="page" id="page-dettes"><div class="kr" id="dk"></div><div id="dl2"></div></div>
+<div class="page" id="page-releve">
+<div class="card"><div class="fb" style="margin-bottom:6px"><div class="ct" style="margin:0">✎ Relevé du mois</div><div style="display:flex;gap:8px;align-items:center"><span id="relMois" style="font-size:12px;color:var(--muted)"></span><button class="btn btn-g" onclick="validerReleve()">Enregistrer le relevé</button></div></div><div style="font-size:11.5px;color:var(--muted)">Mets à jour tes montants une fois par mois, puis enregistre. Tout l'historique de l'application en découle.</div></div>
+<div id="relEtat"></div>
+<div class="card"><div class="ct">Comptes et épargne</div><div class="tw" id="relEpargne"></div></div>
+<div class="card"><div class="ct">Enveloppes boursières</div><div class="tw" id="relBourse"></div></div>
+<div class="card"><div class="ct">Autres postes</div><div class="tw" id="relAutres"></div></div>
+</div>
 <div class="page" id="page-budget"><div class="kr" id="budgetKpi"></div><div class="card"><div class="ct">Flux mensuel</div><div id="sankeyDiv" style="width:100%;overflow-x:auto"><svg id="sankeySvg"></svg></div></div><div class="card"><div class="ct">Détail du budget</div><div id="budgetDetail"></div></div></div>
 <div class="page" id="page-alloc"><div class="card"><div class="fb" style="margin-bottom:16px"><div class="ct" style="margin:0">Allocation du patrimoine</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="allocSum" style="font-size:12px;color:var(--muted)"></span><button class="pb" onclick="cibleEgalActuel()">Cible = actuel</button><button class="pb" onclick="resetCibles()">↺ Réinitialiser</button></div></div><div class="g21"><div class="tw" id="allocTable"></div><div><div class="cbs" style="height:230px"><canvas id="cAlloc"></canvas></div><div id="allocLeg" style="padding:10px 4px 0"></div></div></div><div style="font-size:11px;color:var(--muted);margin-top:14px">Clique sur une cible en % pour la modifier. Les écarts et les montants à ajuster se recalculent aussitôt.</div></div></div>
 <div class="page" id="page-objectifs"><div id="objContent"></div></div>
@@ -290,6 +299,7 @@ details summary{color:var(--text2)}
 <div class="card"><div class="ct">Thématiques</div><div class="cb" style="height:330px"><canvas id="cRadThe"></canvas></div><div id="legThe" style="margin-top:12px"></div></div></div>
 </div>
 <div class="page" id="page-brokers"><div class="kr" id="brokersKpi"></div><div class="card"><div class="ct">🏦 Comparateur de brokers</div><div class="tw" id="brokersTable"></div></div><div class="card"><div class="ct">💱 Impact devises EUR/USD</div><div id="devisesInfo"></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">📊 Benchmark personnalisé</div><div style="display:flex;gap:4px" id="benchBtns"></div></div><div class="cb"><canvas id="cBench"></canvas></div></div></div>
+<div class="page" id="page-analyse"><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution par poste</div><div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap"><button class="pb" onclick="edHistPoste()">Historique</button><span id="envPs" style="display:flex;gap:4px"></span></div></div><div class="cto" id="envCases"></div><div class="cb" style="height:310px"><canvas id="cEnv"></canvas></div><div id="envLeg" style="margin-top:14px"></div></div><div class="card"><div class="ct">📊 Rendement par poche</div><div id="rdtPoches"></div></div></div>
 <div class="page" id="page-resume"><div class="kr" id="resumeKpi"></div><div class="card"><div class="ct">Heatmap portefeuille</div><div id="heatmap" style="width:100%;overflow:hidden"></div></div><div class="card"><div class="ct">📋 Résumé du mois</div><div id="resumeDetail"></div></div></div>
 <div class="page" id="page-simulator"><div id="simContent"></div></div>
 </main></div></div>
@@ -1051,6 +1061,44 @@ window.cibleEgalActuel=function(){const t=Tot();const cats=allocCats(t);const to
 window.resetCibles=function(){if(!confirm('Remettre les cibles par défaut ?'))return;S.allocCible={...ALLOC_DEF};autoSave();R(true)};
 
 
+
+
+/* ====== RELEVÉ MENSUEL ====== */
+const MOIS_AB=["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
+function moisCourant(){const d=new Date();return MOIS_AB[d.getMonth()]+' '+String(d.getFullYear()%100)}
+function cleCourante(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
+function joursDepuisReleve(){
+  if(!snaps.length)return null;
+  const dernier=snaps[snaps.length-1];
+  return Math.floor((Date.now()-(dernier.ts||0))/86400000);
+}
+window.validerReleve=function(){
+  const m=moisCourant();
+  const dejaCeMois=snaps.some(s=>{const d=new Date(s.ts||0);return d.getMonth()===new Date().getMonth()&&d.getFullYear()===new Date().getFullYear()});
+  if(dejaCeMois&&!confirm('Un relevé existe déjà pour '+m+'.\nEn enregistrer un second ?'))return;
+  /* Instantané du patrimoine */
+  doSave();
+  /* Report dans le tableau des versements */
+  const t=Tot();
+  if(!S.versMensuels)S.versMensuels=[];
+  let l=S.versMensuels.find(v=>v.mois===m);
+  if(!l){l={mois:m,bourse:0,versement:0};
+    const MA={"Jan":1,"Fév":2,"Mar":3,"Avr":4,"Mai":5,"Juin":6,"Juil":7,"Août":8,"Sep":9,"Oct":10,"Nov":11,"Déc":12};
+    const rg=x=>{const p=(x||'').split(' ');return (parseInt(p[1])||0)*100+(MA[p[0]]||0)};
+    const i=S.versMensuels.findIndex(v=>rg(v.mois)>rg(m));
+    if(i>=0)S.versMensuels.splice(i,0,l);else S.versMensuels.push(l);
+  }
+  l.bourse=Math.round(t.bo);l.pea=Math.round(t.p.v);l.ctosb=Math.round(t.s.v);
+  l.ctoibkr=Math.round(t.i.v);l.avl=Math.round(t.a.v);
+  /* Report du PEE et de la part SCPI */
+  const k=cleCourante();
+  const pee=S.epBloq.filter(x=>/pee|pere|per\b|épargne salariale/i.test(x.nom||'')).reduce((a,x)=>a+x.montant,0);
+  const avS=[...S.epLibre,...S.epBloq].filter(x=>/linxea|assurance.?vie|^av /i.test(x.nom||'')).reduce((a,x)=>a+x.montant,0);
+  if(pee>0){if(!S.peeHist)S.peeHist={};S.peeHist[k]=Math.round(pee)}
+  if(avS>0){if(!S.avScpiHist)S.avScpiHist={};S.avScpiHist[k]=Math.round(avS)}
+  autoSave();R(true);
+  alert('✓ Relevé de '+m+' enregistré.\n\nPense à saisir tes versements du mois dans le tableau de la page Bourse.');
+};
 
 /* ====== REVUE DE MARCHÉS ====== */
 const MARCHES={
@@ -2017,6 +2065,53 @@ const oc=[CV('--green'),CV('--c1'),CV('--accent'),CV('--c4'),CV('--accent')];
   oH+='<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b><span class="ed" onclick="edObj(this,\''+o.id+'\',\'nom\')">'+o.nom+'</span></b><button class="db" onclick="delObj(\''+o.id+'\')">✕</button></div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:18px;font-weight:800;color:'+color+'">'+curDisp+'</span><span style="color:var(--muted)">/ <span class="ed" onclick="edObj(this,\''+o.id+'\',\'cible\')" style="font-weight:700">'+F(o.cible)+'</span></span></div><div class="obj-bar"><div class="obj-fill" style="width:'+pct+'%;background:'+color+'"></div></div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)"><span>'+pct.toFixed(1)+'%</span><span>'+(tl[o.type]||o.type)+'</span></div></div>';
 });
 document.getElementById('objContent').innerHTML=oH;
+
+/* ===== Page Relevé du mois ===== */
+if(document.getElementById('relEpargne')){
+  const mC=moisCourant();
+  document.getElementById('relMois').textContent=mC;
+  const jrs=joursDepuisReleve();
+  const faitCeMois=snaps.some(s=>{const d=new Date(s.ts||0);return d.getMonth()===new Date().getMonth()&&d.getFullYear()===new Date().getFullYear()});
+  let et='';
+  if(faitCeMois)et='<div class="hc" style="border-top-color:var(--green)"><div><div class="kl">État</div><div style="font-size:15px;font-weight:600;color:var(--green)">✓ Relevé de '+mC+' déjà enregistré</div></div><div style="font-size:12px;color:var(--muted)">Tu peux corriger tes montants et enregistrer de nouveau.</div></div>';
+  else et='<div class="hc"><div><div class="kl">État</div><div style="font-size:15px;font-weight:600;color:var(--accent)">Relevé de '+mC+' à faire</div></div><div style="font-size:12px;color:var(--muted)">'+(jrs!=null?'Dernier relevé il y a '+jrs+' jours':'Aucun relevé enregistré')+'</div></div>';
+  document.getElementById('relEtat').innerHTML=et;
+
+  /* Comptes et épargne, modifiables ici */
+  const grp=[{t:'Comptes',k:'comptes'},{t:'Épargne libre',k:'epLibre'},{t:'Épargne bloquée',k:'epBloq'}];
+  let he='<table><thead><tr><th class="l">Poste</th><th class="l">Établissement</th><th>Montant</th></tr></thead><tbody>';
+  grp.forEach(g=>{
+    const tot=S[g.k].reduce((a,x)=>a+x.montant,0);
+    he+='<tr><td class="l" colspan="2" style="font-weight:600;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding-top:14px">'+g.t+'</td><td style="font-weight:600;padding-top:14px">'+F(tot)+'</td></tr>';
+    S[g.k].forEach(x=>{
+      he+='<tr><td class="l">'+x.nom+'</td><td class="l" style="color:var(--muted)">'+(x.banque||'—')+'</td>';
+      he+='<td><span class="ed" onclick="eI(this,\''+g.k+'\',\''+x.id+'\',\'montant\')" style="font-weight:600">'+F(x.montant)+'</span></td></tr>';
+    });
+  });
+  he+='<tr class="total-row"><td class="l" colspan="2">Total</td><td>'+F(t.co+t.ep)+'</td></tr></tbody></table>';
+  document.getElementById('relEpargne').innerHTML=he;
+
+  /* Enveloppes boursières, en lecture seule */
+  const env=[{n:'PEA Fortuneo',v:t.p.v,d:t.p.dayPnl},{n:'CTO Saxo',v:t.s.v,d:t.s.dayPnl},{n:'CTO IBKR',v:t.i.v,d:t.i.dayPnl},{n:'AV Linxea (ETF)',v:t.a.v,d:t.a.dayPnl}];
+  let hb='<table><thead><tr><th class="l">Enveloppe</th><th>Valeur</th><th>Jour</th></tr></thead><tbody>';
+  env.forEach(e=>{hb+='<tr><td class="l">'+e.n+'</td><td style="font-weight:600">'+F(e.v)+'</td><td style="color:'+(e.d>=0?'var(--green)':'var(--red)')+'">'+(e.d>=0?'+':'')+F2(e.d)+'</td></tr>'});
+  hb+='<tr class="total-row"><td class="l">Total bourse</td><td>'+F(t.bo)+'</td><td></td></tr></tbody></table>';
+  hb+='<div style="font-size:11px;color:var(--muted);margin-top:10px">Ces valeurs viennent des cours en direct. Clique sur 🔄 si elles datent.</div>';
+  document.getElementById('relBourse').innerHTML=hb;
+
+  /* Autres postes */
+  const peeR=S.epBloq.filter(x=>/pee|pere|per\b|épargne salariale/i.test(x.nom||'')).reduce((a,x)=>a+x.montant,0);
+  const avSR=[...S.epLibre,...S.epBloq].filter(x=>/linxea|assurance.?vie|^av /i.test(x.nom||'')).reduce((a,x)=>a+x.montant,0);
+  let ha='<table><thead><tr><th class="l">Poste</th><th>Montant</th><th class="l">Source</th></tr></thead><tbody>';
+  ha+='<tr><td class="l">Crypto</td><td style="font-weight:600">'+F(t.cr)+'</td><td class="l" style="color:var(--muted);font-size:11px">cours en direct</td></tr>';
+  ha+='<tr><td class="l">Immobilier (tes parts)</td><td style="font-weight:600">'+F(t.im)+'</td><td class="l" style="color:var(--muted);font-size:11px">fiches immobilières</td></tr>';
+  ha+='<tr><td class="l">Dettes</td><td style="font-weight:600;color:var(--red)">'+F(t.de)+'</td><td class="l" style="color:var(--muted);font-size:11px">calcul automatique</td></tr>';
+  ha+='<tr><td class="l">PEE détecté</td><td style="font-weight:600">'+(peeR>0?F(peeR):'<span style="color:var(--orange)">non trouvé</span>')+'</td><td class="l" style="color:var(--muted);font-size:11px">épargne bloquée</td></tr>';
+  ha+='<tr><td class="l">AV hors ETF détectée</td><td style="font-weight:600">'+(avSR>0?F(avSR):'<span style="color:var(--orange)">non trouvée</span>')+'</td><td class="l" style="color:var(--muted);font-size:11px">épargne</td></tr>';
+  ha+='<tr class="total-row"><td class="l">Patrimoine net</td><td>'+F(t.ne)+'</td><td></td></tr></tbody></table>';
+  ha+='<div style="font-size:11px;color:var(--muted);margin-top:10px">Enregistrer le relevé sauvegarde un instantané, reporte les enveloppes dans le tableau des versements, et met à jour les historiques du PEE et de l\'assurance-vie.</div>';
+  document.getElementById('relAutres').innerHTML=ha;
+}
 renderAlloc(t,dc);
 
 /* ====== WIDGET RÉSUMÉ ====== */
