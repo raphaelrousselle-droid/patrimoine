@@ -116,15 +116,16 @@ main{max-width:1240px;margin:0 auto;padding:26px 22px 60px}
 td,th,.vc,.kv,.ks,.drow-v{font-variant-numeric:tabular-nums}
 
 
-/* Jauges rayées, à la manière de Finary */
-.pf,.obj-fill,.dbar i,.dist i,.wb div{position:relative;overflow:hidden}
-.pf::after,.obj-fill::after,.dbar i::after,.dist i::after,.wb div::after{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:repeating-linear-gradient(90deg,rgba(255,255,255,.32) 0 1.5px,transparent 1.5px 4px)}
-body.light .pf::after,body.light .obj-fill::after,body.light .dbar i::after,body.light .dist i::after,body.light .wb div::after{
-  background:repeating-linear-gradient(90deg,rgba(255,255,255,.62) 0 1.5px,transparent 1.5px 4px)}
-.dbar,.pg,.obj-bar,.wb,.dist{border-radius:4px}
-.dbar i,.pf,.obj-fill,.dist i{border-radius:4px}
+/* Jauges à bandes, façon Finary : la couleur est découpée par des vides */
+.pf,.obj-fill,.dbar i,.dist i,.wb div{
+  -webkit-mask-image:repeating-linear-gradient(90deg,#000 0 3px,transparent 3px 5px);
+  mask-image:repeating-linear-gradient(90deg,#000 0 3px,transparent 3px 5px);
+  border-radius:0}
+.pg,.obj-bar,.dbar,.wb,.dist{background:transparent;border-radius:0}
+.obj-bar{height:11px;margin:10px 0}
+.pg{height:9px}
+.dbar{height:9px}
+.wb{height:11px;gap:0}
 
 /* Apparition des blocs au défilement */
 .reveal{opacity:0;transform:translateY(22px);transition:opacity .55s cubic-bezier(.22,.61,.36,1),transform .55s cubic-bezier(.22,.61,.36,1)}
