@@ -116,16 +116,23 @@ main{max-width:1240px;margin:0 auto;padding:26px 22px 60px}
 td,th,.vc,.kv,.ks,.drow-v{font-variant-numeric:tabular-nums}
 
 
-/* Jauges à bandes, façon Finary : la couleur est découpée par des vides */
-.pf,.obj-fill,.dbar i,.dist i,.wb div{
-  -webkit-mask-image:repeating-linear-gradient(90deg,#000 0 3px,transparent 3px 5px);
-  mask-image:repeating-linear-gradient(90deg,#000 0 3px,transparent 3px 5px);
-  border-radius:0}
-.pg,.obj-bar,.dbar,.wb,.dist{background:transparent;border-radius:0}
-.obj-bar{height:11px;margin:10px 0}
-.pg{height:9px}
-.dbar{height:9px}
-.wb{height:11px;gap:0}
+/* Jauges en segments espacés */
+.pg,.obj-bar,.dbar{position:relative;background:transparent;border-radius:0;overflow:visible}
+.pg::before,.obj-bar::before,.dbar::before{
+  content:'';position:absolute;inset:0;border-radius:2px;
+  background:repeating-linear-gradient(90deg,var(--border) 0 6px,transparent 6px 9px)}
+.pf,.obj-fill,.dbar i{
+  position:relative;z-index:1;border-radius:2px;
+  -webkit-mask-image:repeating-linear-gradient(90deg,#000 0 6px,transparent 6px 9px);
+  mask-image:repeating-linear-gradient(90deg,#000 0 6px,transparent 6px 9px)}
+.pf::after,.obj-fill::after,.dbar i::after{display:none}
+.obj-bar{height:12px;margin:10px 0}
+.pg{height:10px}
+.dbar{height:10px}
+/* Répartitions : blocs contigus, sans découpe */
+.dist,.wb{border-radius:3px;overflow:hidden}
+.dist i,.wb div{border-radius:0}
+.dist i::after,.wb div::after{display:none}
 
 /* Apparition des blocs au défilement */
 .reveal{opacity:0;transform:translateY(22px);transition:opacity .55s cubic-bezier(.22,.61,.36,1),transform .55s cubic-bezier(.22,.61,.36,1)}
