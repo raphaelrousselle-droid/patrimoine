@@ -117,11 +117,12 @@ td,th,.vc,.kv,.ks,.drow-v{font-variant-numeric:tabular-nums}
 
 
 /* Jauges rayées, à la manière de Finary */
-.pf,.obj-fill,.dbar i,.dist i,.wb div{
-  background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.34) 0 1.5px,transparent 1.5px 4px);
-  background-blend-mode:overlay}
-body.light .pf,body.light .obj-fill,body.light .dbar i,body.light .dist i,body.light .wb div{
-  background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.6) 0 1.5px,transparent 1.5px 4px)}
+.pf,.obj-fill,.dbar i,.dist i,.wb div{position:relative;overflow:hidden}
+.pf::after,.obj-fill::after,.dbar i::after,.dist i::after,.wb div::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.32) 0 1.5px,transparent 1.5px 4px)}
+body.light .pf::after,body.light .obj-fill::after,body.light .dbar i::after,body.light .dist i::after,body.light .wb div::after{
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.62) 0 1.5px,transparent 1.5px 4px)}
 .dbar,.pg,.obj-bar,.wb,.dist{border-radius:4px}
 .dbar i,.pf,.obj-fill,.dist i{border-radius:4px}
 
