@@ -116,21 +116,20 @@ main{max-width:1240px;margin:0 auto;padding:26px 22px 60px}
 td,th,.vc,.kv,.ks,.drow-v{font-variant-numeric:tabular-nums}
 
 
-/* Jauges en segments espacés */
-.pg,.obj-bar,.dbar{position:relative;background:transparent;border-radius:0;overflow:visible}
-.pg::before,.obj-bar::before,.dbar::before{
-  content:'';position:absolute;inset:0;border-radius:2px;
-  background:repeating-linear-gradient(90deg,var(--border) 0 6px,transparent 6px 9px)}
-.pf,.obj-fill,.dbar i{
-  position:relative;z-index:1;border-radius:2px;
-  -webkit-mask-image:repeating-linear-gradient(90deg,#000 0 6px,transparent 6px 9px);
-  mask-image:repeating-linear-gradient(90deg,#000 0 6px,transparent 6px 9px)}
-.pf::after,.obj-fill::after,.dbar i::after{display:none}
-.obj-bar{height:12px;margin:10px 0}
-.pg{height:10px}
-.dbar{height:10px}
-/* Répartitions : blocs contigus, sans découpe */
-.dist,.wb{border-radius:3px;overflow:hidden}
+/* Jauges pleines, arrondies, avec piste discrète */
+.pg,.obj-bar,.dbar{background:var(--card2);border-radius:99px;overflow:hidden}
+.pf,.obj-fill,.dbar i{border-radius:99px;position:relative;overflow:hidden}
+/* Éclaircissement progressif vers la droite */
+.pf::after,.obj-fill::after,.dbar i::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.22))}
+body.light .pf::after,body.light .obj-fill::after,body.light .dbar i::after{
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.4))}
+.obj-bar{height:10px;margin:10px 0}
+.pg{height:8px}
+.dbar{height:8px}
+/* Répartitions : blocs contigus */
+.dist,.wb{border-radius:99px;overflow:hidden;background:var(--card2)}
 .dist i,.wb div{border-radius:0}
 .dist i::after,.wb div::after{display:none}
 
@@ -1476,7 +1475,7 @@ S.bourseGoals.forEach((g,i)=>{
   const r=gt.calc(g);
   const pct=g.cible>0?Math.min(100,r.cur/g.cible*100):0;
   const onTrack=r.cur>=g.cible;
-  const color=onTrack?'var(--green)':'var(--orange)';
+  const color=onTrack?CV('--green'):CV('--accent');
   /* Calcul échéance */
   let echeanceStr='';
   if(g.echeance){
@@ -2083,10 +2082,10 @@ document.getElementById('budgetDetail').innerHTML=bH;
 /* ====== OBJECTIFS ====== */
 let oH='<div class="fire-card"><div style="font-size:18px;font-weight:800;color:var(--orange);margin-bottom:12px">🔥 FIRE Number</div>';
 const fo=S.objectifs.find(o=>o.type==='net');
-if(fo){const cur=t.ne,pct=fo.cible>0?Math.min(100,cur/fo.cible*100):0;oH+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:24px;font-weight:800;color:var(--accent)">'+F(cur)+'</span><span style="color:var(--muted)">/ <span class="ed" onclick="edObj(this,\''+fo.id+'\',\'cible\')" style="font-weight:700">'+F(fo.cible)+'</span></span></div><div class="obj-bar"><div class="obj-fill" style="width:'+pct+'%;background:linear-gradient(90deg,#0fba81,#e8a33d)"></div></div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)"><span>'+pct.toFixed(1)+'%</span><span>Reste '+F(fo.cible-cur)+'</span></div>'}
+if(fo){const cur=t.ne,pct=fo.cible>0?Math.min(100,cur/fo.cible*100):0;oH+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:24px;font-weight:800;color:var(--accent)">'+F(cur)+'</span><span style="color:var(--muted)">/ <span class="ed" onclick="edObj(this,\''+fo.id+'\',\'cible\')" style="font-weight:700">'+F(fo.cible)+'</span></span></div><div class="obj-bar"><div class="obj-fill" style="width:'+pct+'%;background:'+CV('--accent')+'"></div></div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)"><span>'+pct.toFixed(1)+'%</span><span>Reste '+F(fo.cible-cur)+'</span></div>'}
 oH+='</div><div style="display:flex;justify-content:space-between;margin-bottom:16px"><div class="ct" style="margin:0">Objectifs</div><button class="ab" style="width:auto;margin:0;padding:6px 14px;font-size:12px" onclick="addObj()">+ Objectif</button></div>';
 const tl={epargne:"Épargne",bourse:"Bourse",crypto:"Crypto",brut:"Brut",net:"Net",liq:"Liquidités",custom:"Libre"};
-const oc=[CV('--green'),CV('--c1'),CV('--accent'),CV('--c4'),CV('--accent')];
+const oc=[CV('--p1'),CV('--p5'),CV('--p2'),CV('--p6'),CV('--p7')];
 (S.objectifs||[]).filter(o=>o.type!=='net').forEach(o=>{
   let cur=0;
   if(o.type==='custom')cur=o.actuel||0;else if(o.type==='epargne')cur=t.eL+t.eB;else if(o.type==='bourse')cur=t.bo;else if(o.type==='crypto')cur=t.cr;else if(o.type==='brut')cur=t.br;else if(o.type==='liq')cur=t.lq;else cur=t.ne;
@@ -2352,7 +2351,7 @@ simC+='</div><div>';
 simC+='<div class="fire-card" style="margin:0"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px">';
 simC+='<div><div style="font-size:12px;color:var(--muted)">🔥 FIRE Number</div><div style="font-size:26px;font-weight:800;color:var(--orange)">'+F(fireTarget)+'</div></div>';
 simC+='<div style="text-align:right"><div style="font-size:12px;color:var(--muted)">Âge FIRE (réaliste)</div><div style="font-size:26px;font-weight:800;color:var(--accent)">'+simReal.ageFire+' ans</div></div>';
-simC+='</div><div class="obj-bar" style="margin-top:12px"><div class="obj-fill" style="width:'+pctFire+'%;background:linear-gradient(90deg,#0fba81,#e8a33d)"></div></div>';
+simC+='</div><div class="obj-bar" style="margin-top:12px"><div class="obj-fill" style="width:'+pctFire+'%;background:'+CV('--accent')+'"></div></div>';
 simC+='<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px"><span>'+pctFire.toFixed(1)+'% atteint</span><span>Opti: '+simOpti.ageFire+' ans | Pessi: '+simPessi.ageFire+' ans</span></div></div>';
 simC+='</div></div></div>';
 
