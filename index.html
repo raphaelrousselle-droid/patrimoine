@@ -421,7 +421,7 @@ await db.collection('users').doc(uid).set({patrimoine:clean,snapshots:snaps,upda
 const AV="P3CLMM04M63LQ42M";let nxId=Date.now();const nid=()=>++nxId;
 const INDICES=[{t:'^GSPC',n:'S&P 500'},{t:'^IXIC',n:'Nasdaq'},{t:'^DJI',n:'Dow Jones'},{t:'^FCHI',n:'CAC 40'},{t:'^GDAXI',n:'DAX'},{t:'^STOXX50E',n:'Euro Stoxx 50'},{t:'^FTSE',n:'FTSE 100'},{t:'^N225',n:'Nikkei'},{t:'^HSI',n:'Hang Seng'},{t:'BTC-EUR',n:'Bitcoin'}];
 let idxData={};
-const GAS="https://script.google.com/macros/s/AKfycbz0U012MVfplaKN2itb8MbSLuH_huKTEZekYa4gy9oKOMPOI1l07dzfvIwRiO607ELXaw/exec";
+const GAS="https://script.google.com/macros/s/AKfycbw8behnjUJ8SPqStAVi4BFT2AHGAZxLQ--TtUn8rQIe4xkUuSylgA__Z9QWXKyINIs7jQ/exec";
 async function yQ(t){try{const r=await fetch(GAS+"?t="+encodeURIComponent(t));if(!r.ok)return null;const j=await r.json();const d=j[t]||j;if(d.error||!d.price)return null;return{price:d.price,prev:d.prev||0,chg:d.chg||0,cur:d.cur||'USD'}}catch(e){return null}}
 async function yQBatch(tickers){
   const results={};
