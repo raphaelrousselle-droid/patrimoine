@@ -1122,18 +1122,20 @@ async function fetchIntra(force){
   const infoParis=s=>{const d=new Date(new Date(s*1000).toLocaleString('en-US',{timeZone:'Europe/Paris'}));
     return{jour:d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate(),min:d.getHours()*60+d.getMinutes()}};
   const jourActuel=infoParis(Math.floor(Date.now()/1000)).jour;
-  /* Écarter les relevés qui ne sont pas du jour */
+  /* Ne garder que les relevés du jour ; un titre sans cotation conserve sa clôture de veille */
   Object.keys(res).forEach(k=>{
     const d=res[k],ts=[],cl=[];
     for(let i=0;i<d.ts.length;i++){
       const inf=infoParis(d.ts[i]);
       if(inf.jour===jourActuel&&inf.min>=570&&inf.min<=1320){ts.push(d.ts[i]);cl.push(d.cl[i])}
     }
-    if(ts.length){d.ts=ts;d.cl=cl}else delete res[k];
+    d.ts=ts;d.cl=cl;
+    /* Les titres américains n'ouvrent qu'à 15h30 : ils gardent leur valeur de veille en attendant */
+    if(!ts.length&&!(d.prev>0))delete res[k];
   });
   if(!Object.keys(res).length)return;
   let tmin=Infinity,tmax=0;
-  Object.values(res).forEach(d=>{tmin=Math.min(tmin,d.ts[0]);tmax=Math.max(tmax,d.ts[d.ts.length-1])});
+  Object.values(res).forEach(d=>{if(!d.ts.length)return;tmin=Math.min(tmin,d.ts[0]);tmax=Math.max(tmax,d.ts[d.ts.length-1])});
   if(!isFinite(tmin))return;
   /* Grille depuis 9h30 jusqu'au dernier relevé */
   const pas=300;
@@ -1156,10 +1158,14 @@ async function fetchIntra(force){
     let tot=esp;
     lignes.forEach(l=>{
       const d=res[l.y];if(!d)return;
-      let k=idx[l.y+'_c']||0;
-      while(k+1<d.ts.length&&d.ts[k+1]<=s)k++;
-      idx[l.y+'_c']=k;
-      let px=d.ts[0]>s?(d.prev||d.cl[0]):d.cl[k];
+      let px;
+      if(!d.ts.length){px=d.prev||d.price||0}          /* pas encore ouvert */
+      else{
+        let k=idx[l.y+'_c']||0;
+        while(k+1<d.ts.length&&d.ts[k+1]<=s)k++;
+        idx[l.y+'_c']=k;
+        px=d.ts[0]>s?(d.prev||d.cl[0]):d.cl[k];
+      }
       if(d.cur==='USD')px=px*eurUsd;
       else if(d.cur==='GBp')px=px*.01*1.17;
       tot+=px*l.q;
@@ -1169,7 +1175,7 @@ async function fetchIntra(force){
   /* Référence : valeur à la clôture de la veille */
   let ref=esp;
   lignes.forEach(l=>{const d=res[l.y];if(!d)return;
-    let px=d.prev||d.cl[0];
+    let px=d.prev||(d.cl.length?d.cl[0]:d.price)||0;
     if(d.cur==='USD')px=px*eurUsd;else if(d.cur==='GBp')px=px*.01*1.17;
     ref+=px*l.q});
   /* Prolonger l'axe jusqu'à 22h, sans tracé pour les heures à venir */
