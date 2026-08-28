@@ -275,7 +275,8 @@ details summary{color:var(--text2)}
 </header>
 <main>
 <div class="page active" id="page-home"><div id="homeAlerts"></div><div class="kr" id="hk"></div><div id="widgetResume" style="margin-bottom:20px"></div><div class="hc"><div><span style="font-size:12px;color:var(--muted)">◆ Règle des 4%</span><div style="font-size:20px;font-weight:800;color:var(--accent);margin-top:2px" id="k4"></div></div><div style="font-size:13px;color:var(--muted)" id="k4m"></div></div><div class="g21"><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution Patrimoine Net</div><div style="display:flex;gap:4px" id="netPs"></div></div><div class="cb"><canvas id="cN"></canvas></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">Répartition</div><div style="display:flex;gap:4px"><button class="ctb active" id="pieMode_brut" onclick="setPieMode('brut')">Brut</button><button class="ctb" id="pieMode_net" onclick="setPieMode('net')">Net</button></div></div><div class="cbs" style="height:230px"><canvas id="cP"></canvas></div><div id="pl" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution par catégorie</div><div style="display:flex;gap:4px" id="evoPs"></div></div><div class="cto" id="et"></div><div class="cb"><canvas id="cE"></canvas></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">◷ Historique</div><button class="reset-btn" onclick="if(confirm('Reset?'))doReset()">↺ Réinitialiser</button></div><div id="sl" style="margin-top:12px"></div></div></div>
-<div class="page" id="page-bourse"><div class="kr" id="bk"></div><div class="wb" id="bw"></div><div id="rstat" class="rs" style="margin:12px 0"></div><div class="card"><div class="fb"><div class="ct" style="margin:0">PEA — Fortuneo</div></div><div class="kr" id="pk1" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt1"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — Saxo <span style="font-size:11px;color:var(--muted)">(PRU $)</span></div></div><div class="kr" id="pk2" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt2"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — IBKR</div></div><div class="kr" id="pk3" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt3"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">AV — Linxea</div></div><div class="kr" id="pk4" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt4"></div></div><div class="g2" style="margin:16px 0"><div class="card"><div class="ct">◫ Panorama 2026</div><div id="ptw"></div><div class="ss" id="sps"></div></div><div class="card"><div class="ct">Répartition secteur</div><div class="cbs" style="height:230px"><canvas id="cSec"></canvas></div><div id="secLeg" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:8px"><div class="ct" style="margin:0">Perf cumulée TWR vs S&P</div><div style="display:flex;gap:4px" id="ps"></div></div><div class="cb"><canvas id="cPf"></canvas></div><div class="cl"><span style="color:#7c3aed">● Portf.</span><span style="color:#e8a33d">- - S&P</span></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">↕ Versements mensuels</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addVM()">+ Mois</button></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Valeur = relevée au 1er du mois suivant. Versement = viré pendant le mois.</div><div id="vmList"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">◎ Objectifs Bourse</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addBourseGoal()">+ Objectif</button></div><div id="bourseGoals" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">◌ Watchlist</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addWatch()">+ Suivre</button></div><div id="watchlist" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">✎ Journal d'investissement</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addJournal()">+ Entrée</button></div><div id="journal" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb" style="margin-bottom:14px"><div class="ct" style="margin:0">◈ Dividendes perçus</div><div style="display:flex;gap:4px" id="divVueBtns"></div></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Note ici les dividendes que tu reçois réellement chaque mois (tous portefeuilles confondus). Clique sur un montant pour le modifier.</div><div class="tw" id="divMoisTable"></div><div class="cbs" style="margin-top:16px"><canvas id="cDivMois"></canvas></div></div></div>
+<div class="page" id="page-bourse"><div class="kr" id="bk"></div>
+<div class="card"><div class="fb" style="margin-bottom:4px"><div><div class="kl">Portefeuille · aujourd'hui</div><div id="intraTitre" style="display:flex;align-items:baseline;gap:12px;margin-top:4px"></div></div><div id="intraInfo" style="font-size:11.5px;color:var(--muted);text-align:right"></div></div><div class="cb" style="height:190px"><canvas id="cIntra"></canvas></div></div><div class="wb" id="bw"></div><div id="rstat" class="rs" style="margin:12px 0"></div><div class="card"><div class="fb"><div class="ct" style="margin:0">PEA — Fortuneo</div></div><div class="kr" id="pk1" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt1"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — Saxo <span style="font-size:11px;color:var(--muted)">(PRU $)</span></div></div><div class="kr" id="pk2" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt2"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — IBKR</div></div><div class="kr" id="pk3" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt3"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">AV — Linxea</div></div><div class="kr" id="pk4" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt4"></div></div><div class="g2" style="margin:16px 0"><div class="card"><div class="ct">◫ Panorama 2026</div><div id="ptw"></div><div class="ss" id="sps"></div></div><div class="card"><div class="ct">Répartition secteur</div><div class="cbs" style="height:230px"><canvas id="cSec"></canvas></div><div id="secLeg" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:8px"><div class="ct" style="margin:0">Perf cumulée TWR vs S&P</div><div style="display:flex;gap:4px" id="ps"></div></div><div class="cb"><canvas id="cPf"></canvas></div><div class="cl"><span style="color:#7c3aed">● Portf.</span><span style="color:#e8a33d">- - S&P</span></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">↕ Versements mensuels</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addVM()">+ Mois</button></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Valeur = relevée au 1er du mois suivant. Versement = viré pendant le mois.</div><div id="vmList"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">◎ Objectifs Bourse</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addBourseGoal()">+ Objectif</button></div><div id="bourseGoals" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">◌ Watchlist</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addWatch()">+ Suivre</button></div><div id="watchlist" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">✎ Journal d'investissement</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addJournal()">+ Entrée</button></div><div id="journal" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb" style="margin-bottom:14px"><div class="ct" style="margin:0">◈ Dividendes perçus</div><div style="display:flex;gap:4px" id="divVueBtns"></div></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Note ici les dividendes que tu reçois réellement chaque mois (tous portefeuilles confondus). Clique sur un montant pour le modifier.</div><div class="tw" id="divMoisTable"></div><div class="cbs" style="margin-top:16px"><canvas id="cDivMois"></canvas></div></div></div>
 <div class="page" id="page-epargne"><div class="kr" id="ek"></div><div class="g2"><div class="card"><div class="ct" id="ct1"></div><div id="cl1"></div><div id="af1"></div></div><div class="card"><div class="ct" id="ct2"></div><div id="cl2"></div><div id="af2"></div></div><div class="card sf"><div class="ct" id="ct3"></div><div id="cl3"></div><div id="af3"></div></div></div></div>
 <div class="page" id="page-immo"><div class="kr" id="ik"></div><div class="g2" style="margin-bottom:16px"><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Patrimoine Immo Net</div><div style="display:flex;gap:4px" id="immoPs"></div></div><div class="cb"><canvas id="cImmoNet"></canvas></div></div><div class="card"><div class="ct">Tableau récapitulatif mensuel</div><div class="tw" id="immoRecap"></div></div></div><div class="card" id="immoSCI" style="display:none"><div class="ct">⬡ Tableau de bord SCI</div><div id="sciDash"></div></div><div id="ic"></div>
 <div class="card"><div class="fb" style="margin-bottom:14px"><div class="ct" style="margin:0">⇄ Comparatif des biens</div><div style="font-size:11.5px;color:var(--muted)">TMI : <span class="ed" onclick="edTMI()" id="tmiVal"></span></div></div><div class="tw" id="immoCompare"></div><div style="font-size:11px;color:var(--muted);margin-top:12px">Effort d'épargne : ce que le bien te coûte (négatif) ou te rapporte (positif) chaque mois, impôts déduits.</div></div>
@@ -515,10 +516,10 @@ if(cryptoT.length){
   ));
 }
 /* Indices du bandeau */
-INDICES.forEach(x=>{if(data[x.t]&&data[x.t].price)idxData[x.t]=data[x.t]});renderTicker();
+INDICES.forEach(x=>{if(data[x.t]&&data[x.t].price)idxData[x.t]=data[x.t]});renderTicker();fetchIntra(true);
 /* Taux euro/dollar issu du même lot */
 if(data['EURUSD=X']&&data['EURUSD=X'].price>0)eurUsd=1/data['EURUSD=X'].price;
-const parisH=new Date().toLocaleString('en-US',{timeZone:'Europe/Paris',hour:'numeric',hour12:false});const usOpen=parseInt(parisH)>=15||parseInt(parisH)<1;
+const pH=new Date().toLocaleString('en-US',{timeZone:'Europe/Paris',hour:'2-digit',minute:'2-digit',hour12:false});const [pHh,pHm]=pH.split(':').map(Number);const minParis=pHh*60+pHm;const usOpen=minParis>=930||minParis<120;/* 15h30 à 22h, séance américaine */
 taskMap.forEach(task=>{const r=data[task.yt];if(!r||r.error||!r.price)return;ok++;
 if(task.t==='s'){const l=S.pf[task.pk].l.find(x=>x.id===task.id);if(l){const isUS=r.cur==='USD';if(isUS){l.usd=Math.round(r.price*100)/100;l.co=Math.round(r.price*eurUsd*100)/100}else if(r.cur==='GBp')l.co=Math.round(r.price*.01*1.17*100)/100;else l.co=Math.round(r.price*100)/100;if(isUS&&!usOpen){l.var=0}else{l.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0}
 /* Sparkline: stocker les 5 derniers prix */
@@ -637,7 +638,7 @@ snaps.push({date:lb,ts:Date.now(),immobilier:t.im,comptes:t.co,epargne:t.ep,bour
 window.dS=ts=>{snaps=snaps.filter(s=>s.ts!==ts);autoSave();R(true)};
 window.doReset=async()=>{S=JSON.parse(JSON.stringify(D));snaps=[];await saveData();R(true)};
 function gH(){const a=[...SEED];snaps.forEach(s=>a.push(s));return a}
-document.getElementById('tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t||!t.dataset.page)return;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.getElementById('page-'+t.dataset.page).classList.add('active');majOutils();setTimeout(initReveal,30);if(t.dataset.page==='marches'&&(!S.marches||!S.marches[marPer]||!S.marches[marPer]._maj))fetchMarches();if(window.innerWidth<=900)toggleSide()};
+document.getElementById('tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t||!t.dataset.page)return;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.getElementById('page-'+t.dataset.page).classList.add('active');majOutils();setTimeout(initReveal,30);if(t.dataset.page==='bourse')fetchIntra();if(t.dataset.page==='marches'&&(!S.marches||!S.marches[marPer]||!S.marches[marPer]._maj))fetchMarches();if(window.innerWidth<=900)toggleSide()};
 /* Fermer dropdown quand on clique ailleurs */
 
 
@@ -1093,6 +1094,62 @@ window.resetCibles=function(){if(!confirm('Remettre les cibles par défaut ?'))r
 
 
 
+
+/* ====== COURBE DU JOUR ====== */
+let intraData=null,intraEnCours=false;
+async function fetchIntra(force){
+  if(intraEnCours)return;
+  const ajd=new Date().toISOString().slice(0,10);
+  if(!force&&intraData&&intraData._jour===ajd&&Date.now()-intraData._maj<240000)return;
+  intraEnCours=true;
+  /* Tickers détenus, avec leur quantité et leur enveloppe */
+  const lignes=[];
+  ['pea','ctosb','ctoibkr','avl'].forEach(pk=>{const pf=S.pf[pk];if(!pf)return;
+    pf.l.forEach(l=>{const y=YM[l.c]||l.c;if(y&&y!=='—'&&l.p>0)lignes.push({y,q:l.p,pk})})});
+  if(!lignes.length){intraEnCours=false;return}
+  const uniq=[...new Set(lignes.map(x=>x.y))];
+  const res={};
+  for(let i=0;i<uniq.length;i+=8){
+    const lot=uniq.slice(i,i+8);
+    try{
+      const r=await fetch(GAS+"?intra=1&t="+encodeURIComponent(lot.join(",")));
+      if(r.ok){const j=await r.json();Object.keys(j||{}).forEach(k=>{if(j[k]&&j[k].ts&&j[k].ts.length)res[k]=j[k]})}
+    }catch(e){}
+  }
+  intraEnCours=false;
+  if(!Object.keys(res).length)return;
+  /* Grille de temps commune, par pas de 5 minutes */
+  let tmin=Infinity,tmax=0;
+  Object.values(res).forEach(d=>{tmin=Math.min(tmin,d.ts[0]);tmax=Math.max(tmax,d.ts[d.ts.length-1])});
+  const pas=300,grille=[];
+  for(let s=Math.floor(tmin/pas)*pas;s<=tmax;s+=pas)grille.push(s);
+  /* Valeur du portefeuille à chaque instant */
+  const esp=['pea','ctosb','ctoibkr','avl'].reduce((a,pk)=>a+((S.pf[pk]&&S.pf[pk].esp)||0),0);
+  const idx={};uniq.forEach(y=>idx[y]=0);
+  const serie=grille.map(s=>{
+    let tot=esp;
+    lignes.forEach(l=>{
+      const d=res[l.y];if(!d)return;
+      let k=idx[l.y+'_c']||0;
+      while(k+1<d.ts.length&&d.ts[k+1]<=s)k++;
+      idx[l.y+'_c']=k;
+      let px=d.ts[0]>s?(d.prev||d.cl[0]):d.cl[k];
+      if(d.cur==='USD')px=px*eurUsd;
+      else if(d.cur==='GBp')px=px*.01*1.17;
+      tot+=px*l.q;
+    });
+    return Math.round(tot*100)/100;
+  });
+  /* Référence : valeur à la clôture de la veille */
+  let ref=esp;
+  lignes.forEach(l=>{const d=res[l.y];if(!d)return;
+    let px=d.prev||d.cl[0];
+    if(d.cur==='USD')px=px*eurUsd;else if(d.cur==='GBp')px=px*.01*1.17;
+    ref+=px*l.q});
+  intraData={_jour:ajd,_maj:Date.now(),ts:grille,val:serie,ref:Math.round(ref*100)/100};
+  R(true);
+}
+
 /* ====== RELEVÉ MENSUEL ====== */
 const MOIS_AB=["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
 function moisCourant(){const d=new Date();return MOIS_AB[d.getMonth()]+' '+String(d.getFullYear()%100)}
@@ -1439,6 +1496,44 @@ const tB=t.bo,aDiv=t.p.divTot+t.s.divTot+t.i.divTot+t.a.divTot,tV=S.pf.pea.ver+S
 const dayTotal=t.p.dayPnl+t.s.dayPnl+t.i.dayPnl+t.a.dayPnl,dayTotalPct=tB>0?(dayTotal/tB*100):0;
 document.getElementById('bk').innerHTML='<div class="kpi"><div class="kl">Bourse</div><div class="kv" style="color:var(--bourse)">'+F(tB)+'</div></div><div class="kpi"><div class="kl">Perf jour</div><div class="kv" style="color:'+(dayTotal>=0?'var(--green)':'var(--red)')+'">'+(dayTotal>=0?'+':'')+F2(dayTotal)+'</div><div class="ks">'+(dayTotalPct>=0?'+':'')+dayTotalPct.toFixed(2)+'%</div></div><div class="kpi"><div class="kl">Perf réelle</div><div class="kv" style="color:'+(tPV>=0?'var(--green)':'var(--red)')+'">'+F2(tPV)+'</div><div class="ks">'+FP(tV>0?(tPV/tV)*100:0)+'</div></div><div class="kpi"><div class="kl">Dividendes/an</div><div class="kv" style="color:var(--orange)">'+F2(aDiv)+'</div></div>';
 document.getElementById('bw').innerHTML='<div style="width:'+(t.p.v/tB*100)+'%;background:#3d2e6b"></div><div style="width:'+(t.s.v/tB*100)+'%;background:#6b5baf"></div><div style="width:'+(t.i.v/tB*100)+'%;background:#9b8fd4"></div><div style="width:'+(t.a.v/tB*100)+'%;background:#e8a33d"></div>';
+
+/* Courbe du jour */
+if(document.getElementById('cIntra')){
+  const dd=intraData;
+  const tt=document.getElementById('intraTitre');
+  const ii=document.getElementById('intraInfo');
+  if(!dd||!dd.val||dd.val.length<2){
+    tt.innerHTML='<span style="font-size:22px;font-weight:500;color:var(--muted)">—</span>';
+    ii.textContent='Clique sur ↻ pour charger la journée';
+  }else{
+    const der=dd.val[dd.val.length-1];
+    const ec=der-dd.ref, ecP=dd.ref>0?ec/dd.ref*100:0;
+    const col=ec>=0?CV('--green'):CV('--red');
+    tt.innerHTML='<span style="font-size:26px;font-weight:500;color:'+col+'">'+(ec>=0?'+':'')+F2(ec)+'</span>'
+      +'<span style="font-size:14px;font-weight:500;color:'+col+'">'+(ecP>=0?'+':'')+ecP.toFixed(2)+'%</span>'
+      +'<span style="font-size:13px;color:var(--muted)">'+F(Math.round(der))+'</span>';
+    const hM=new Date(dd._maj).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    ii.innerHTML='depuis la clôture de la veille<br>relevé à '+hM;
+    if(dc){
+      const el=document.getElementById('cIntra');
+      if(window._cIntra)window._cIntra.destroy();
+      const lbl=dd.ts.map(s=>new Date(s*1000).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'}));
+      window._cIntra=new Chart(el,{type:'line',
+        data:{labels:lbl,datasets:[
+          {data:dd.val,borderColor:col,backgroundColor:gradFill(col,.45),fill:true,tension:.25,pointRadius:0,pointHoverRadius:4,borderWidth:1.8},
+          {data:dd.ts.map(()=>dd.ref),borderColor:CV('--border'),borderDash:[4,4],borderWidth:1,pointRadius:0,fill:false}
+        ]},
+        options:{responsive:true,maintainAspectRatio:false,animation:animConf,
+          interaction:{mode:'index',intersect:false},
+          plugins:{legend:{display:false},
+            tooltip:{...tipOpts(),callbacks:{title:it=>it[0].label,
+              label:c=>c.datasetIndex===1?'Veille : '+F(Math.round(c.raw)):F(Math.round(c.raw))+'  ('+(c.raw-dd.ref>=0?'+':'')+F2(c.raw-dd.ref)+')'},
+              filter:c=>c.datasetIndex===0}},
+          scales:{x:{ticks:{color:CV('--muted'),font:{size:10},maxTicksLimit:8,maxRotation:0},grid:{display:false},border:{display:false}},
+                  y:{ticks:{color:CV('--muted'),font:{size:10},padding:6,callback:v=>(v/1000).toFixed(1)+'k'},grid:{color:CV('--grid'),drawTicks:false},border:{display:false}}}}});
+    }
+  }
+}
 
 /* Panorama */
 let ph='<table class="pt"><thead><tr><th></th><th>S&P</th><th>Portf.</th><th>+/- €</th></tr></thead><tbody>';
