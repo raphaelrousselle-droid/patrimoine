@@ -642,7 +642,7 @@ document.getElementById('tabs').onclick=e=>{const t=e.target.closest('.tab');if(
 /* Fermer dropdown quand on clique ailleurs */
 
 
-let _cN,_cP,_cE,_cPf,_cS,cPr=12,evoPr=12,immoPr=12,netPr=12,cryPr=12,envPr=12,pieMode='brut',divVue='annee';
+let _cN,_cP,_cE,_cPf,_cS,cPr=12,evoPr=12,immoPr=12,netPr=12,cryPr=12,envPr=12,pieMode='brut',divVue='mois';
 const perfLines=[{k:'bourse',l:'Global',c:CV('--c1'),on:true},{k:'pea',l:'PEA',c:CV('--c1'),on:false},{k:'ctosb',l:'CTO Saxo',c:CV('--c3'),on:false},{k:'ctoibkr',l:'CTO IBKR',c:CV('--c4'),on:false},{k:'avl',l:'AV Linxea',c:CV('--c2'),on:false},{k:'sp',l:'S&P 500',c:CV('--muted'),on:true}];
 window.tPL=i=>{perfLines[i].on=!perfLines[i].on;R(true)};
 const evo=[{k:'immobilier',c:CV('--accent'),l:'Immobilier',on:false},{k:'bourse',c:CV('--c1'),l:'Bourse',on:true},{k:'epargne',c:CV('--accent'),l:'Épargne',on:true},{k:'comptes',c:CV('--green'),l:'Comptes',on:true},{k:'crypto',c:CV('--c4'),l:'Crypto',on:true},{k:'brut',c:CV('--text'),l:'Brut',on:false},{k:'net',c:CV('--c1'),l:'Net',on:false}];
@@ -2072,7 +2072,12 @@ document.getElementById('immoCD').innerHTML=cdH;
 
 /* Crypto */
 const tCr=t.cr,crI=t.crI,crPV=tCr-crI;
-document.getElementById('ck').innerHTML='<div class="kpi"><div class="kl">Crypto</div><div class="kv" style="color:var(--crypto)">'+F2(tCr)+'</div></div><div class="kpi"><div class="kl">Investi</div><div class="kv">'+F2(crI)+'</div></div><div class="kpi"><div class="kl">+/-</div><div class="kv" style="color:'+(crPV>=0?'var(--green)':'var(--red)')+'">'+F2(crPV)+'</div><div class="ks">'+(crI>0?FP(crPV/crI*100):'—')+'</div></div>';
+/* Variation sur 24 heures glissantes */
+let crJour=0;
+S.crypto.forEach(c=>{const v=c.prix>0?c.prix*c.qte:(c.montant||0);
+  if(c.var&&c.prix>0){const av=v/(1+c.var/100);crJour+=v-av}});
+const crJourP=tCr>0?crJour/(tCr-crJour)*100:0;
+document.getElementById('ck').innerHTML='<div class="kpi"><div class="kl">Crypto</div><div class="kv" style="color:var(--crypto)">'+F2(tCr)+'</div></div><div class="kpi"><div class="kl">24 heures</div><div class="kv" style="color:'+(crJour>=0?'var(--green)':'var(--red)')+'">'+(crJour>=0?'+':'')+F2(crJour)+'</div><div class="ks">'+(crJourP>=0?'+':'')+crJourP.toFixed(2)+'%</div></div><div class="kpi"><div class="kl">Investi</div><div class="kv">'+F2(crI)+'</div></div><div class="kpi"><div class="kl">+/-</div><div class="kv" style="color:'+(crPV>=0?'var(--green)':'var(--red)')+'">'+F2(crPV)+'</div><div class="ks">'+(crI>0?FP(crPV/crI*100):'—')+'</div></div>';
 let crH='<table><thead><tr><th class="l">Crypto</th><th>Qté</th><th>PRU</th><th>Prix</th><th>Valeur</th><th>+/-</th><th>Var</th><th></th></tr></thead><tbody>';
 [...S.crypto].sort((a,b)=>(b.montant||0)-(a.montant||0)).forEach(c=>{const mt=c.prix>0?c.prix*c.qte:(c.montant||0),pt=c.pru*c.qte,g=mt-pt;crH+='<tr><td class="l"><b>'+c.nom+'</b><div class="tk">'+c.symbol+'</div></td><td><span class="ed" onclick="eI(this,\'crypto\',\''+c.id+'\',\'qte\')">'+c.qte+'</span></td><td><span class="ed" onclick="eI(this,\'crypto\',\''+c.id+'\',\'pru\')">'+(c.pru?F2(c.pru):'—')+'</span></td><td>'+(c.prix?F2(c.prix):'—')+'</td><td style="font-weight:700">'+F2(mt)+'</td><td style="color:'+(g>=0?'var(--green)':'var(--red)')+'">'+(pt>0?(g>=0?'+':'')+F2(g):'—')+'</td><td>'+VC(c.var)+'</td><td><button class="db" onclick="dI(\'crypto\',\''+c.id+'\')">✕</button></td></tr>'});
 crH+='</tbody></table>';document.getElementById('crt').innerHTML=crH;
