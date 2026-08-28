@@ -1118,25 +1118,37 @@ async function fetchIntra(force){
   }
   intraEnCours=false;
   if(!Object.keys(res).length)return;
-  /* Grille de 9h30 à 22h00, heure de Paris, par pas de 5 minutes */
-  const minutesParis=s=>{const d=new Date(s*1000);
-    const h=new Date(d.toLocaleString('en-US',{timeZone:'Europe/Paris'}));
-    return h.getHours()*60+h.getMinutes()};
+  /* Séance du jour uniquement, de 9h30 à 22h heure de Paris */
+  const infoParis=s=>{const d=new Date(new Date(s*1000).toLocaleString('en-US',{timeZone:'Europe/Paris'}));
+    return{jour:d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate(),min:d.getHours()*60+d.getMinutes()}};
+  const jourActuel=infoParis(Math.floor(Date.now()/1000)).jour;
+  /* Écarter les relevés qui ne sont pas du jour */
+  Object.keys(res).forEach(k=>{
+    const d=res[k],ts=[],cl=[];
+    for(let i=0;i<d.ts.length;i++){
+      const inf=infoParis(d.ts[i]);
+      if(inf.jour===jourActuel&&inf.min>=570&&inf.min<=1320){ts.push(d.ts[i]);cl.push(d.cl[i])}
+    }
+    if(ts.length){d.ts=ts;d.cl=cl}else delete res[k];
+  });
+  if(!Object.keys(res).length)return;
   let tmin=Infinity,tmax=0;
   Object.values(res).forEach(d=>{tmin=Math.min(tmin,d.ts[0]);tmax=Math.max(tmax,d.ts[d.ts.length-1])});
   if(!isFinite(tmin))return;
-  /* Bornes de la séance du jour */
+  /* Grille depuis 9h30 jusqu'au dernier relevé */
   const pas=300;
-  let deb=Math.floor(tmin/pas)*pas;
-  while(minutesParis(deb)<570)deb+=pas;          /* démarrage à 9h30 */
-  while(minutesParis(deb)>570&&deb-pas>=tmin-3600)deb-=pas;
-  const fin=Math.ceil(tmax/pas)*pas;
+  const base9h30=(function(){const d=new Date();
+    const p=new Date(d.toLocaleString('en-US',{timeZone:'Europe/Paris'}));
+    const dec=d.getTime()-p.getTime();
+    p.setHours(9,30,0,0);
+    return Math.floor((p.getTime()+dec)/1000)})();
   const grille=[];
-  for(let s=deb;s<=fin;s+=pas){
-    const m=minutesParis(s);
-    if(m>=570&&m<=1320)grille.push(s);           /* de 9h30 à 22h00 */
+  for(let s=Math.floor(base9h30/pas)*pas;s<=Math.ceil(tmax/pas)*pas;s+=pas){
+    const inf=infoParis(s);
+    if(inf.jour===jourActuel&&inf.min>=570&&inf.min<=1320)grille.push(s);
   }
   if(grille.length<2)return;
+  const minutesParis=s=>infoParis(s).min;
   /* Valeur du portefeuille à chaque instant */
   const esp=['pea','ctosb','ctoibkr','avl'].reduce((a,pk)=>a+((S.pf[pk]&&S.pf[pk].esp)||0),0);
   const idx={};uniq.forEach(y=>idx[y]=0);
