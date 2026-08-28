@@ -342,7 +342,7 @@ function majOutils(){
   toggleOutils(actif||garde);
 }
 function toggleSide(){const s=document.getElementById('side'),o=document.getElementById('sideOv');s.classList.toggle('open');o.classList.toggle('on',s.classList.contains('open'))}
-function toggleTheme(){themeMode=themeMode==='light'?'dark':'light';localStorage.setItem('theme',themeMode);applyTheme();try{Object.keys(_mot).forEach(k=>delete _mot[k])}catch(e){}if(typeof R==='function')R(true)}
+function toggleTheme(){themeMode=themeMode==='light'?'dark':'light';localStorage.setItem('theme',themeMode);applyTheme();if(typeof R==='function')R(true)}
 applyTheme();
 /* Couleurs lues depuis le thème actif */
 const CV=n=>getComputedStyle(document.body).getPropertyValue(n).trim()||'#888';
@@ -356,18 +356,6 @@ function gradFill(col,op){return c=>{const{ctx,chartArea}=c.chart;if(!chartArea)
   g.addColorStop(1,hexA(col,0));
   return g}}
 function hexA(h,a){h=(h||'#888').trim();if(h.startsWith('#')){const n=h.length===4?h.replace(/#(.)(.)(.)/,'#$1$1$2$2$3$3'):h;const r=parseInt(n.slice(1,3),16),g=parseInt(n.slice(3,5),16),b=parseInt(n.slice(5,7),16);return'rgba('+r+','+g+','+b+','+a+')'}return h}
-/* Barres rayées, à la manière de Finary */
-const _mot={};
-function raye(col){
-  if(!col||typeof col!=='string')return col;
-  if(_mot[col])return _mot[col];
-  const c=document.createElement('canvas');c.width=4;c.height=4;
-  const x=c.getContext('2d');
-  x.fillStyle=col;x.fillRect(0,0,4,4);
-  x.fillStyle='rgba(255,255,255,.30)';x.fillRect(0,0,1.5,4);
-  const p=document.createElement('canvas').getContext('2d').createPattern(c,'repeat');
-  _mot[col]=p||col;return _mot[col];
-}
 /* Halo lumineux sous les courbes, façon écran de trading */
 const glowLine={id:'glowLine',beforeDatasetDraw(chart,args){
   const ds=chart.data.datasets[args.index];
@@ -1819,12 +1807,12 @@ if(cDivEl){
   if(window._cDivM)window._cDivM.destroy();
   const ordre=[...anneesDiv].sort();
   if(divVue==='annee'){
-    window._cDivM=new Chart(cDivEl,{type:'bar',data:{labels:ordre,datasets:[{label:'Dividendes perçus',data:ordre.map(a=>totAn(a)),backgroundColor:ordre.map(a=>raye(a===String(anDiv)?CV('--accent'):hexA(CV('--accent'),.45))),borderRadius:6,borderSkipped:false}]},
+    window._cDivM=new Chart(cDivEl,{type:'bar',data:{labels:ordre,datasets:[{label:'Dividendes perçus',data:ordre.map(a=>totAn(a)),backgroundColor:ordre.map(a=>a===String(anDiv)?CV('--accent'):hexA(CV('--accent'),.4)),borderRadius:6,borderSkipped:false,barPercentage:.55,categoryPercentage:.8,borderWidth:0}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tipOpts(c=>F2(c.raw)+' sur l\'année')},scales:axeOpts(v=>v+'€')}});
   }else{
     const pal=[CV('--accent'),CV('--c1'),CV('--c2'),CV('--c4'),CV('--c5')];
     const ds=ordre.slice(-4).map((a,k,arr)=>({label:a,data:moisDivL.map(m=>(S.divMois[a]||{})[m]||0),
-      backgroundColor:raye(k===arr.length-1?CV('--accent'):hexA(pal[(arr.length-1-k)%pal.length],.55)),borderRadius:5,borderSkipped:false}));
+      backgroundColor:k===arr.length-1?CV('--accent'):hexA(pal[(arr.length-1-k)%pal.length],.5),borderRadius:5,borderSkipped:false,barPercentage:.7,categoryPercentage:.75,borderWidth:0}));
     window._cDivM=new Chart(cDivEl,{type:'bar',data:{labels:moisDivL,datasets:ds},
       options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},animation:animConf,plugins:{legend:{display:ds.length>1,position:'bottom',labels:{font:{size:11},usePointStyle:true,pointStyle:'circle',boxWidth:7,boxHeight:7,padding:14,color:CV('--muted')}},tooltip:tipOpts(c=>c.dataset.label+' : '+F2(c.raw))},scales:axeOpts(v=>v+'€')}});
   }
@@ -2392,7 +2380,7 @@ document.getElementById('widgetResume').innerHTML=wH;
     const eel=document.getElementById('cEnv');
     if(eel){
       if(window._cEnv)window._cEnv.destroy();
-      const ds=choisis.map(p=>({label:p.n,data:base.map(b=>b[p.k]||0),backgroundColor:raye(p.c),borderRadius:{topLeft:4,topRight:4},borderSkipped:false}));
+      const ds=choisis.map(p=>({label:p.n,data:base.map(b=>b[p.k]||0),backgroundColor:p.c,borderRadius:{topLeft:5,topRight:5},borderSkipped:false,barPercentage:.62,categoryPercentage:.86,borderWidth:0}));
       window._cEnv=new Chart(eel,{type:'bar',
         data:{labels:base.map(b=>b.date),datasets:ds},
         options:{responsive:true,maintainAspectRatio:false,animation:animConf,
@@ -2562,7 +2550,7 @@ if(rProjEl){
     rpData.push({y:y,rev:Math.round(totalM)});
     bourse=bourse*(1+sp.rend/100)+(sp.ep||0)*12;
   }
-  window._cRPr=new Chart(rProjEl,{type:'bar',data:{labels:rpData.map(d=>'+'+d.y+'a'),datasets:[{label:'Rev./mois',data:rpData.map(d=>d.rev),backgroundColor:raye(CV('--green')),borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},animation:animConf,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>F(c.raw)+'/mois'}}},scales:axeOpts(v=>F(v))}})
+  window._cRPr=new Chart(rProjEl,{type:'bar',data:{labels:rpData.map(d=>'+'+d.y+'a'),datasets:[{label:'Rev./mois',data:rpData.map(d=>d.rev),backgroundColor:CV('--green'),borderRadius:5,borderSkipped:false,barPercentage:.7,categoryPercentage:.75,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},animation:animConf,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>F(c.raw)+'/mois'}}},scales:axeOpts(v=>F(v))}})
 }}
 
 /* Détail éditable */
