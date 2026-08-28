@@ -1539,7 +1539,21 @@ if(document.getElementById('cIntra')){
       const lbl=dd.ts.map(s=>new Date(s*1000).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'}));
       window._cIntra=new Chart(el,{type:'line',
         data:{labels:lbl,datasets:[
-          {data:dd.val,borderColor:col,backgroundColor:gradFill(col,.45),fill:true,tension:.25,pointRadius:0,pointHoverRadius:4,borderWidth:1.8,spanGaps:false},
+          {data:dd.val,borderColor:col,
+            segment:{borderColor:c=>{const a=c.p0.parsed.y,b=c.p1.parsed.y;return (a+b)/2>=dd.ref?CV('--green'):CV('--red')}},
+            backgroundColor:c=>{const{ctx,chartArea,scales}=c.chart;if(!chartArea)return 'transparent';
+              const yr=scales.y.getPixelForValue(dd.ref);
+              const h=chartArea.bottom-chartArea.top;
+              let p=(yr-chartArea.top)/h;p=Math.max(0,Math.min(1,p));
+              const g=ctx.createLinearGradient(0,chartArea.top,0,chartArea.bottom);
+              const v=CV('--green'),r=CV('--red');
+              g.addColorStop(0,hexA(v,.42));
+              g.addColorStop(Math.max(0,p-.002),hexA(v,.04));
+              g.addColorStop(Math.min(1,p+.002),hexA(r,.04));
+              g.addColorStop(1,hexA(r,.42));
+              return g},
+            fill:{target:{value:dd.ref}},
+            tension:.25,pointRadius:0,pointHoverRadius:4,borderWidth:1.8,spanGaps:false},
           {data:dd.ts.map(()=>dd.ref),borderColor:CV('--border'),borderDash:[4,4],borderWidth:1,pointRadius:0,fill:false}
         ]},
         options:{responsive:true,maintainAspectRatio:false,animation:animConf,
