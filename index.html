@@ -1118,11 +1118,25 @@ async function fetchIntra(force){
   }
   intraEnCours=false;
   if(!Object.keys(res).length)return;
-  /* Grille de temps commune, par pas de 5 minutes */
+  /* Grille de 9h30 à 22h00, heure de Paris, par pas de 5 minutes */
+  const minutesParis=s=>{const d=new Date(s*1000);
+    const h=new Date(d.toLocaleString('en-US',{timeZone:'Europe/Paris'}));
+    return h.getHours()*60+h.getMinutes()};
   let tmin=Infinity,tmax=0;
   Object.values(res).forEach(d=>{tmin=Math.min(tmin,d.ts[0]);tmax=Math.max(tmax,d.ts[d.ts.length-1])});
-  const pas=300,grille=[];
-  for(let s=Math.floor(tmin/pas)*pas;s<=tmax;s+=pas)grille.push(s);
+  if(!isFinite(tmin))return;
+  /* Bornes de la séance du jour */
+  const pas=300;
+  let deb=Math.floor(tmin/pas)*pas;
+  while(minutesParis(deb)<570)deb+=pas;          /* démarrage à 9h30 */
+  while(minutesParis(deb)>570&&deb-pas>=tmin-3600)deb-=pas;
+  const fin=Math.ceil(tmax/pas)*pas;
+  const grille=[];
+  for(let s=deb;s<=fin;s+=pas){
+    const m=minutesParis(s);
+    if(m>=570&&m<=1320)grille.push(s);           /* de 9h30 à 22h00 */
+  }
+  if(grille.length<2)return;
   /* Valeur du portefeuille à chaque instant */
   const esp=['pea','ctosb','ctoibkr','avl'].reduce((a,pk)=>a+((S.pf[pk]&&S.pf[pk].esp)||0),0);
   const idx={};uniq.forEach(y=>idx[y]=0);
@@ -1146,7 +1160,12 @@ async function fetchIntra(force){
     let px=d.prev||d.cl[0];
     if(d.cur==='USD')px=px*eurUsd;else if(d.cur==='GBp')px=px*.01*1.17;
     ref+=px*l.q});
-  intraData={_jour:ajd,_maj:Date.now(),ts:grille,val:serie,ref:Math.round(ref*100)/100};
+  /* Prolonger l'axe jusqu'à 22h, sans tracé pour les heures à venir */
+  const grilleC=[...grille],serieC=[...serie];
+  let s2=grille[grille.length-1]+pas;
+  let garde=0;
+  while(minutesParis(s2)<=1320&&minutesParis(s2)>=570&&garde<200){grilleC.push(s2);serieC.push(null);s2+=pas;garde++}
+  intraData={_jour:ajd,_maj:Date.now(),ts:grilleC,val:serieC,ref:Math.round(ref*100)/100,nb:serie.length};
   R(true);
 }
 
@@ -1502,11 +1521,11 @@ if(document.getElementById('cIntra')){
   const dd=intraData;
   const tt=document.getElementById('intraTitre');
   const ii=document.getElementById('intraInfo');
-  if(!dd||!dd.val||dd.val.length<2){
+  if(!dd||!dd.val||dd.val.filter(v=>v!=null).length<2){
     tt.innerHTML='<span style="font-size:22px;font-weight:500;color:var(--muted)">—</span>';
     ii.textContent='Clique sur ↻ pour charger la journée';
   }else{
-    const der=dd.val[dd.val.length-1];
+    const reels=dd.val.filter(v=>v!=null);const der=reels[reels.length-1];
     const ec=der-dd.ref, ecP=dd.ref>0?ec/dd.ref*100:0;
     const col=ec>=0?CV('--green'):CV('--red');
     tt.innerHTML='<span style="font-size:26px;font-weight:500;color:'+col+'">'+(ec>=0?'+':'')+F2(ec)+'</span>'
@@ -1520,7 +1539,7 @@ if(document.getElementById('cIntra')){
       const lbl=dd.ts.map(s=>new Date(s*1000).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'}));
       window._cIntra=new Chart(el,{type:'line',
         data:{labels:lbl,datasets:[
-          {data:dd.val,borderColor:col,backgroundColor:gradFill(col,.45),fill:true,tension:.25,pointRadius:0,pointHoverRadius:4,borderWidth:1.8},
+          {data:dd.val,borderColor:col,backgroundColor:gradFill(col,.45),fill:true,tension:.25,pointRadius:0,pointHoverRadius:4,borderWidth:1.8,spanGaps:false},
           {data:dd.ts.map(()=>dd.ref),borderColor:CV('--border'),borderDash:[4,4],borderWidth:1,pointRadius:0,fill:false}
         ]},
         options:{responsive:true,maintainAspectRatio:false,animation:animConf,
