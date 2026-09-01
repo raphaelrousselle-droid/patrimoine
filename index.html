@@ -1178,6 +1178,20 @@ async function fetchIntra(force){
 /* ====== RELEVÉ MENSUEL ====== */
 const MOIS_AB=["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
 function moisCourant(){const d=new Date();return MOIS_AB[d.getMonth()]+' '+String(d.getFullYear()%100)}
+/* Mois auquel rattacher le relevé : le mois écoulé si l'on est dans les 12 premiers jours */
+function moisReleve(){
+  if(S.moisReleveForce)return S.moisReleveForce;
+  const d=new Date();
+  if(d.getDate()<=12){const p=new Date(d.getFullYear(),d.getMonth()-1,1);return MOIS_AB[p.getMonth()]+' '+String(p.getFullYear()%100)}
+  return MOIS_AB[d.getMonth()]+' '+String(d.getFullYear()%100);
+}
+window.edMoisReleve=function(){
+  const p=prompt('Sous quel mois enregistrer ce relevé ?\nFormat : Août 26',moisReleve());
+  if(!p)return;
+  const s=p.trim(),pp=s.split(' ');
+  if(pp.length!==2||MOIS_AB.indexOf(pp[0])<0){alert('Format attendu : Août 26');return}
+  S.moisReleveForce=s;autoSave();R(true);
+};
 function cleCourante(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
 function joursDepuisReleve(){
   if(!snaps.length)return null;
@@ -1185,9 +1199,9 @@ function joursDepuisReleve(){
   return Math.floor((Date.now()-(dernier.ts||0))/86400000);
 }
 window.validerReleve=function(){
-  const m=moisCourant();
-  const dejaCeMois=snaps.some(s=>{const d=new Date(s.ts||0);return d.getMonth()===new Date().getMonth()&&d.getFullYear()===new Date().getFullYear()});
-  if(dejaCeMois&&!confirm('Un relevé existe déjà pour '+m+'.\nEn enregistrer un second ?'))return;
+  const m=moisReleve();
+  const dejaLigne=(S.versMensuels||[]).some(v=>v.mois===m&&(v.bourse||0)>0);
+  if(dejaLigne&&!confirm('Une ligne existe déjà pour '+m+'.\nLa remplacer par les valeurs actuelles ?'))return;
   /* Instantané du patrimoine */
   doSave();
   /* Report dans le tableau des versements */
@@ -1203,13 +1217,14 @@ window.validerReleve=function(){
   l.bourse=Math.round(t.bo);l.pea=Math.round(t.p.v);l.ctosb=Math.round(t.s.v);
   l.ctoibkr=Math.round(t.i.v);l.avl=Math.round(t.a.v);
   /* Report du PEE et de la part SCPI */
-  const k=cleCourante();
+  const mp=m.split(' ');
+  const k=('20'+mp[1])+'-'+String(MOIS_AB.indexOf(mp[0])+1).padStart(2,'0');
   const pee=S.epBloq.filter(x=>/pee|pere|per\b|épargne salariale/i.test(x.nom||'')).reduce((a,x)=>a+x.montant,0);
   const avS=[...S.epLibre,...S.epBloq].filter(x=>/linxea|assurance.?vie|^av /i.test(x.nom||'')).reduce((a,x)=>a+x.montant,0);
   if(pee>0){if(!S.peeHist)S.peeHist={};S.peeHist[k]=Math.round(pee)}
   if(avS>0){if(!S.avScpiHist)S.avScpiHist={};S.avScpiHist[k]=Math.round(avS)}
   autoSave();R(true);
-  alert('✓ Relevé de '+m+' enregistré.\n\nPense à saisir tes versements du mois dans le tableau de la page Bourse.');
+  S.moisReleveForce=null;autoSave();alert('✓ Relevé enregistré sous '+m+'.\n\nPense à saisir tes versements du mois dans le tableau de la page Bourse.');
 };
 
 /* ====== REVUE DE MARCHÉS ====== */
@@ -1820,7 +1835,7 @@ if(cDivEl){
 document.getElementById('divVueBtns').innerHTML=[{k:'annee',l:'Par année'},{k:'mois',l:'Par mois'}].map(x=>'<button class="pb '+(divVue===x.k?'on':'')+'" onclick="setDivVue(\''+x.k+'\')">'+x.l+'</button>').join('');
 
 /* Épargne */
-document.getElementById('ek').innerHTML='<div class="kpi"><div class="kl">Total</div><div class="kv" style="color:#0891b2">'+F(t.ep)+'</div></div><div class="kpi"><div class="kl">Libre</div><div class="kv">'+F(t.eL)+'</div></div><div class="kpi"><div class="kl">Bloquée</div><div class="kv">'+F(t.eB)+'</div></div>';
+document.getElementById('ek').innerHTML='<div class="kpi"><div class="kl">Total disponible</div><div class="kv" style="color:'+CV('--c1')+'">'+F(t.co+t.ep)+'</div><div class="ks">comptes et épargne</div></div><div class="kpi"><div class="kl">Comptes</div><div class="kv">'+F(t.co)+'</div></div><div class="kpi"><div class="kl">Épargne libre</div><div class="kv">'+F(t.eL)+'</div></div><div class="kpi"><div class="kl">Épargne bloquée</div><div class="kv">'+F(t.eB)+'</div></div>';
 document.getElementById('ct1').textContent="Comptes — "+F(t.co);document.getElementById('cl1').innerHTML=mkL(S.comptes,'comptes',[{k:'montant',fmt:F}]);document.getElementById('af1').innerHTML=addB('af1',[{k:'nom',label:'Nom',w:2},{k:'banque',label:'Banque'},{k:'montant',label:'€',num:true}],'comptes',{banque:'',montant:0});
 document.getElementById('ct2').textContent="Libre — "+F(t.eL);document.getElementById('cl2').innerHTML=mkL(S.epLibre,'epLibre',[{k:'montant',fmt:F}]);document.getElementById('af2').innerHTML=addB('af2',[{k:'nom',label:'Nom',w:2},{k:'banque',label:'Banque'},{k:'montant',label:'€',num:true}],'epLibre',{banque:'',montant:0});
 document.getElementById('ct3').textContent="Bloquée — "+F(t.eB);document.getElementById('cl3').innerHTML=mkL(S.epBloq,'epBloq',[{k:'montant',fmt:F}]);document.getElementById('af3').innerHTML=addB('af3',[{k:'nom',label:'Nom',w:2},{k:'banque',label:'Banque'},{k:'montant',label:'€',num:true}],'epBloq',{banque:'',montant:0});
@@ -2238,12 +2253,13 @@ document.getElementById('objContent').innerHTML=oH;
 /* ===== Page Relevé du mois ===== */
 if(document.getElementById('relEpargne')){
   const mC=moisCourant();
-  document.getElementById('relMois').textContent=mC;
+  const mR=moisReleve();
+  document.getElementById('relMois').innerHTML='enregistré sous <span class="ed" onclick="edMoisReleve()" style="font-weight:600;color:var(--accent)">'+mR+'</span>';
   const jrs=joursDepuisReleve();
-  const faitCeMois=snaps.some(s=>{const d=new Date(s.ts||0);return d.getMonth()===new Date().getMonth()&&d.getFullYear()===new Date().getFullYear()});
+  const faitCeMois=(S.versMensuels||[]).some(v=>v.mois===mR&&(v.bourse||0)>0);
   let et='';
-  if(faitCeMois)et='<div class="hc" style="border-top-color:var(--green)"><div><div class="kl">État</div><div style="font-size:15px;font-weight:600;color:var(--green)">✓ Relevé de '+mC+' déjà enregistré</div></div><div style="font-size:12px;color:var(--muted)">Tu peux corriger tes montants et enregistrer de nouveau.</div></div>';
-  else et='<div class="hc"><div><div class="kl">État</div><div style="font-size:15px;font-weight:600;color:var(--accent)">Relevé de '+mC+' à faire</div></div><div style="font-size:12px;color:var(--muted)">'+(jrs!=null?'Dernier relevé il y a '+jrs+' jours':'Aucun relevé enregistré')+'</div></div>';
+  if(faitCeMois)et='<div class="hc" style="border-top-color:var(--green)"><div><div class="kl">État</div><div style="font-size:15px;font-weight:600;color:var(--green)">✓ Relevé de '+mR+' déjà enregistré</div></div><div style="font-size:12px;color:var(--muted)">Tu peux corriger tes montants et enregistrer de nouveau.</div></div>';
+  else et='<div class="hc"><div><div class="kl">État</div><div style="font-size:15px;font-weight:600;color:var(--accent)">Relevé de '+mR+' à faire</div></div><div style="font-size:12px;color:var(--muted)">'+(jrs!=null?'Dernier relevé il y a '+jrs+' jours':'Aucun relevé enregistré')+'</div></div>';
   document.getElementById('relEtat').innerHTML=et;
 
   /* Comptes et épargne, modifiables ici */
