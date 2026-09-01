@@ -1093,7 +1093,7 @@ async function fetchIntra(force){
   /* Tickers détenus, avec leur quantité et leur enveloppe */
   const lignes=[];
   ['pea','ctosb','ctoibkr','avl'].forEach(pk=>{const pf=S.pf[pk];if(!pf)return;
-    pf.l.forEach(l=>{const y=YM[l.c]||l.c;if(y&&y!=='—'&&l.p>0)lignes.push({y,q:l.p,pk})})});
+    pf.l.forEach(l=>{const y=YM[l.c]||l.c;if(y&&y!=='—'&&l.p>0)lignes.push({y,q:l.p,pk,val:(l.co||0)*l.p})})});
   if(!lignes.length){intraEnCours=false;return}
   const uniq=[...new Set(lignes.map(x=>x.y))];
   const res={};
@@ -1145,7 +1145,8 @@ async function fetchIntra(force){
   const serie=grille.map(s=>{
     let tot=esp;
     lignes.forEach(l=>{
-      const d=res[l.y];if(!d)return;
+      const d=res[l.y];
+      if(!d){tot+=l.val||0;return}
       let px;
       if(!d.ts.length){px=d.prev||d.price||0}          /* pas encore ouvert */
       else{
@@ -1162,7 +1163,8 @@ async function fetchIntra(force){
   });
   /* Référence : valeur à la clôture de la veille */
   let ref=esp;
-  lignes.forEach(l=>{const d=res[l.y];if(!d)return;
+  lignes.forEach(l=>{const d=res[l.y];
+    if(!d){ref+=l.val||0;return}
     let px=d.prev||(d.cl.length?d.cl[0]:d.price)||0;
     if(d.cur==='USD')px=px*eurUsd;else if(d.cur==='GBp')px=px*.01*1.17;
     ref+=px*l.q});
