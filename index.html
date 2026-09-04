@@ -781,6 +781,37 @@ window.addBgtCat=function(){S.budget.categories.push({id:'cat'+nid(),nom:prompt(
 window.addBgtP=function(cid){const c=S.budget.categories.find(x=>x.id===cid);if(c){c.postes.push({id:'p'+nid(),nom:prompt('Poste','Nouveau')||'Poste',montant:0});autoSave();R(true)}};
 
 /* Fonctions Immo */
+/* Lots : logements loués au sein d'un même bien */
+function loyerBien(b){
+  if(b.lots&&b.lots.length)return b.lots.reduce((a,l)=>a+(l.loyer||0),0);
+  return b.loyer||0;
+}
+function nbLots(b){return (b.lots&&b.lots.length)?b.lots.length:1}
+window.addLot=function(id){
+  const b=S.immo.find(x=>x.id===id);if(!b)return;
+  const nom=prompt('Nom du logement\n(ex: Appartement 1, Maison A, RDC)','');
+  if(!nom)return;
+  const loyer=parseFloat((prompt('Loyer mensuel','')||'').replace(',','.'))||0;
+  if(!b.lots)b.lots=[];
+  b.lots.push({id:'lt'+nid(),nom:nom.trim(),loyer,occupe:true});
+  b.loyer=loyerBien(b);
+  autoSave();R(true);
+};
+window.edLot=function(el,id,li,champ){
+  const b=S.immo.find(x=>x.id===id);if(!b||!b.lots||!b.lots[li])return;
+  if(champ==='nom'){const v=prompt('Nom du logement',b.lots[li].nom);if(v===null)return;b.lots[li].nom=v.trim()||b.lots[li].nom}
+  else{const v=parseFloat((prompt('Loyer mensuel',b.lots[li].loyer)||'').replace(',','.'));if(isNaN(v))return;b.lots[li].loyer=v}
+  b.loyer=loyerBien(b);autoSave();R(true);
+};
+window.togLot=function(id,li){
+  const b=S.immo.find(x=>x.id===id);if(!b||!b.lots||!b.lots[li])return;
+  b.lots[li].occupe=!b.lots[li].occupe;autoSave();R(true);
+};
+window.delLot=function(id,li){
+  const b=S.immo.find(x=>x.id===id);if(!b||!b.lots)return;
+  if(!confirm('Supprimer ce logement ?'))return;
+  b.lots.splice(li,1);b.loyer=loyerBien(b);autoSave();R(true);
+};
 window.addImmo=function(){const nom=prompt('Nom du bien','');if(!nom)return;S.immo.push({id:'i'+nid(),nom,type:'',prixAchat:0,valeur:0,sci:false,partsPct:100,adresse:'',surface:0,typeLocation:'',loyer:0,charges:0,taxeFonciere:0,assurance:0,gestion:0,travaux:[],creditId:'',cdRevenus:new Array(12).fill(0),cdNuits:new Array(12).fill(0)});autoSave();R(true)};
 window.edImmoType=function(id){const b=S.immo.find(x=>x.id===id);if(!b)return;const c=parseInt(prompt('Type de location :\n1. Longue durée\n2. Courte durée\n3. Résidence principale','1'));if(c===1)b.typeLocation='longue';else if(c===2)b.typeLocation='courte';else if(c===3)b.typeLocation='rp';autoSave();R(true)};
 window.togSCI=function(id){const b=S.immo.find(x=>x.id===id);if(!b)return;b.sci=!b.sci;autoSave();R(true)};
@@ -1887,7 +1918,9 @@ const imDettes=S.dettes.filter(d=>creditIds.includes(d.id)).reduce((a,d)=>{
 },0);
 
 /* ===== Tableau de bord locatif, hors résidence principale ===== */
-const nbLots=immoLoc.length;
+const nbBiens=immoLoc.length;
+const nbLots=immoLoc.reduce((a,b)=>a+nbLots_(b),0);
+function nbLots_(b){return (b.lots&&b.lots.length)?b.lots.length:1}
 const investTot=immoLoc.reduce((a,b)=>a+((b.prixAchat||b.valeur||0)+(b.travaux||[]).reduce((s,x)=>s+(x.montant||0),0)),0);
 const valeurTot=immoLoc.reduce((a,b)=>a+(b.valeur||0),0);
 const pvLatente=valeurTot-investTot;
@@ -1903,7 +1936,7 @@ immoLoc.forEach(b=>{
 const rdtNetMoy=investTot>0?(netAnnuel/investTot*100):0;
 
 document.getElementById('ik').innerHTML=
- '<div class="kpi"><div class="kl">Biens en location</div><div class="kv" style="color:'+CV('--p5')+'">'+nbLots+'</div><div class="ks">hors résidence principale</div></div>'
+ '<div class="kpi"><div class="kl">Biens en location</div><div class="kv" style="color:'+CV('--p5')+'">'+nbBiens+'</div><div class="ks">'+nbLots+' logement'+(nbLots>1?'s':'')+' · hors RP</div></div>'
 +'<div class="kpi"><div class="kl">Investissement total</div><div class="kv" style="color:'+CV('--p6')+'">'+F(Math.round(investTot))+'</div><div class="ks">achat et travaux</div></div>'
 +'<div class="kpi"><div class="kl">Loyers mensuels</div><div class="kv" style="color:var(--green)">'+F(Math.round(loyerTotal))+'</div></div>'
 +'<div class="kpi"><div class="kl">Cashflow mensuel</div><div class="kv" style="color:'+(cashflowTotal>=0?'var(--green)':'var(--red)')+'">'+(cashflowTotal>=0?'+':'')+F(Math.round(cashflowTotal))+'</div><div class="ks">après charges et crédit</div></div>'
@@ -1971,7 +2004,8 @@ else{
     const{b,f}=r;
     sLoy+=f.loyerAn;sCh+=f.chargesAn;sImp+=f.impot;sEff+=f.effort;
     const med=k===0&&rows.length>1?'▲ ':'';
-    cpH+='<tr><td class="l" style="font-weight:600">'+med+b.nom+'</td>';
+    const nl=(b.lots&&b.lots.length)?b.lots.length:1;
+    cpH+='<tr><td class="l" style="font-weight:600">'+med+b.nom+(nl>1?' <span style="color:var(--muted);font-size:10.5px">'+nl+' logements</span>':'')+'</td>';
     cpH+='<td class="l"><span class="ed" onclick="edRegime(\''+b.id+'\')" style="font-size:11.5px">'+f.reg.n+'</span></td>';
     cpH+='<td style="color:var(--green)">'+F(Math.round(f.loyerAn))+'</td>';
     cpH+='<td style="color:var(--red)">'+F(Math.round(f.chargesAn))+'</td>';
@@ -2000,8 +2034,12 @@ document.getElementById('immoCompare').innerHTML=cpH;
   if(dc)drawPie('cImmoReg','_cImR',itR);
   er.innerHTML=pieLeg(itR);
   /* Loyers par bien */
-  const itL=[...immoLoc].sort((a,b)=>(b.loyer||0)-(a.loyer||0))
-    .map((b,k)=>({n:b.nom,v:b.loyer||0,c:pal[k%8]}));
+  const lignesL=[];
+  immoLoc.forEach(b=>{
+    if(b.lots&&b.lots.length)b.lots.forEach(l=>lignesL.push({n:b.nom+' · '+l.nom,v:l.loyer||0}));
+    else lignesL.push({n:b.nom,v:b.loyer||0});
+  });
+  const itL=lignesL.sort((a,b)=>b.v-a.v).map((x,k)=>({...x,c:pal[k%8]}));
   if(itL.reduce((a,x)=>a+x.v,0)>0){
     if(dc)drawPie('cImmoLoy','_cImL',itL,v=>F(Math.round(v))+'/mois');
     if(el2)el2.innerHTML=pieLeg(itL,v=>F(Math.round(v)));
@@ -2048,7 +2086,10 @@ let imH='';S.immo.forEach(b=>{
   imH+='<div class="lr"><span>Ta part (valeur)</span><span style="font-weight:700;color:var(--orange)">'+F(Math.round(b.valeur*((b.partsPct||100)/100)))+'</span></div>';
   imH+='<div class="lr"><span>Crédit lié</span><span class="ed" onclick="edImmoCredit(\''+b.id+'\')">'+(cr?cr.nom:'—')+'</span></div>';
   imH+='</div><div>';
-  imH+='<div class="lr"><span>Loyer/mois</span><span class="ed" onclick="eI(this,\'immo\',\''+b.id+'\',\'loyer\')" style="color:var(--green);font-weight:700">'+F(b.loyer||0)+'</span></div>';
+  const aLots=b.lots&&b.lots.length;
+  imH+='<div class="lr"><span>Loyer/mois'+(aLots?' <span style="color:var(--muted);font-size:11px">('+b.lots.length+' logements)</span>':'')+'</span>'
+    +(aLots?'<span style="color:var(--green);font-weight:700">'+F(loyerBien(b))+'</span>'
+           :'<span class="ed" onclick="eI(this,\'immo\',\''+b.id+'\',\'loyer\')" style="color:var(--green);font-weight:700">'+F(b.loyer||0)+'</span>')+'</div>';
   imH+='<div class="lr"><span>Charges/mois</span><span class="ed" onclick="eI(this,\'immo\',\''+b.id+'\',\'charges\')" style="color:var(--red)">'+F(b.charges||0)+'</span></div>';
   imH+='<div class="lr"><span>Taxe foncière/an</span><span class="ed" onclick="eI(this,\'immo\',\''+b.id+'\',\'taxeFonciere\')">'+F(b.taxeFonciere||0)+'</span></div>';
   imH+='<div class="lr"><span>Assurance/an</span><span class="ed" onclick="eI(this,\'immo\',\''+b.id+'\',\'assurance\')">'+F(b.assurance||0)+'</span></div>';
@@ -2071,6 +2112,23 @@ let imH='';S.immo.forEach(b=>{
   imH+='<div class="lr"><span>Rendement net d\'impôts</span><span style="font-weight:600">'+fb.rdtNet.toFixed(2)+'%</span></div>';
   imH+='<div style="font-size:10.5px;color:var(--muted);margin-top:8px">Estimation indicative, à confirmer avec ton comptable.</div>';
   imH+='</div></details>';
+
+  /* Logements du bien */
+  imH+='<details style="margin-top:12px"'+(aLots?' open':'')+'><summary style="font-size:12px;font-weight:600;cursor:pointer">⌂ Logements loués ('+(aLots?b.lots.length:0)+')</summary><div style="margin-top:8px">';
+  if(aLots){
+    imH+='<table style="font-size:12px"><thead><tr><th class="l">Logement</th><th>Loyer</th><th>État</th><th></th></tr></thead><tbody>';
+    b.lots.forEach((l,li)=>{
+      imH+='<tr><td class="l"><span class="ed" onclick="edLot(this,\''+b.id+'\','+li+',\'nom\')">'+l.nom+'</span></td>';
+      imH+='<td><span class="ed" onclick="edLot(this,\''+b.id+'\','+li+',\'loyer\')" style="color:var(--green);font-weight:600">'+F(l.loyer||0)+'</span></td>';
+      imH+='<td><span class="ed" onclick="togLot(\''+b.id+'\','+li+')"><span class="badge '+(l.occupe!==false?'pos':'neg')+'">'+(l.occupe!==false?'Loué':'Vacant')+'</span></span></td>';
+      imH+='<td><button class="db" onclick="delLot(\''+b.id+'\','+li+')">✕</button></td></tr>';
+    });
+    const loue=b.lots.filter(l=>l.occupe!==false).reduce((a,l)=>a+(l.loyer||0),0);
+    imH+='<tr class="total-row"><td class="l">Total</td><td style="color:var(--green)">'+F(loyerBien(b))+'</td><td>'+b.lots.filter(l=>l.occupe!==false).length+'/'+b.lots.length+' loués</td><td></td></tr>';
+    imH+='</tbody></table>';
+    if(loue<loyerBien(b))imH+='<div style="font-size:11px;color:var(--accent);margin-top:8px">Loyers effectivement perçus : '+F(loue)+' — écart de '+F(loyerBien(b)-loue)+' dû aux logements vacants.</div>';
+  }else imH+='<div style="font-size:11.5px;color:var(--muted)">Ce bien est traité comme un logement unique. Ajoute des logements s\'il en compte plusieurs : le loyer total sera alors calculé automatiquement.</div>';
+  imH+='<button class="ab" onclick="addLot(\''+b.id+'\')">+ Logement</button></div></details>';
 
   /* Travaux / historique dépenses */
   imH+='<details style="margin-top:12px"><summary style="font-size:12px;font-weight:600;cursor:pointer">⚒ Travaux & dépenses ('+(b.travaux||[]).length+')</summary><div style="margin-top:8px">';
