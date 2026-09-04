@@ -107,6 +107,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 main{max-width:1240px;margin:0 auto;padding:26px 22px 60px}
 .page{display:none}.page.active{display:block}
 .kr{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px;margin-bottom:24px}
+.kr4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.kr4{grid-template-columns:repeat(2,1fr)}}
 .kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;transition:border-color .15s}
 .kpi:hover{border-color:var(--muted)}
 .kl{font-size:10.5px;color:var(--muted);letter-spacing:.02em;font-weight:500;margin-bottom:6px}
@@ -278,7 +280,7 @@ details summary{color:var(--text2)}
 <div class="page" id="page-bourse"><div class="kr" id="bk"></div>
 <div class="card"><div class="fb" style="margin-bottom:4px"><div><div class="kl">Portefeuille · aujourd'hui</div><div id="intraTitre" style="display:flex;align-items:baseline;gap:12px;margin-top:4px"></div></div><div id="intraInfo" style="font-size:11.5px;color:var(--muted);text-align:right"></div></div><div class="cb" style="height:190px"><canvas id="cIntra"></canvas></div></div><div class="wb" id="bw"></div><div id="rstat" class="rs" style="margin:12px 0"></div><div class="card"><div class="fb"><div class="ct" style="margin:0">PEA — Fortuneo</div></div><div class="kr" id="pk1" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt1"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — Saxo <span style="font-size:11px;color:var(--muted)">(PRU $)</span></div></div><div class="kr" id="pk2" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt2"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — IBKR</div></div><div class="kr" id="pk3" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt3"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">AV — Linxea</div></div><div class="kr" id="pk4" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt4"></div></div><div class="g2" style="margin:16px 0"><div class="card"><div class="ct">◫ Panorama 2026</div><div id="ptw"></div><div class="ss" id="sps"></div></div><div class="card"><div class="ct">Répartition secteur</div><div class="cbs" style="height:230px"><canvas id="cSec"></canvas></div><div id="secLeg" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:8px"><div class="ct" style="margin:0">Perf cumulée TWR vs S&P</div><div style="display:flex;gap:4px" id="ps"></div></div><div class="cb"><canvas id="cPf"></canvas></div><div class="cl"><span style="color:#7c3aed">● Portf.</span><span style="color:#e8a33d">- - S&P</span></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">↕ Versements mensuels</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addVM()">+ Mois</button></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Valeur = relevée au 1er du mois suivant. Versement = viré pendant le mois.</div><div id="vmList"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">◎ Objectifs Bourse</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addBourseGoal()">+ Objectif</button></div><div id="bourseGoals" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">◌ Watchlist</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addWatch()">+ Suivre</button></div><div id="watchlist" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">✎ Journal d'investissement</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addJournal()">+ Entrée</button></div><div id="journal" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb" style="margin-bottom:14px"><div class="ct" style="margin:0">◈ Dividendes perçus</div><div style="display:flex;gap:4px" id="divVueBtns"></div></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Note ici les dividendes que tu reçois réellement chaque mois (tous portefeuilles confondus). Clique sur un montant pour le modifier.</div><div class="tw" id="divMoisTable"></div><div class="cbs" style="margin-top:16px"><canvas id="cDivMois"></canvas></div></div></div>
 <div class="page" id="page-epargne"><div class="kr" id="ek"></div><div class="g2"><div class="card"><div class="ct" id="ct1"></div><div id="cl1"></div><div id="af1"></div></div><div class="card"><div class="ct" id="ct2"></div><div id="cl2"></div><div id="af2"></div></div><div class="card sf"><div class="ct" id="ct3"></div><div id="cl3"></div><div id="af3"></div></div></div></div>
-<div class="page" id="page-immo"><div class="kr" id="ik"></div><div class="g2" style="margin-bottom:16px"><div class="g2" style="margin-bottom:16px"><div class="card"><div class="ct">Répartition par régime fiscal</div><div id="immoRegimes"></div></div><div class="card"><div class="ct">Répartition des loyers</div><div id="immoLoyers"></div></div></div>
+<div class="page" id="page-immo"><div class="kr kr4" id="ik"></div><div class="g2" style="margin-bottom:16px"><div class="g2" style="margin-bottom:16px"><div class="card"><div class="ct">Répartition par régime fiscal</div><div class="cbs" style="height:230px"><canvas id="cImmoReg"></canvas></div><div id="immoRegimes" style="margin-top:10px"></div></div><div class="card"><div class="ct">Répartition des loyers</div><div class="cbs" style="height:230px"><canvas id="cImmoLoy"></canvas></div><div id="immoLoyers" style="margin-top:10px"></div></div></div>
 <div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Patrimoine Immo Net</div><div style="display:flex;gap:4px" id="immoPs"></div></div><div class="cb"><canvas id="cImmoNet"></canvas></div></div><div class="card"><div class="ct">Tableau récapitulatif mensuel</div><div class="tw" id="immoRecap"></div></div></div><div class="card" id="immoSCI" style="display:none"><div class="ct">⬡ Tableau de bord SCI</div><div id="sciDash"></div></div><div id="ic"></div>
 <div class="card"><div class="fb" style="margin-bottom:14px"><div class="ct" style="margin:0">⇄ Comparatif des biens</div><div style="font-size:11.5px;color:var(--muted)">TMI : <span class="ed" onclick="edTMI()" id="tmiVal"></span></div></div><div class="tw" id="immoCompare"></div><div style="font-size:11px;color:var(--muted);margin-top:12px">Effort d'épargne : ce que le bien te coûte (négatif) ou te rapporte (positif) chaque mois, impôts déduits.</div></div>
 <div class="card"><div class="fb"><div class="ct" style="margin:0">△ Projets d'achat</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addProjet()">+ Projet</button></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Prépare tes futurs achats : simule le cashflow avant de te lancer, puis transforme le projet en vrai bien le jour de l'achat.</div><div id="projetsList"></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">◫ Suivi courte durée</div></div><div id="immoCD"></div></div></div>
@@ -1986,36 +1988,24 @@ document.getElementById('immoCompare').innerHTML=cpH;
 /* Répartition par régime fiscal et par bien */
 (function(){
   const er=document.getElementById('immoRegimes');if(!er)return;
-  if(!immoLoc.length){er.innerHTML='<div style="color:var(--muted);font-size:12px">Aucun bien locatif.</div>';
-    document.getElementById('immoLoyers').innerHTML='';return}
-  /* Par régime */
+  const el2=document.getElementById('immoLoyers');
+  if(!immoLoc.length){er.innerHTML='<div style="color:var(--muted);font-size:12px">Aucun bien locatif.</div>';if(el2)el2.innerHTML='';return}
+  const pal=PIE();
+  /* Par régime fiscal, en valeur */
   const parReg={};
   immoLoc.forEach(b=>{const r=(REGIMES[b.regime||'micro_foncier']||REGIMES.micro_foncier).n;
     if(!parReg[r])parReg[r]={n:0,v:0};parReg[r].n++;parReg[r].v+=b.valeur||0});
-  const regs=Object.entries(parReg).sort((a,b)=>b[1].v-a[1].v);
-  const totV=regs.reduce((a,x)=>a+x[1].v,0);
-  const pal=[CV('--p1'),CV('--p2'),CV('--p5'),CV('--p6'),CV('--p7'),CV('--p4')];
-  let h='<div class="dist">';
-  regs.forEach((r,k)=>{if(r[1].v>0)h+='<i style="width:'+(r[1].v/totV*100)+'%;background:'+pal[k%pal.length]+'"></i>'});
-  h+='</div>';
-  regs.forEach((r,k)=>{
-    h+='<div class="drow"><div class="drow-h"><div class="drow-n"><span style="width:9px;height:9px;border-radius:3px;background:'+pal[k%pal.length]+'"></span><b>'+r[0]+'</b><span style="color:var(--muted);font-size:11px">'+r[1].n+' bien'+(r[1].n>1?'s':'')+'</span></div>';
-    h+='<div class="drow-v"><b>'+F(Math.round(r[1].v))+'</b><em>'+(totV>0?(r[1].v/totV*100).toFixed(0):0)+'%</em></div></div></div>';
-  });
-  er.innerHTML=h;
+  const itR=Object.entries(parReg).sort((a,b)=>b[1].v-a[1].v)
+    .map(([n,d],k)=>({n:n+' ('+d.n+')',v:d.v,c:pal[k%8]}));
+  if(dc)drawPie('cImmoReg','_cImR',itR);
+  er.innerHTML=pieLeg(itR);
   /* Loyers par bien */
-  const bs=[...immoLoc].sort((a,b)=>(b.loyer||0)-(a.loyer||0));
-  const totL=bs.reduce((a,b)=>a+(b.loyer||0),0);
-  let h2='<div class="dist">';
-  bs.forEach((b,k)=>{if((b.loyer||0)>0)h2+='<i style="width:'+((b.loyer||0)/totL*100)+'%;background:'+pal[k%pal.length]+'"></i>'});
-  h2+='</div>';
-  bs.forEach((b,k)=>{
-    const ty={longue:'longue durée',courte:'courte durée'}[b.typeLocation]||'';
-    h2+='<div class="drow"><div class="drow-h"><div class="drow-n"><span style="width:9px;height:9px;border-radius:3px;background:'+pal[k%pal.length]+'"></span><b>'+b.nom+'</b>'+(ty?'<span style="color:var(--muted);font-size:11px">'+ty+'</span>':'')+'</div>';
-    h2+='<div class="drow-v"><b>'+F(Math.round(b.loyer||0))+'</b><em>'+(totL>0?((b.loyer||0)/totL*100).toFixed(0):0)+'%</em></div></div></div>';
-  });
-  if(totL===0)h2='<div style="color:var(--muted);font-size:12px">Aucun loyer renseigné.</div>';
-  document.getElementById('immoLoyers').innerHTML=h2;
+  const itL=[...immoLoc].sort((a,b)=>(b.loyer||0)-(a.loyer||0))
+    .map((b,k)=>({n:b.nom,v:b.loyer||0,c:pal[k%8]}));
+  if(itL.reduce((a,x)=>a+x.v,0)>0){
+    if(dc)drawPie('cImmoLoy','_cImL',itL,v=>F(Math.round(v))+'/mois');
+    if(el2)el2.innerHTML=pieLeg(itL,v=>F(Math.round(v)));
+  }else if(el2)el2.innerHTML='<div style="color:var(--muted);font-size:12px">Aucun loyer renseigné.</div>';
 })();
 
 /* SCI Dashboard */
