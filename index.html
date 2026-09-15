@@ -495,7 +495,7 @@ const data=await yQBatch(allT);
 let ok=0;
 /* Cryptos en 24 h glissantes */
 if(cryptoT.length){
-  const lots=[];for(let i=0;i<cryptoT.length;i+=8)lots.push(cryptoT.slice(i,i+8));
+  const lots=[];for(let i=0;i<cryptoT.length;i+=10)lots.push(cryptoT.slice(i,i+10));
   await Promise.all(lots.map(lot=>
     fetch(GAS+"?h24=1&t="+encodeURIComponent(lot.map(x=>x.yt).join(",")))
       .then(r=>r.ok?r.json():{})
@@ -507,7 +507,8 @@ if(cryptoT.length){
   ));
 }
 /* Indices du bandeau */
-INDICES.forEach(x=>{if(data[x.t]&&data[x.t].price)idxData[x.t]=data[x.t]});renderTicker();fetchIntra(true);
+INDICES.forEach(x=>{if(data[x.t]&&data[x.t].price)idxData[x.t]=data[x.t]});renderTicker();
+if(document.getElementById('page-bourse')&&document.getElementById('page-bourse').classList.contains('active'))fetchIntra(true);
 /* Taux euro/dollar issu du même lot */
 if(data['EURUSD=X']&&data['EURUSD=X'].price>0)eurUsd=1/data['EURUSD=X'].price;
 const pH=new Date().toLocaleString('en-US',{timeZone:'Europe/Paris',hour:'2-digit',minute:'2-digit',hour12:false});const [pHh,pHm]=pH.split(':').map(Number);const minParis=pHh*60+pHm;const usOpen=minParis>=930||minParis<120;/* 15h30 à 22h, séance américaine */
@@ -533,7 +534,7 @@ async function fSP(){
     if(j["Monthly Time Series"]){spD=j["Monthly Time Series"];cSPx();spSt="✓"}else spSt="⚠"
   }catch(e){spSt="⚠"}
   /* Récupérer les autres indices via Yahoo proxy */
-  await fetchBenchmarks();
+  fetchBenchmarks();
   R(true);
 }
 
@@ -1131,13 +1132,13 @@ async function fetchIntra(force){
   if(!lignes.length){intraEnCours=false;return}
   const uniq=[...new Set(lignes.map(x=>x.y))];
   const res={};
-  for(let i=0;i<uniq.length;i+=8){
-    const lot=uniq.slice(i,i+8);
-    try{
-      const r=await fetch(GAS+"?intra=1&t="+encodeURIComponent(lot.join(",")));
-      if(r.ok){const j=await r.json();Object.keys(j||{}).forEach(k=>{if(j[k]&&j[k].ts&&j[k].ts.length)res[k]=j[k]})}
-    }catch(e){}
-  }
+  const lots=[];for(let i=0;i<uniq.length;i+=10)lots.push(uniq.slice(i,i+10));
+  await Promise.all(lots.map(lot=>
+    fetch(GAS+"?intra=1&t="+encodeURIComponent(lot.join(",")))
+      .then(r=>r.ok?r.json():{})
+      .then(j=>{Object.keys(j||{}).forEach(k=>{if(j[k]&&j[k].ts)res[k]=j[k]})})
+      .catch(()=>{})
+  ));
   intraEnCours=false;
   if(!Object.keys(res).length)return;
   /* Séance du jour uniquement, de 9h30 à 22h heure de Paris */
@@ -1202,6 +1203,21 @@ async function fetchIntra(force){
     let px=d.prev||(d.cl.length?d.cl[0]:d.price)||0;
     if(d.cur==='USD')px=px*eurUsd;else if(d.cur==='GBp')px=px*.01*1.17;
     ref+=px*l.q});
+  /* Caler la courbe sur les chiffres des indicateurs, pour éviter tout écart */
+  (function(){
+    const tt=Tot();
+    const reelle=tt.bo;                                   /* valeur affichée en haut */
+    const jour=tt.p.dayPnl+tt.s.dayPnl+tt.i.dayPnl+tt.a.dayPnl;
+    const refReelle=reelle-jour;                          /* valeur de veille correspondante */
+    const der=serie[serie.length-1];
+    if(der>0&&ref>0){
+      /* Ajuster le niveau, puis l'amplitude, pour retomber sur les valeurs réelles */
+      const ecartCalc=der-ref, ecartReel=jour;
+      const k=Math.abs(ecartCalc)>1?ecartReel/ecartCalc:1;
+      for(let i=0;i<serie.length;i++)serie[i]=Math.round((refReelle+(serie[i]-ref)*k)*100)/100;
+      ref=refReelle;
+    }
+  })();
   /* Prolonger l'axe jusqu'à 22h, sans tracé pour les heures à venir */
   const grilleC=[...grille],serieC=[...serie];
   let s2=grille[grille.length-1]+pas;
