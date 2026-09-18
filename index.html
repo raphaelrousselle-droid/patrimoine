@@ -508,7 +508,6 @@ if(cryptoT.length){
 }
 /* Indices du bandeau */
 INDICES.forEach(x=>{if(data[x.t]&&data[x.t].price)idxData[x.t]=data[x.t]});renderTicker();
-if(document.getElementById('page-bourse')&&document.getElementById('page-bourse').classList.contains('active'))fetchIntra(true);
 /* Taux euro/dollar issu du même lot */
 if(data['EURUSD=X']&&data['EURUSD=X'].price>0)eurUsd=1/data['EURUSD=X'].price;
 const pH=new Date().toLocaleString('en-US',{timeZone:'Europe/Paris',hour:'2-digit',minute:'2-digit',hour12:false});const [pHh,pHm]=pH.split(':').map(Number);const minParis=pHh*60+pHm;const usOpen=minParis>=930||minParis<120;/* 15h30 à 22h, séance américaine */
@@ -521,7 +520,10 @@ else{const cr=S.crypto.find(x=>x.id===task.id);if(cr){cr.prix=Math.round(r.price
 if(task.t==='w'){const w=S.watchlist?S.watchlist.find(x=>x.id===task.id):null;if(w){w.prix=Math.round(r.price*100)/100;w.prev=r.prev||0;w.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0;w.cur=r.cur||''}}
 });let spyDay=null;if(data['SPY']&&data['SPY'].price)spyDay=Math.round(data['SPY'].chg*100)/100;
 if(ok>0){if(!S.histJour)S.histJour=[];const today=new Date().toISOString().slice(0,10);const t2=Tot();const dp=t2.p.dayPnl+t2.s.dayPnl+t2.i.dayPnl;const dpct=t2.bo>0?(dp/t2.bo*100):0;const ex=S.histJour.findIndex(h=>h.date===today);const ent={date:today,portf:Math.round(dpct*100)/100,pnl:Math.round(dp*100)/100,sp:spyDay,bourse:Math.round(t2.bo)};if(ex>=0)S.histJour[ex]=ent;else S.histJour.push(ent);if(S.histJour.length>30)S.histJour=S.histJour.slice(-30)}
-const now=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});rStat='✓ '+ok+' à '+now;rL=false;b.innerHTML='↻';b.disabled=false;autoSave();R(true)}
+const now=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});rStat='✓ '+ok+' à '+now;rL=false;b.innerHTML='↻';b.disabled=false;autoSave();R(true);
+/* Courbe du jour, une fois les cours appliqués */
+const pb=document.getElementById('page-bourse');
+if(pb&&pb.classList.contains('active'))fetchIntra(true);}
 
 let spD=null,spSt="";
 const BENCH_TICKERS={SPY:'SPY',QQQ:'QQQ','IWDA.AS':'IWDA.AS','CAC.PA':'^FCHI'};
@@ -790,18 +792,24 @@ function loyerBien(b){
 function nbLots(b){return (b.lots&&b.lots.length)?b.lots.length:1}
 window.addLot=function(id){
   const b=S.immo.find(x=>x.id===id);if(!b)return;
-  const nom=prompt('Nom du logement\n(ex: Appartement 1, Maison A, RDC)','');
-  if(!nom)return;
-  const loyer=parseFloat((prompt('Loyer mensuel','')||'').replace(',','.'))||0;
   if(!b.lots)b.lots=[];
-  b.lots.push({id:'lt'+nid(),nom:nom.trim(),loyer,occupe:true});
+  /* Si le bien avait un loyer unique, il devient le premier logement */
+  if(!b.lots.length&&(b.loyer||0)>0)b.lots.push({id:'lt'+nid(),nom:'Logement 1',loyer:b.loyer,occupe:true});
+  b.lots.push({id:'lt'+nid(),nom:'Logement '+(b.lots.length+1),loyer:0,occupe:true});
   b.loyer=loyerBien(b);
   autoSave();R(true);
 };
 window.edLot=function(el,id,li,champ){
   const b=S.immo.find(x=>x.id===id);if(!b||!b.lots||!b.lots[li])return;
-  if(champ==='nom'){const v=prompt('Nom du logement',b.lots[li].nom);if(v===null)return;b.lots[li].nom=v.trim()||b.lots[li].nom}
-  else{const v=parseFloat((prompt('Loyer mensuel',b.lots[li].loyer)||'').replace(',','.'));if(isNaN(v))return;b.lots[li].loyer=v}
+  const val=champ==='nom'?b.lots[li].nom:(b.lots[li].loyer||0);
+  el.outerHTML='<input class="ci" style="width:'+(champ==='nom'?'130px;text-align:left':'80px')+'" value="'+String(val).replace(/"/g,'&quot;')+'"'
+    +' onkeydown="if(event.key===\'Enter\')cmLot(this,\''+id+'\','+li+',\''+champ+'\');if(event.key===\'Escape\')R(true)"'
+    +' onblur="cmLot(this,\''+id+'\','+li+',\''+champ+'\')" autofocus>';
+};
+window.cmLot=function(inp,id,li,champ){
+  const b=S.immo.find(x=>x.id===id);if(!b||!b.lots||!b.lots[li]){R(true);return}
+  if(champ==='nom'){const v=inp.value.trim();if(v)b.lots[li].nom=v}
+  else{const v=parseFloat(inp.value.replace(',','.'));if(!isNaN(v))b.lots[li].loyer=v}
   b.loyer=loyerBien(b);autoSave();R(true);
 };
 window.togLot=function(id,li){
@@ -1123,7 +1131,7 @@ let intraData=null,intraEnCours=false;
 async function fetchIntra(force){
   if(intraEnCours)return;
   const ajd=new Date().toISOString().slice(0,10);
-  if(!force&&intraData&&intraData._jour===ajd&&Date.now()-intraData._maj<240000)return;
+  if(!force&&intraData&&intraData._jour===ajd&&Date.now()-intraData._maj<270000)return;
   intraEnCours=true;
   /* Tickers détenus, avec leur quantité et leur enveloppe */
   const lignes=[];
@@ -1161,7 +1169,7 @@ async function fetchIntra(force){
   Object.values(res).forEach(d=>{if(!d.ts.length)return;tmin=Math.min(tmin,d.ts[0]);tmax=Math.max(tmax,d.ts[d.ts.length-1])});
   if(!isFinite(tmin))return;
   /* Grille depuis 9h30 jusqu'au dernier relevé */
-  const pas=300;
+  const pas=900;
   const base9h30=(function(){const d=new Date();
     const p=new Date(d.toLocaleString('en-US',{timeZone:'Europe/Paris'}));
     const dec=d.getTime()-p.getTime();
