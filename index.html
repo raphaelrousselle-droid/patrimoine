@@ -145,6 +145,11 @@ body.light .pf::after,body.light .obj-fill::after,body.light .dbar i::after{
 .g21{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:22px}
 .sf{grid-column:1/-1}
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* Tableau plus large que l'écran : on peut le faire glisser du doigt */
+.tw::-webkit-scrollbar{height:6px}
+.tw::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.tw.deborde{border-right:1px dashed var(--border)}
+.twhint{font-size:10px;color:var(--muted);margin:0 0 6px;letter-spacing:.03em;opacity:.8}
 table{width:100%;border-collapse:collapse;font-size:12px}
 th{text-align:right;padding:9px 10px;color:var(--muted);font-weight:500;font-size:9.5px;text-transform:uppercase;letter-spacing:.09em;border-bottom:1px solid var(--border);white-space:nowrap}
 th.l,td.l{text-align:left}
@@ -186,6 +191,7 @@ tr:hover{background:var(--card2)}
 .cto{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
 .ctb{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11.5px;padding:5px 11px;border-radius:7px;border:1px solid var(--border);background:transparent;user-select:none;transition:all .15s;color:var(--muted)}
 .ctb.on{border-color:currentColor;font-weight:550}
+.ctb.active{background:var(--card2);color:var(--text);border-color:var(--accent);font-weight:600}
 .ctb .dot{width:7px;height:7px;border-radius:2px}
 .pt{width:100%;font-size:13px;margin-top:12px}
 .pt th{text-align:center;padding:11px 14px;font-size:9.5px;font-weight:500;text-transform:uppercase;letter-spacing:.09em;border-bottom:1px solid var(--border);color:var(--muted)}
@@ -221,7 +227,14 @@ body:not(.light) .badge.neg{box-shadow:0 0 12px rgba(255,92,108,.1)}
 .sankey-bar{height:28px;border-radius:5px;display:flex;align-items:center;padding:0 10px;color:var(--bg);font-weight:550;font-size:11px;min-width:40px}
 details summary{color:var(--text2)}
 @media(max-width:900px){.side{transform:translateX(-100%)}.side.open{transform:none}.shell{margin-left:0}}
-@media(max-width:700px){.g2,.g21{grid-template-columns:1fr}.kr{grid-template-columns:repeat(2,1fr);gap:8px}.kpi{padding:13px 14px}.kv{font-size:19px}.card{padding:16px;margin-bottom:14px}.hc{flex-direction:column;align-items:flex-start}.cb{height:215px}.cbs{height:170px}main{padding:16px 10px 60px}.topbar{padding:8px 12px;gap:8px}.topacts .btn{padding:6px 9px}table{font-size:11px}td,th{padding:7px 5px}.lr{font-size:12px;padding:10px 0}.ct{font-size:13px}.vm-table td{padding:5px 6px;font-size:11px}}
+@media(max-width:700px){/* Téléphone : le bandeau défilant passe sous les boutons pour ne plus les écraser */
+.topbar{flex-wrap:wrap;row-gap:4px}
+.ticker{order:3;flex-basis:100%;flex:0 0 100%;height:22px}
+.topacts{margin-left:auto}
+.user-bar span:not(.logout){display:none}
+.user-bar img{width:22px;height:22px}
+.btn{padding:6px 8px}
+.g2,.g21{grid-template-columns:1fr}.g2>*,.g21>*,.kr>*{min-width:0}.kr{grid-template-columns:repeat(2,1fr);gap:8px}.kpi{padding:13px 14px}.kv{font-size:19px}.card{padding:16px;margin-bottom:14px}.hc{flex-direction:column;align-items:flex-start}.cb{height:215px}.cbs{height:170px}main{padding:16px 10px 60px}.topbar{padding:8px 12px;gap:8px}.topacts .btn{padding:6px 9px}table{font-size:11px}td,th{padding:7px 5px}.lr{font-size:12px;padding:10px 0}.ct{font-size:13px}.vm-table td{padding:5px 6px;font-size:11px}}
 .hamburger{display:none;background:none;border:none;font-size:20px;cursor:pointer;padding:2px 6px;color:var(--muted);flex-shrink:0}
 @media(max-width:900px){.hamburger{display:block}}
 .dm-btn{position:fixed;bottom:18px;right:18px;width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;z-index:99999}
@@ -322,7 +335,7 @@ details summary{color:var(--text2)}
 </div>
 <div class="page" id="page-brokers"><div class="kr" id="brokersKpi"></div><div class="card"><div class="ct">⇄ Comparateur de brokers</div><div class="tw" id="brokersTable"></div></div><div class="card"><div class="ct">⇋ Impact devises EUR/USD</div><div id="devisesInfo"></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">◫ Benchmark personnalisé</div><div style="display:flex;gap:4px" id="benchBtns"></div></div><div class="cb"><canvas id="cBench"></canvas></div></div></div>
 <div class="page" id="page-analyse"><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution par poste</div><div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap"><button class="pb" onclick="edHistPoste()">Historique</button><span id="envPs" style="display:flex;gap:4px"></span></div></div><div class="cto" id="envCases"></div><div class="cb" style="height:310px"><canvas id="cEnv"></canvas></div><div id="envLeg" style="margin-top:14px"></div></div><div class="card"><div class="ct">◫ Rendement par poche</div><div id="rdtPoches"></div></div></div>
-<div class="page" id="page-resume"><div class="kr" id="resumeKpi"></div><div class="card"><div class="ct">Heatmap portefeuille</div><div id="heatmap" style="width:100%;overflow:hidden"></div></div><div class="card"><div class="ct">▤ Résumé du mois</div><div id="resumeDetail"></div></div></div>
+<div class="page" id="page-resume"><div class="kr" id="resumeKpi"></div><div class="card"><div class="ct">Heatmap portefeuille</div><div id="heatmap" class="tw" style="width:100%"></div></div><div class="card"><div class="ct">▤ Résumé du mois</div><div id="resumeDetail"></div></div></div>
 <div class="page" id="page-simulator"><div id="simContent"></div></div>
 </main></div></div>
 <button class="dm-btn" onclick="toggleHide()" id="dmBtn" title="Masquer les montants">◉</button>
@@ -483,44 +496,103 @@ const estETF=(l,pk)=>l.sec==='ETF'||(l.sec?false:((SECTORS[l.c]||'')==='ETF'||pk
 function secteurDe(l,pk){return l.sec||SECTORS[l.c]||(estETF(l,pk)?'ETF':'Autre')}
 function cSec(){const s={};['pea','ctosb','ctoibkr','avl'].forEach(pk=>{const pf=S.pf[pk];if(!pf)return;pf.l.forEach(l=>{const k=secteurDe(l,pk);s[k]=(s[k]||0)+l.co*l.p})});return Object.entries(s).sort((a,b)=>b[1]-a[1])}
 
-async function doRef(){if(rL)return;rL=true;const b=document.getElementById('rbtn');b.innerHTML='◌';b.disabled=true;
-const allT=['SPY','EURUSD=X'];const taskMap=[];
-['pea','ctosb','ctoibkr','avl'].forEach(pk=>{S.pf[pk].l.forEach(x=>{const yt=YM[x.c]||x.c;if(yt&&yt!=='—'){allT.push(yt);taskMap.push({t:'s',pk,id:x.id,yt})}})});
-/* Les cryptos se négocient en continu : variation sur 24 h glissantes */
-const cryptoT=[];S.crypto.forEach(x=>{const yt=YM[x.symbol];if(yt)cryptoT.push({yt,id:x.id})});
-/* Watchlist */
-if(S.watchlist)S.watchlist.forEach(w=>{allT.push(w.ticker);taskMap.push({t:'w',id:w.id,yt:w.ticker})});
-INDICES.forEach(x=>allT.push(x.t));
-const data=await yQBatch(allT);
-let ok=0;
-/* Cryptos en 24 h glissantes */
-if(cryptoT.length){
-  const lots=[];for(let i=0;i<cryptoT.length;i+=10)lots.push(cryptoT.slice(i,i+10));
-  await Promise.all(lots.map(lot=>
-    fetch(GAS+"?h24=1&t="+encodeURIComponent(lot.map(x=>x.yt).join(",")))
-      .then(r=>r.ok?r.json():{})
-      .then(j=>{lot.forEach(x=>{const d=(j||{})[x.yt];if(d&&d.price){
-        const cr=S.crypto.find(c=>c.id===x.id);
-        if(cr){cr.prix=Math.round(d.price*100)/100;cr.var=d.chg||0;ok++}
-      }})})
-      .catch(()=>{})
+/* Récupère un lot de cours, avec rattrapage individuel pour les manquants */
+async function yQLot(tickers){
+  const res={};
+  const uniq=[...new Set(tickers.filter(t=>t&&t!=='—'))];
+  if(!uniq.length)return res;
+  try{
+    const r=await fetch(GAS+"?t="+encodeURIComponent(uniq.join(",")));
+    if(r.ok){const j=await r.json();Object.keys(j||{}).forEach(k=>{if(j[k]&&j[k].price)res[k]=j[k]})}
+  }catch(e){}
+  const manq=uniq.filter(t=>!res[t]);
+  if(manq.length)await Promise.all(manq.map(t=>
+    fetch(GAS+"?t="+encodeURIComponent(t)).then(r=>r.ok?r.json():{})
+      .then(j=>{const d=(j&&j[t])||j;if(d&&d.price)res[t]=d}).catch(()=>{})
   ));
+  return res;
 }
-/* Indices du bandeau */
-INDICES.forEach(x=>{if(data[x.t]&&data[x.t].price)idxData[x.t]=data[x.t]});renderTicker();
-/* Taux euro/dollar issu du même lot */
-if(data['EURUSD=X']&&data['EURUSD=X'].price>0)eurUsd=1/data['EURUSD=X'].price;
-const pH=new Date().toLocaleString('en-US',{timeZone:'Europe/Paris',hour:'2-digit',minute:'2-digit',hour12:false});const [pHh,pHm]=pH.split(':').map(Number);const minParis=pHh*60+pHm;const usOpen=minParis>=930||minParis<120;/* 15h30 à 22h, séance américaine */
-taskMap.forEach(task=>{const r=data[task.yt];if(!r||r.error||!r.price)return;ok++;
-if(task.t==='s'){const l=S.pf[task.pk].l.find(x=>x.id===task.id);if(l){const isUS=r.cur==='USD';if(isUS){l.usd=Math.round(r.price*100)/100;l.co=Math.round(r.price*eurUsd*100)/100}else if(r.cur==='GBp')l.co=Math.round(r.price*.01*1.17*100)/100;else l.co=Math.round(r.price*100)/100;if(isUS&&!usOpen){l.var=0}else{l.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0}
-/* Sparkline: stocker les 5 derniers prix */
-if(!l.spark)l.spark=[];const today2=new Date().toISOString().slice(0,10);if(l.spark.length===0||l.spark[l.spark.length-1].d!==today2)l.spark.push({d:today2,p:l.co});else l.spark[l.spark.length-1].p=l.co;if(l.spark.length>5)l.spark=l.spark.slice(-5);
-}}
-else{const cr=S.crypto.find(x=>x.id===task.id);if(cr){cr.prix=Math.round(r.price*100)/100;cr.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0}}
-if(task.t==='w'){const w=S.watchlist?S.watchlist.find(x=>x.id===task.id):null;if(w){w.prix=Math.round(r.price*100)/100;w.prev=r.prev||0;w.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0;w.cur=r.cur||''}}
-});let spyDay=null;if(data['SPY']&&data['SPY'].price)spyDay=Math.round(data['SPY'].chg*100)/100;
+/* Applique les cours reçus à un lot de lignes. Renvoie le nombre de réussites. */
+function appliquerCours(lot,data,usOpen){
+  let n=0;
+  lot.forEach(task=>{const r=data[task.yt];if(!r||r.error||!r.price)return;n++;
+    if(task.t==='s'){
+      const l=S.pf[task.pk].l.find(x=>x.id===task.id);if(!l)return;
+      const isUS=r.cur==='USD';
+      if(isUS){l.usd=Math.round(r.price*100)/100;l.co=Math.round(r.price*eurUsd*100)/100}
+      else if(r.cur==='GBp')l.co=Math.round(r.price*.01*1.17*100)/100;
+      else l.co=Math.round(r.price*100)/100;
+      if(isUS&&!usOpen)l.var=0;else l.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0;
+      if(!l.spark)l.spark=[];
+      const j2=new Date().toISOString().slice(0,10);
+      if(l.spark.length===0||l.spark[l.spark.length-1].d!==j2)l.spark.push({d:j2,p:l.co});
+      else l.spark[l.spark.length-1].p=l.co;
+      if(l.spark.length>5)l.spark=l.spark.slice(-5);
+    }else if(task.t==='w'){
+      const w=S.watchlist?S.watchlist.find(x=>x.id===task.id):null;if(!w)return;
+      w.prix=Math.round(r.price*100)/100;w.prev=r.prev||0;
+      w.var=r.prev>0?Math.round((r.price-r.prev)/r.prev*10000)/100:0;w.cur=r.cur||'';
+    }
+  });
+  return n;
+}
+/* Texte d'ancienneté des cours affiché à côté du bouton */
+function texteCours(){
+  if(!S||!S.lastRefresh)return'';
+  const d=new Date(S.lastRefresh);if(isNaN(d))return'';
+  const h=d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  const auj=new Date().toISOString().slice(0,10)===new Date(S.lastRefresh).toISOString().slice(0,10);
+  return'✓ cours de '+(auj?h:d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+' à '+h);
+}
+async function doRef(){if(rL)return;rL=true;
+const b=document.getElementById('rbtn');b.disabled=true;b.innerHTML='◌';
+/* Ce qu'il faut interroger */
+const taskMap=[];
+['pea','ctosb','ctoibkr','avl'].forEach(pk=>{S.pf[pk].l.forEach(x=>{const yt=YM[x.c]||x.c;if(yt&&yt!=='—')taskMap.push({t:'s',pk,id:x.id,yt})})});
+if(S.watchlist)S.watchlist.forEach(w=>{if(w.ticker)taskMap.push({t:'w',id:w.id,yt:w.ticker})});
+const cryptoT=[];S.crypto.forEach(x=>{const yt=YM[x.symbol];if(yt)cryptoT.push({yt,id:x.id})});
+const total=taskMap.length+cryptoT.length;
+let fait=0,ok=0,spyDay=null;
+const majBouton=()=>{b.innerHTML=total>0?'<span style="font-size:11px">'+Math.round(fait/total*100)+'%</span>':'◌'};
+/* Affichage rafraîchi au plus une fois par seconde pendant la récupération */
+let tR=0,tim=null;
+const rendre=()=>{const n=Date.now();if(n-tR>1000){tR=n;R(true)}else if(!tim)tim=setTimeout(()=>{tim=null;tR=Date.now();R(true)},1000)};
+/* Le taux euro/dollar et les indices partent en premier : les titres en dollar en dépendent */
+const pBase=yQLot(['EURUSD=X','SPY'].concat(INDICES.map(x=>x.t))).then(d=>{
+  if(d['EURUSD=X']&&d['EURUSD=X'].price>0)eurUsd=1/d['EURUSD=X'].price;
+  if(d['SPY']&&d['SPY'].price)spyDay=Math.round(d['SPY'].chg*100)/100;
+  INDICES.forEach(x=>{if(d[x.t]&&d[x.t].price)idxData[x.t]=d[x.t]});
+  try{renderTicker()}catch(e){}
+  return d;
+});
+const pH=new Date().toLocaleString('en-US',{timeZone:'Europe/Paris',hour:'2-digit',minute:'2-digit',hour12:false});
+const [pHh,pHm]=pH.split(':').map(Number);const minParis=pHh*60+pHm;const usOpen=minParis>=930||minParis<120;
+/* Petits lots de 5 : plus de requêtes en parallèle, donc résultat plus tôt à l'écran */
+const lots=[];for(let i=0;i<taskMap.length;i+=5)lots.push(taskMap.slice(i,i+5));
+const lotsC=[];for(let i=0;i<cryptoT.length;i+=5)lotsC.push(cryptoT.slice(i,i+5));
+const jobs=lots.map(async lot=>{
+  const d=await yQLot(lot.map(x=>x.yt));
+  await pBase;
+  ok+=appliquerCours(lot,d,usOpen);
+  fait+=lot.length;majBouton();rendre();
+});
+/* Les cryptos se négocient en continu : variation sur 24 h glissantes */
+lotsC.forEach(lot=>jobs.push(
+  fetch(GAS+"?h24=1&t="+encodeURIComponent(lot.map(x=>x.yt).join(",")))
+    .then(r=>r.ok?r.json():{})
+    .then(j=>{lot.forEach(x=>{const d=(j||{})[x.yt];if(d&&d.price){
+      const cr=S.crypto.find(c=>c.id===x.id);
+      if(cr){cr.prix=Math.round(d.price*100)/100;cr.var=d.chg||0;ok++}}})})
+    .catch(()=>{})
+    .then(()=>{fait+=lot.length;majBouton();rendre()})
+));
+await Promise.all(jobs);
+await pBase;
 if(ok>0){if(!S.histJour)S.histJour=[];const today=new Date().toISOString().slice(0,10);const t2=Tot();const dp=t2.p.dayPnl+t2.s.dayPnl+t2.i.dayPnl;const dpct=t2.bo>0?(dp/t2.bo*100):0;const ex=S.histJour.findIndex(h=>h.date===today);const ent={date:today,portf:Math.round(dpct*100)/100,pnl:Math.round(dp*100)/100,sp:spyDay,bourse:Math.round(t2.bo)};if(ex>=0)S.histJour[ex]=ent;else S.histJour.push(ent);if(S.histJour.length>30)S.histJour=S.histJour.slice(-30)}
-const now=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});rStat='✓ '+ok+' à '+now;rL=false;b.innerHTML='↻';b.disabled=false;autoSave();R(true);
+if(ok>0)S.lastRefresh=Date.now();
+if(tim){clearTimeout(tim);tim=null}
+rStat=ok>0?texteCours():'⚠ cours indisponibles';
+rL=false;b.innerHTML='↻';b.disabled=false;autoSave();R(true);
 /* Courbe du jour, une fois les cours appliqués */
 const pb=document.getElementById('page-bourse');
 if(pb&&pb.classList.contains('active'))fetchIntra(true);}
@@ -1445,6 +1517,34 @@ function initReveal(){
 }
 
 /* ====== RENDER ====== */
+/* Sur petit écran, un tableau plus large que l'écran doit pouvoir glisser du doigt
+   au lieu d'être coupé. On l'entoure donc d'un cadre défilant après chaque affichage. */
+function enrouleTables(){
+  document.querySelectorAll('table').forEach(t=>{
+    let p=t.parentElement;if(!p)return;
+    if(!p.classList.contains('tw')){
+      if(p.classList.contains('amor-table')){p.classList.add('tw')}
+      else{
+        const d=document.createElement('div');d.className='tw';
+        p.insertBefore(d,t);d.appendChild(t);p=d;
+      }
+    }else p=p;
+    const box=t.closest('.tw');if(!box)return;
+    const trop=box.scrollWidth>box.clientWidth+4;
+    box.classList.toggle('deborde',trop);
+    /* Mention « glissez » affichée une seule fois par tableau, sur petit écran */
+    const av=box.previousElementSibling;
+    if(trop&&window.innerWidth<=700){
+      if(!av||!av.classList.contains('twhint')){
+        const h=document.createElement('div');h.className='twhint';
+        h.textContent='← glissez le tableau pour voir les autres colonnes';
+        box.parentElement.insertBefore(h,box);
+      }
+    }else if(av&&av.classList.contains('twhint'))av.remove();
+  });
+}
+let _tResize;
+window.addEventListener('resize',()=>{clearTimeout(_tResize);_tResize=setTimeout(()=>{try{enrouleTables()}catch(e){}},200)});
 function R(dc){
 try{
 /* Mettre à jour le restant dû de chaque dette AVANT les calculs */
@@ -2969,6 +3069,7 @@ if(dc&&document.getElementById('cRadIdx')){
   if(mm){const m=((S.marches||{})[marPer]||{})._maj;mm.textContent=m?'à jour le '+m.slice(8,10)+'/'+m.slice(5,7)+' à '+m.slice(11,13)+'h':''}
 }
 setTimeout(initReveal,30);
+try{enrouleTables()}catch(e){}
 }catch(err){console.error('Erreur rendu R():',err)}
 }/* end R */
 
@@ -3060,7 +3161,7 @@ window.edNote=function(section){if(!S||!S.notes)return;const cur=S.notes[section
 function noteBtn(section){const has=S&&S.notes&&S.notes[section];return ' <button style="font-size:10px;background:none;border:1px solid '+(has?'var(--accent)':'var(--border)')+';border-radius:4px;padding:2px 6px;cursor:pointer;color:'+(has?'var(--accent)':'var(--muted)')+'" onclick="edNote(\''+section+'\')">✎'+(has?' ✓':'')+'</button>'}
 function noteDisp(section){if(!S||!S.notes)return '';const n=S.notes[section];return n?'<div style="background:rgba(62,207,142,.05);border:1px solid rgba(62,207,142,.15);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text);margin-bottom:12px">✎ '+n+'</div>':''}
 
-function initApp(){R(true);majOutils();fSP();setTimeout(doRef,2000);setInterval(function(){if(!rL)doRef()},300000)}
+function initApp(){rStat=texteCours();R(true);majOutils();fSP();setTimeout(doRef,2000);setInterval(function(){if(!rL)doRef()},300000)}
 </script>
 </body>
 </html>
