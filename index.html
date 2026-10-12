@@ -1777,7 +1777,8 @@ function ajouteOps(liste){
     S.ope.push({i:'o'+Date.now().toString(36)+Math.random().toString(36).slice(2,7),d:o.d,l:o.l,m:o.m,b:o.b,c:categoriseOp(o.l,o.m),h});
   });
   S.ope.sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:0);
-  return{neuf,dbl};
+  const vir=apparieVirements();
+  return{neuf,dbl,vir};
 }
 window.opeFichiers=async function(files){
   const zone=document.getElementById('opeMsg');
@@ -1807,8 +1808,67 @@ window.opeDrop=function(e){e.preventDefault();document.getElementById('opeZone')
 window.opeOver=function(e){e.preventDefault();document.getElementById('opeZone').classList.add('survol')};
 window.opeLeave=function(){document.getElementById('opeZone').classList.remove('survol')};
 
+/* --- Réglages par compte : nature et part détenue --- */
+const OTYPES=[{k:'perso',n:'Personnel'},{k:'commun',n:'Commun'},{k:'pro',n:'Pro (SCI)'}];
+function cptReg(b){
+  if(!S.opeCpts)S.opeCpts={};
+  if(!S.opeCpts[b])S.opeCpts[b]={t:/indy|sci|pro/i.test(b)?'pro':'perso',p:100};
+  const r=S.opeCpts[b];
+  if(r.p==null)r.p=100;
+  if(!r.t)r.t='perso';
+  return r;
+}
+function partDe(o){const r=cptReg(o.b);return Math.max(0,Math.min(100,r.p))/100}
+/* Montant retenu dans les totaux : la totalité, ou seulement ma part */
+function mt(o){return opePart?o.m*partDe(o):o.m}
+window.setCptType=function(sel,b){cptReg(b).t=sel.value;autoSave();R(true)};
+window.setCptPart=function(inp,b){
+  const v=parseFloat(String(inp.value).replace(',','.'));
+  if(!isNaN(v))cptReg(b).p=Math.max(0,Math.min(100,v));
+  autoSave();R(true);
+};
+window.setCptNom=function(inp,b){
+  const v=inp.value.trim();
+  if(v&&v!==b){
+    (S.ope||[]).forEach(o=>{if(o.b===b){o.b=v;o.h=hashOp(o)}});
+    if(!S.opeCpts)S.opeCpts={};
+    S.opeCpts[v]=S.opeCpts[b]||{t:'perso',p:100};delete S.opeCpts[b];
+    if(opeCpt===b)opeCpt=v;
+  }
+  autoSave();R(true);
+};
+
+/* --- Virements d'un de mes comptes vers un autre --- */
+/* Un débit ici et un crédit là-bas, même montant à quelques jours d'écart : ce n'est
+   ni un revenu ni une dépense, juste de l'argent qui change de poche. */
+function apparieVirements(){
+  const l=(S.ope||[]).filter(o=>!o.fige);
+  const sorties=l.filter(o=>o.m<0&&!o.vi);
+  const entrees=l.filter(o=>o.m>0&&!o.vi);
+  let n=0;
+  sorties.forEach(d=>{
+    if(d.vi)return;
+    const jd=Date.parse(d.d);
+    const c=entrees.find(e=>!e.vi&&e.b!==d.b&&Math.abs(e.m+d.m)<0.02&&Math.abs(Date.parse(e.d)-jd)<=4*86400000);
+    if(!c)return;
+    d.vi=c.i;c.vi=d.i;
+    d.c='Virements internes';c.c='Virements internes';
+    n++;
+  });
+  return n;
+}
+window.detacheVir=function(id){
+  const o=(S.ope||[]).find(x=>x.i===id);if(!o)return;
+  const autre=(S.ope||[]).find(x=>x.i===o.vi);
+  o.vi=null;o.fige=1;o.c=categoriseOp(o.l,o.m);
+  if(autre){autre.vi=null;autre.fige=1;autre.c=categoriseOp(autre.l,autre.m)}
+  autoSave();R(true);
+};
+
 /* --- Filtres et sélections --- */
-let opeMois='',opeCpt='',opeVue='cat';
+let opeMois='',opeCpt='',opePer='perso',opePart=true;
+window.setOpePer=v=>{opePer=v;R(true)};
+window.setOpePart=v=>{opePart=(v==='part');R(true)};
 window.setOpeMois=v=>{opeMois=v;R(true)};
 window.setOpeCpt=v=>{opeCpt=v;R(true)};
 window.setOpeVue=v=>{opeVue=v;R(true)};
@@ -1847,13 +1907,19 @@ function opeLibMois(k){
 }
 /* Les mouvements internes et l'épargne ne sont pas des dépenses de consommation */
 const HORS_DEPENSE=['Virements internes','Épargne & Invest.'];
+/* Le périmètre sépare les comptes du ménage de ceux de la société */
+function dansPerimetre(o){
+  if(opePer==='tout')return true;
+  const t=cptReg(o.b).t;
+  return opePer==='pro'?t==='pro':t!=='pro';
+}
 function opeFiltre(){
-  return opeListe().filter(o=>(!opeMois||o.d.slice(0,7)===opeMois)&&(!opeCpt||o.b===opeCpt));
+  return opeListe().filter(o=>(!opeMois||o.d.slice(0,7)===opeMois)&&(!opeCpt||o.b===opeCpt)&&dansPerimetre(o));
 }
 /* Repère les prélèvements qui reviennent tous les mois */
 function opeRecurrences(){
   const g={};
-  opeListe().filter(o=>o.m<0).forEach(o=>{
+  opeListe().filter(o=>o.m<0&&dansPerimetre(o)&&HORS_DEPENSE.indexOf(o.c)<0).forEach(o=>{
     const k=cleLib(o.l);if(!k||k.length<3)return;
     (g[k]=g[k]||[]).push(o);
   });
@@ -1862,7 +1928,7 @@ function opeRecurrences(){
     const l=g[k];
     const mois=[...new Set(l.map(o=>o.d.slice(0,7)))];
     if(mois.length<3)continue;
-    const moy=l.reduce((a,o)=>a+Math.abs(o.m),0)/l.length;
+    const moy=l.reduce((a,o)=>a+Math.abs(mt(o)),0)/l.length;
     const ecart=l.reduce((a,o)=>a+Math.abs(Math.abs(o.m)-moy),0)/l.length;
     if(ecart>moy*0.25)continue;/* montant trop variable : ce n'est pas un abonnement */
     out.push({k,n:l[0].l,moy:Math.round(moy*100)/100,nb:mois.length,c:l[0].c,dernier:l[0].d});
@@ -1878,9 +1944,15 @@ function rOpe(dc){
   if(!dispo.length)opeMois='';
 
   /* Barre de filtres */
+  const aPro=opeComptes().some(b=>cptReg(b).t==='pro');
+  const aPartagé=opeComptes().some(b=>cptReg(b).p<100);
   document.getElementById('opeFiltres').innerHTML=
     '<select class="sel" onchange="setOpeMois(this.value)">'+dispo.map(m=>'<option value="'+m+'"'+(m===opeMois?' selected':'')+'>'+opeLibMois(m)+'</option>').join('')+(dispo.length?'':'<option>—</option>')+'</select>'+
     '<select class="sel" onchange="setOpeCpt(this.value)"><option value="">Tous les comptes</option>'+opeComptes().map(b=>'<option value="'+b+'"'+(b===opeCpt?' selected':'')+'>'+b+'</option>').join('')+'</select>'+
+    (aPro?'<select class="sel" onchange="setOpePer(this.value)">'+
+      [{k:'perso',n:'Mes comptes privés'},{k:'pro',n:'Société (SCI)'},{k:'tout',n:'Tout confondu'}]
+      .map(x=>'<option value="'+x.k+'"'+(x.k===opePer?' selected':'')+'>'+x.n+'</option>').join('')+'</select>':'')+
+    (aPartagé?'<div style="display:flex;gap:4px"><button class="ctb'+(opePart?' active':'')+'" onclick="setOpePart(\'part\')">Ma part</button><button class="ctb'+(opePart?'':' active')+'" onclick="setOpePart(\'tout\')">Montants entiers</button></div>':'')+
     '<span style="flex:1"></span>'+
     (tous.length?'<button class="pb" onclick="reclasseOpe()">↺ Reclasser</button><button class="pb" onclick="videOpe()">✕ Tout effacer</button>':'');
 
@@ -1894,9 +1966,9 @@ function rOpe(dc){
   const entrees=f.filter(o=>o.m>0&&HORS_DEPENSE.indexOf(o.c)<0);
   const sorties=f.filter(o=>o.m<0&&HORS_DEPENSE.indexOf(o.c)<0);
   const epargne=f.filter(o=>o.c==='Épargne & Invest.'&&o.m<0);
-  const sRev=entrees.reduce((a,o)=>a+o.m,0);
-  const sDep=sorties.reduce((a,o)=>a-o.m,0);
-  const sEpa=epargne.reduce((a,o)=>a-o.m,0);
+  const sRev=entrees.reduce((a,o)=>a+mt(o),0);
+  const sDep=sorties.reduce((a,o)=>a-mt(o),0);
+  const sEpa=epargne.reduce((a,o)=>a-mt(o),0);
   const solde=sRev-sDep;
   const taux=sRev>0?((solde+ 0)/sRev*100):0;
 
@@ -1908,7 +1980,7 @@ function rOpe(dc){
 
   /* Répartition des dépenses du mois */
   const parCat={};
-  sorties.forEach(o=>{parCat[o.c]=(parCat[o.c]||0)+Math.abs(o.m)});
+  sorties.forEach(o=>{parCat[o.c]=(parCat[o.c]||0)+Math.abs(mt(o))});
   let items=Object.keys(parCat).sort((a,b)=>parCat[b]-parCat[a])
     .map(k=>({n:k,v:Math.round(parCat[k]),c:OCAT_COUL[k]||'#8b95a5'}));
   /* Au-delà de neuf postes la légende devient illisible : le reste est regroupé */
@@ -1919,16 +1991,18 @@ function rOpe(dc){
 
   /* Mois pour les graphiques d'évolution */
   const parMoisTous={};
-  opeListe().filter(o=>(!opeCpt||o.b===opeCpt)).forEach(o=>{
+  opeListe().filter(o=>(!opeCpt||o.b===opeCpt)&&dansPerimetre(o)).forEach(o=>{
     const k=o.d.slice(0,7);
     const e=parMoisTous[k]=parMoisTous[k]||{rev:0,dep:0,cat:{}};
     if(HORS_DEPENSE.indexOf(o.c)>=0)return;
-    if(o.m>0)e.rev+=o.m;else{e.dep+=-o.m;e.cat[o.c]=(e.cat[o.c]||0)+(-o.m)}
+    const v=mt(o);
+    if(v>0)e.rev+=v;else{e.dep+=-v;e.cat[o.c]=(e.cat[o.c]||0)+(-v)}
   });
   const clesM=Object.keys(parMoisTous).sort().slice(-12);
   const libM=clesM.map(k=>MOIS_LONG[parseInt(k.slice(5))-1].slice(0,4)+' '+k.slice(2,4));
 
   document.getElementById('opeCorps').innerHTML=
+   opeHtmlComptes()+
    '<div class="g2" style="align-items:start">'+
      '<div class="card"><div class="fb"><div class="ct" style="margin:0">Dépenses par catégorie</div><div style="font-size:11.5px;color:var(--muted)">'+opeLibMois(opeMois||'')+'</div></div>'+
        '<div class="cbs" style="height:230px"><canvas id="cOpeCat"></canvas></div><div id="opeLeg" style="padding:8px 2px 0"></div></div>'+
@@ -1965,6 +2039,32 @@ function rOpe(dc){
                 y:{stacked:true,ticks:{color:CV('--muted'),font:{size:10.5},padding:8,callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v},grid:{color:CV('--grid'),drawTicks:false},border:{display:false}}}}});
   }
 }
+
+/* Carte de réglage des comptes */
+function opeHtmlComptes(){
+  const cpts=opeComptes();
+  if(!cpts.length)return'';
+  const nVir=(S.ope||[]).filter(o=>o.vi).length;
+  let h='<div class="card"><div class="fb"><div class="ct" style="margin:0">Mes comptes</div>'+
+    (nVir?'<div style="font-size:11.5px;color:var(--muted)">'+(nVir/2)+' virement'+(nVir>2?'s':'')+' entre vos comptes repéré'+(nVir>2?'s':'')+'</div>':'')+'</div>';
+  h+='<div class="tw"><table><thead><tr><th class="l">Compte</th><th class="l">Nature</th><th>Ma part</th><th>Opérations</th><th>Solde des flux</th></tr></thead><tbody>';
+  cpts.forEach(b=>{
+    const r=cptReg(b);
+    const l=opeListe().filter(o=>o.b===b);
+    const flux=l.filter(o=>HORS_DEPENSE.indexOf(o.c)<0).reduce((a,o)=>a+o.m*(r.p/100),0);
+    h+='<tr><td class="l"><input class="ci" value="'+b.replace(/"/g,'&quot;')+'" onblur="setCptNom(this,\''+b.replace(/'/g,"\\'")+'\')" style="font-weight:600;font-size:12px;width:150px;text-align:left"></td>'+
+      '<td class="l"><select class="sel sel-min" onchange="setCptType(this,\''+b.replace(/'/g,"\\'")+'\')">'+
+        OTYPES.map(t=>'<option value="'+t.k+'"'+(t.k===r.t?' selected':'')+'>'+t.n+'</option>').join('')+'</select></td>'+
+      '<td><input class="ci" value="'+r.p+'" onblur="setCptPart(this,\''+b.replace(/'/g,"\\'")+'\')" style="width:48px;text-align:right"> %</td>'+
+      '<td style="color:var(--muted)">'+l.length+'</td>'+
+      '<td style="font-weight:700;color:'+(flux>=0?'var(--green)':'var(--red)')+'">'+(flux>=0?'+':'')+F(Math.round(flux))+'</td></tr>';
+  });
+  h+='</tbody></table></div>';
+  h+='<div style="font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6">'+
+    'Indiquez la nature de chaque compte et la part qui vous revient. Sur un compte joint détenu à deux, mettez 50 % : les totaux ne retiendront que votre moitié. '+
+    'Les comptes de société restent à l\'écart de votre budget privé, sauf si vous choisissez « Tout confondu ».</div></div>';
+  return h;
+}
 function opeHtmlRecurrences(){
   const r=opeRecurrences();
   if(!r.length)return'';
@@ -1987,8 +2087,8 @@ function opeHtmlTable(f){
       '<td class="l"><span style="font-size:12px">'+o.l.slice(0,48)+'</span></td>'+
       '<td class="l"><select class="sel sel-min" onchange="majOpeCat(this,\''+o.i+'\')" style="color:'+(OCAT_COUL[o.c]||'#8b95a5')+'">'+opts(o.c)+'</select></td>'+
       '<td style="color:var(--muted);font-size:11px">'+o.b+'</td>'+
-      '<td style="font-weight:700;color:'+(o.m>0?'var(--green)':'var(--text)')+'">'+(o.m>0?'+':'')+F2(o.m)+'</td>'+
-      '<td><button class="db" onclick="suppOpe(\''+o.i+'\')">✕</button></td></tr>';
+      '<td style="font-weight:700;color:'+(o.m>0?'var(--green)':'var(--text)')+'">'+(o.m>0?'+':'')+F2(o.m)+(partDe(o)<1&&opePart?'<div class="tk">ma part '+F2(mt(o))+'</div>':'')+'</td>'+
+      '<td>'+(o.vi?'<button class="db" title="Ce n\'est pas un virement entre mes comptes" onclick="detacheVir(\''+o.i+'\')">⇄</button>':'')+'<button class="db" onclick="suppOpe(\''+o.i+'\')">✕</button></td></tr>';
   });
   h+='</tbody></table></div>';
   if(f.length>400)h+='<div style="font-size:11.5px;color:var(--muted);margin-top:8px">400 premières lignes affichées sur '+f.length+'.</div>';
