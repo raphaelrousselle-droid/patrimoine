@@ -289,7 +289,7 @@ details summary{color:var(--text2)}
 </div>
 </header>
 <main>
-<div class="page active" id="page-home"><div id="homeAlerts"></div><div class="kr" id="hk"></div><div id="widgetResume" style="margin-bottom:20px"></div><div class="hc"><div><span style="font-size:12px;color:var(--muted)">◆ Règle des 4%</span><div style="font-size:20px;font-weight:800;color:var(--accent);margin-top:2px" id="k4"></div></div><div style="font-size:13px;color:var(--muted)" id="k4m"></div></div><div class="g21"><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0" id="netTitre">Évolution Patrimoine Net</div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div style="display:flex;gap:4px"><button class="ctb" id="netMode_brut" onclick="setNetMode('brut')">Brut</button><button class="ctb active" id="netMode_net" onclick="setNetMode('net')">Net</button></div><div style="display:flex;gap:4px" id="netPs"></div></div></div><div class="cb"><canvas id="cN"></canvas></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">Répartition</div><div style="display:flex;gap:4px"><button class="ctb active" id="pieMode_brut" onclick="setPieMode('brut')">Brut</button><button class="ctb" id="pieMode_net" onclick="setPieMode('net')">Net</button></div></div><div class="cbs" style="height:230px"><canvas id="cP"></canvas></div><div id="pl" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution par catégorie</div><div style="display:flex;gap:4px" id="evoPs"></div></div><div class="cto" id="et"></div><div class="cb"><canvas id="cE"></canvas></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">◷ Historique</div><button class="reset-btn" onclick="if(confirm('Reset?'))doReset()">↺ Réinitialiser</button></div><div id="sl" style="margin-top:12px"></div></div></div>
+<div class="page active" id="page-home"><div id="homeAlerts"></div><div class="kr" id="hk"></div><div id="widgetResume" style="margin-bottom:20px"></div><div class="hc"><div><span style="font-size:12px;color:var(--muted)">◆ Règle des 4%</span><div style="font-size:20px;font-weight:800;color:var(--accent);margin-top:2px" id="k4"></div></div><div style="font-size:13px;color:var(--muted)" id="k4m"></div></div><div class="g21"><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0" id="netTitre">Évolution Patrimoine Net</div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div style="display:flex;gap:4px"><button class="ctb" id="netMode_brut" onclick="setNetMode('brut')">Brut</button><button class="ctb active" id="netMode_net" onclick="setNetMode('net')">Net</button></div><div style="display:flex;gap:4px"><button class="ctb active" id="netVue_courbe" onclick="setNetVue('courbe')">⌁ Courbe</button><button class="ctb" id="netVue_barres" onclick="setNetVue('barres')">▮ Barres</button></div><div style="display:flex;gap:4px" id="netPs"></div></div><div class="cto" id="netCases" style="display:none"></div></div><div class="cb"><canvas id="cN"></canvas></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">Répartition</div><div style="display:flex;gap:4px"><button class="ctb active" id="pieMode_brut" onclick="setPieMode('brut')">Brut</button><button class="ctb" id="pieMode_net" onclick="setPieMode('net')">Net</button></div></div><div class="cbs" style="height:230px"><canvas id="cP"></canvas></div><div id="pl" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution par catégorie</div><div style="display:flex;gap:4px" id="evoPs"></div></div><div class="cto" id="et"></div><div class="cb"><canvas id="cE"></canvas></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">◷ Historique</div><button class="reset-btn" onclick="if(confirm('Reset?'))doReset()">↺ Réinitialiser</button></div><div id="sl" style="margin-top:12px"></div></div></div>
 <div class="page" id="page-bourse"><div class="kr" id="bk"></div>
 <div class="card"><div class="fb" style="margin-bottom:4px"><div><div class="kl">Portefeuille · aujourd'hui</div><div id="intraTitre" style="display:flex;align-items:baseline;gap:12px;margin-top:4px"></div></div><div id="intraInfo" style="font-size:11.5px;color:var(--muted);text-align:right"></div></div><div class="cb" style="height:190px"><canvas id="cIntra"></canvas></div></div><div class="wb" id="bw"></div><div id="rstat" class="rs" style="margin:12px 0"></div><div class="card"><div class="fb"><div class="ct" style="margin:0">PEA — Fortuneo</div></div><div class="kr" id="pk1" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt1"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — Saxo <span style="font-size:11px;color:var(--muted)">(PRU $)</span></div></div><div class="kr" id="pk2" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt2"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">CTO — IBKR</div></div><div class="kr" id="pk3" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt3"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">AV — Linxea</div></div><div class="kr" id="pk4" style="margin-bottom:8px"></div><div class="tw" style="margin-top:12px" id="pt4"></div></div><div class="g2" style="margin:16px 0"><div class="card"><div class="ct">◫ Panorama 2026</div><div id="ptw"></div><div class="ss" id="sps"></div></div><div class="card"><div class="ct">Répartition secteur</div><div class="cbs" style="height:230px"><canvas id="cSec"></canvas></div><div id="secLeg" style="padding:8px 12px 0"></div></div></div><div class="card"><div class="fb" style="margin-bottom:8px"><div class="ct" style="margin:0">Perf cumulée TWR vs S&P</div><div style="display:flex;gap:4px" id="ps"></div></div><div class="cb"><canvas id="cPf"></canvas></div><div class="cl"><span style="color:#7c3aed">● Portf.</span><span style="color:#e8a33d">- - S&P</span></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">↕ Versements mensuels</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addVM()">+ Mois</button></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Valeur = relevée au 1er du mois suivant. Versement = viré pendant le mois.</div><div id="vmList"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">◎ Objectifs Bourse</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addBourseGoal()">+ Objectif</button></div><div id="bourseGoals" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">◌ Watchlist</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addWatch()">+ Suivre</button></div><div id="watchlist" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb"><div class="ct" style="margin:0">✎ Journal d'investissement</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addJournal()">+ Entrée</button></div><div id="journal" style="margin-top:12px"></div></div><div class="card" style="margin-top:16px"><div class="fb" style="margin-bottom:14px"><div class="ct" style="margin:0">◈ Dividendes perçus</div><div style="display:flex;gap:4px" id="divVueBtns"></div></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Note ici les dividendes que tu reçois réellement chaque mois (tous portefeuilles confondus). Clique sur un montant pour le modifier.</div><div class="tw" id="divMoisTable"></div><div class="cbs" style="margin-top:16px"><canvas id="cDivMois"></canvas></div></div></div>
 <div class="page" id="page-epargne"><div class="kr" id="ek"></div><div class="g2"><div class="card"><div class="ct" id="ct1"></div><div id="cl1"></div><div id="af1"></div></div><div class="card"><div class="ct" id="ct2"></div><div id="cl2"></div><div id="af2"></div></div><div class="card sf"><div class="ct" id="ct3"></div><div id="cl3"></div><div id="af3"></div></div></div></div>
@@ -708,11 +708,11 @@ document.getElementById('tabs').onclick=e=>{const t=e.target.closest('.tab');if(
 /* Fermer dropdown quand on clique ailleurs */
 
 
-let _cN,_cP,_cE,_cPf,_cS,cPr=12,evoPr=12,immoPr=12,netPr=12,cryPr=12,envPr=12,pieMode='brut',netMode='net',divVue='mois';
+let _cN,_cP,_cE,_cPf,_cS,cPr=12,evoPr=12,immoPr=12,netPr=12,cryPr=12,envPr=12,pieMode='brut',netMode='net',netVue='courbe',divVue='mois';
 const perfLines=[{k:'bourse',l:'Global',c:CV('--c1'),on:true},{k:'pea',l:'PEA',c:CV('--c1'),on:false},{k:'ctosb',l:'CTO Saxo',c:CV('--c3'),on:false},{k:'ctoibkr',l:'CTO IBKR',c:CV('--c4'),on:false},{k:'avl',l:'AV Linxea',c:CV('--p6'),on:false},{k:'sp',l:'S&P 500',c:CV('--muted'),on:true}];
 window.tPL=i=>{perfLines[i].on=!perfLines[i].on;R(true)};
 const evo=[{k:'immobilier',c:CV('--p2'),l:'Immobilier',on:false},{k:'bourse',c:CV('--p5'),l:'Bourse',on:true},{k:'epargne',c:CV('--p1'),l:'Épargne',on:true},{k:'comptes',c:CV('--p7'),l:'Comptes',on:true},{k:'crypto',c:CV('--p4'),l:'Crypto',on:true},{k:'brut',c:CV('--p3'),l:'Brut',on:false},{k:'net',c:CV('--p6'),l:'Net',on:false}];
-window.tE=i=>{evo[i].on=!evo[i].on;R(true)};window.sP=m=>{cPr=m;R(true)};window.sEP=m=>{evoPr=m;R(true)};window.setPieMode=m=>{pieMode=m;R(true)};window.setNetMode=m=>{netMode=m;R(true)};window.sIP=m=>{immoPr=m;R(true)};window.sNP=m=>{netPr=m;R(true)};window.sCP=m=>{cryPr=m;R(true)};window.sEnvP=m=>{envPr=m;R(true)};window.edHistPoste=function(){
+window.tE=i=>{evo[i].on=!evo[i].on;R(true)};window.sP=m=>{cPr=m;R(true)};window.sEP=m=>{evoPr=m;R(true)};window.setPieMode=m=>{pieMode=m;R(true)};window.setNetMode=m=>{netMode=m;R(true)};window.setNetVue=v=>{netVue=v;R(true)};window.tNetCls=k=>{if(!S.netSel)S.netSel={};S.netSel[k]=!S.netSel[k];autoSave();R(true)};window.sIP=m=>{immoPr=m;R(true)};window.sNP=m=>{netPr=m;R(true)};window.sCP=m=>{cryPr=m;R(true)};window.sEnvP=m=>{envPr=m;R(true)};window.edHistPoste=function(){
   const c=parseInt(prompt('Quel poste veux-tu renseigner ?\n\n1. PEE\n2. Assurance-vie (part SCPI et fonds euros)','1'));
   if(c===1)edPeeHist();else if(c===2)edAvScpiHist();
 };
@@ -1545,6 +1545,10 @@ function enrouleTables(){
 }
 let _tResize;
 window.addEventListener('resize',()=>{clearTimeout(_tResize);_tResize=setTimeout(()=>{try{enrouleTables()}catch(e){}},200)});
+/* Dans une barre empilée, seul le segment le plus haut est arrondi */
+const coinHaut=ctx=>{const d=ctx.chart.data.datasets,i=ctx.dataIndex;
+  for(let j=ctx.datasetIndex+1;j<d.length;j++){if((d[j].data[i]||0)>0)return 0}
+  return{topLeft:6,topRight:6}};
 function R(dc){
 try{
 /* Mettre à jour le restant dû de chaque dette AVANT les calculs */
@@ -1613,7 +1617,47 @@ document.getElementById('netMode_net').className='ctb'+(nmB?'':' active');
 document.getElementById('netTitre').textContent='Évolution Patrimoine '+(nmB?'Brut':'Net');
 const nmC=nmB?CV('--accent'):CV('--green');
 const valNet=h=>{if(nmB)return (h.brut!=null?h.brut:((h.immobilier||0)+(h.comptes||0)+(h.epargne||0)+(h.bourse||0)+(h.crypto||0)));return (h.net!=null?h.net:((h.immobilier||0)+(h.comptes||0)+(h.epargne||0)+(h.bourse||0)+(h.crypto||0)-(h.dettes||0)))};
-if(_cN)_cN.destroy();_cN=new Chart(document.getElementById('cN'),{type:'line',data:{labels:Hn.map(h=>h.date),datasets:[{data:Hn.map(valNet),borderColor:nmC,backgroundColor:gradFill(nmC),fill:true,tension:.35,pointRadius:0,pointHoverRadius:5,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},animation:animConf,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>F(c.raw)}}},scales:axeOpts(v=>(v/1000).toFixed(0)+'k')}});
+document.getElementById('netVue_courbe').className='ctb'+(netVue==='courbe'?' active':'');
+document.getElementById('netVue_barres').className='ctb'+(netVue==='barres'?' active':'');
+/* Les cinq classes d'actifs, mêmes couleurs que le camembert d'à côté */
+const CLS=[
+  {k:'immobilier',n:nmB?'Immobilier':'Immobilier net',c:PIE()[0]},
+  {k:'comptes',n:'Comptes',c:PIE()[1]},
+  {k:'epargne',n:'Épargne',c:PIE()[2]},
+  {k:'bourse',n:'Bourse',c:PIE()[3]},
+  {k:'crypto',n:'Crypto',c:PIE()[4]}];
+if(!S.netSel)S.netSel={immobilier:true,comptes:true,epargne:true,bourse:true,crypto:true};
+CLS.forEach(c=>{if(S.netSel[c.k]===undefined)S.netSel[c.k]=true});
+/* En mode Net, l'immobilier est amputé des dettes du mois */
+const valCls=(h,k)=>{
+  if(k==='immobilier'){
+    const br=h.immobilier||0;
+    return nmB?br:Math.max(0,br-(h.dettes||0));
+  }
+  return h[k]||0;
+};
+const casesN=document.getElementById('netCases');
+if(netVue==='barres'){
+  casesN.style.display='flex';
+  casesN.innerHTML=CLS.map(c=>'<label class="ctb '+(S.netSel[c.k]?'on':'')+'" style="color:'+(S.netSel[c.k]?c.c:'var(--muted)')+'" onclick="tNetCls(\''+c.k+'\')"><span class="dot" style="background:'+(S.netSel[c.k]?c.c:'var(--border)')+'"></span>'+c.n+'</label>').join('');
+}else casesN.style.display='none';
+if(_cN)_cN.destroy();
+if(netVue==='barres'){
+  const choisies=CLS.filter(c=>S.netSel[c.k]&&Hn.some(h=>valCls(h,c.k)>0));
+  _cN=new Chart(document.getElementById('cN'),{type:'bar',
+    data:{labels:Hn.map(h=>h.date),datasets:choisies.map(c=>({label:c.n,data:Hn.map(h=>Math.round(valCls(h,c.k))),backgroundColor:c.c,borderRadius:coinHaut,borderSkipped:false,barPercentage:.64,categoryPercentage:.86,borderWidth:0}))},
+    options:{responsive:true,maintainAspectRatio:false,animation:animConf,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},
+        tooltip:{backgroundColor:CV('--card2'),titleColor:CV('--text'),bodyColor:CV('--text2'),borderColor:CV('--border'),borderWidth:1,padding:11,cornerRadius:9,usePointStyle:true,boxWidth:8,boxHeight:8,boxPadding:4,
+          filter:c=>c.raw>0,
+          callbacks:{label:c=>c.dataset.label+' : '+F(c.raw),
+            footer:it=>'Total : '+F(it.reduce((a,i)=>a+i.raw,0))}}},
+      scales:{x:{stacked:true,ticks:{color:CV('--muted'),font:{size:10.5},maxRotation:0,autoSkipPadding:12},grid:{display:false},border:{display:false}},
+              y:{stacked:true,ticks:{color:CV('--muted'),font:{size:10.5},padding:8,callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v},grid:{color:CV('--grid'),drawTicks:false},border:{display:false}}}}});
+}else{
+_cN=new Chart(document.getElementById('cN'),{type:'line',data:{labels:Hn.map(h=>h.date),datasets:[{data:Hn.map(valNet),borderColor:nmC,backgroundColor:gradFill(nmC),fill:true,tension:.35,pointRadius:0,pointHoverRadius:5,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},animation:animConf,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>F(c.raw)}}},scales:axeOpts(v=>(v/1000).toFixed(0)+'k')}});
+}
 
 const pL=pieMode==='net'?["Immobilier net","Comptes","Épargne","Bourse","Crypto"]:["Immobilier","Comptes","Épargne","Bourse","Crypto"];
 const pV=pieMode==='net'?[Math.max(0,t.im-t.de),t.co,t.ep,t.bo,t.cr]:[t.im,t.co,t.ep,t.bo,t.cr];
@@ -2636,7 +2680,7 @@ document.getElementById('widgetResume').innerHTML=wH;
     const eel=document.getElementById('cEnv');
     if(eel){
       if(window._cEnv)window._cEnv.destroy();
-      const ds=choisis.map(p=>({label:p.n,data:base.map(b=>b[p.k]||0),backgroundColor:p.c,borderRadius:{topLeft:5,topRight:5},borderSkipped:false,barPercentage:.62,categoryPercentage:.86,borderWidth:0}));
+      const ds=choisis.map(p=>({label:p.n,data:base.map(b=>b[p.k]||0),backgroundColor:p.c,borderRadius:coinHaut,borderSkipped:false,barPercentage:.62,categoryPercentage:.86,borderWidth:0}));
       window._cEnv=new Chart(eel,{type:'bar',
         data:{labels:base.map(b=>b.date),datasets:ds},
         options:{responsive:true,maintainAspectRatio:false,animation:animConf,
