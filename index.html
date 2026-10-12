@@ -283,7 +283,7 @@ details summary{color:var(--text2)}
 </div>
 </div>
 <div class="side-perf" id="sidePerf"></div>
-<div id="appVersion" style="font-size:10px;color:var(--muted);text-align:center;padding:8px 0 2px;letter-spacing:.03em">version du 12/10 16h40</div>
+<div id="appVersion" style="font-size:10px;color:var(--muted);text-align:center;padding:8px 0 2px;letter-spacing:.03em">version du 12/10 16h46</div>
 </aside>
 <div class="side-ov" id="sideOv" onclick="toggleSide()"></div>
 <div class="shell">
@@ -1602,6 +1602,7 @@ const coinHaut=ctx=>{const d=ctx.chart.data.datasets,i=ctx.dataIndex;
 /* ===================== COMPTES BANCAIRES ===================== */
 /* Catégories de dépenses, avec les mots qui permettent de les reconnaître */
 const OCATS=[
+ {n:'Investissements immo.',c:'#f59e0b',m:['notaire','scp ','etude notariale','agence immobiliere','orpi','century 21','laforet','guy hoquet','stephane plaza','iad france','diagnostic immobilier','dpe ','geometre','géomètre','architecte','maitre d oeuvre','maitre d\'oeuvre','artisan','macon','maçon','maconnerie','maçonnerie','charpente','toiture','couvreur','plomberie','plombier','menuiserie','menuisier','carrelage','terrassement','ravalement','isolation','placo','enduit','gros oeuvre','point p','gedimat','brico depot','brico dépôt','tout faire materiaux','chausson materiaux','materiaux','assurance pno','garantie decennale','decennale','frais de notaire','apport travaux','permis de construire','taxe amenagement','taxe d amenagement']},
  {n:'Logement',c:'#22d3ee',m:['loyer','edf','engie','total energie','veolia','suez','eau ','syndic','copropriete','copropriété','assurance habitation','maaf','matmut habitation','foncier','ordures']},
  {n:'Alimentation',c:'#34d399',m:['carrefour','leclerc','intermarche','intermarché','super u','hyper u','auchan','lidl','aldi','casino','monoprix','franprix','picard','grand frais','biocoop','boulangerie','boucherie','primeur','marche ','naturalia','g20','spar','netto','cora']},
  {n:'Restaurants',c:'#fbbf24',m:['restaurant','resto','mcdonald','burger','kfc','subway','pizza','sushi','brasserie','bar ','cafe ','café','uber eats','deliveroo','just eat','food','traiteur','creperie','crêperie']},
@@ -1863,7 +1864,17 @@ window.opeFichiers=async function(files){
       txt=new TextDecoder('utf-8').decode(buf);
       if(/ /.test(txt)){try{txt=new TextDecoder('windows-1252').decode(buf)}catch(e){}}
       const r=lireCSV(txt,f.name);
-      if(r.err){soucis.push(f.name+' : '+r.err);continue}
+      if(r.err){
+        /* On garde les premières lignes du fichier : c'est ce qui permet de comprendre
+           pourquoi la lecture a échoué. */
+        const apercu=txt.split(/\r?\n/).slice(0,6).map(l=>l.slice(0,160)).join('\n');
+        soucis.push(f.name+' : '+r.err+
+          '<details style="margin-top:4px"><summary style="cursor:pointer;color:var(--muted);font-size:11.5px">voir les premières lignes du fichier</summary>'+
+          '<pre style="white-space:pre-wrap;font-size:10.5px;color:var(--muted);background:var(--card2);padding:8px;border-radius:7px;margin-top:5px;overflow-x:auto">'+
+          apercu.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))+'</pre>'+
+          '<div style="font-size:10.5px;color:var(--muted);margin-top:4px">'+(txt.length)+' caractères · '+(txt.split(/\r?\n/).length)+' lignes</div></details>');
+        continue;
+      }
       /* Nom du compte : celui que vous avez choisi, sinon celui déduit du fichier */
       const force=destChoisie();
       const nom=force||nomDuCompte(r.banque,r.ident,r.sig);
