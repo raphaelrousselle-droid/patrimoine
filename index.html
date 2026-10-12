@@ -1673,29 +1673,42 @@ function parseMontant(v){
   if(isNaN(n))return null;
   return neg?-n:n;
 }
-/* Repère la ligne d'en-tête et le rôle de chaque colonne */
+/* Repère la ligne d'en-tête et le rôle de chaque colonne.
+   Beaucoup de banques font précéder le tableau d'un bloc d'informations sur le compte,
+   parfois long : on cherche donc l'en-tête dans tout le fichier, pas seulement au début. */
 function trouveColonnes(lignes,sep){
-  for(let i=0;i<Math.min(25,lignes.length);i++){
+  let presque=null;
+  for(let i=0;i<lignes.length;i++){
     const c=decoupeLigne(lignes[i],sep).map(normLib);
     if(c.length<2)continue;
-    const iDate=c.findIndex(x=>/^date/.test(x)||x==='date operation'||x==='date de l operation');
+    const iDate=c.findIndex(x=>/^date/.test(x)||/date (de l )?(operation|valeur|comptable)/.test(x)||x==='jour');
     if(iDate<0)continue;
-    const iLib=c.findIndex(x=>/libell|description|intitul|nature|motif|detail|objet|operation|designation/.test(x)&&!/^date/.test(x));
-    const iDeb=c.findIndex(x=>/^debit|debit euro|retrait|sortie/.test(x));
-    const iCre=c.findIndex(x=>/^credit|credit euro|versement|entree/.test(x));
-    let iMt=c.findIndex(x=>/^montant|^amount|^valeur|^somme/.test(x));
-    if(iMt<0&&iDeb<0&&iCre<0)continue;
-    if(iLib<0)continue;
+    let iLib=c.findIndex(x=>/libell|description|intitul|nature|motif|detail|objet|operation|designation|reference|commentaire|beneficiaire|tiers/.test(x)&&!/^date/.test(x));
+    const iDeb=c.findIndex(x=>/^debit|debit |retrait|sortie|^sorties/.test(x));
+    const iCre=c.findIndex(x=>/^credit|credit |versement|entree|^entrees|^recette/.test(x));
+    const iMt=c.findIndex(x=>/^montant|^amount|^valeur|^somme|^total/.test(x));
+    /* Faute de colonne libellé claire, on prend « type » ou la première colonne de texte */
+    if(iLib<0)iLib=c.findIndex((x,k)=>k!==iDate&&k!==iDeb&&k!==iCre&&k!==iMt&&/^(type|categorie|mode)/.test(x));
+    if(iMt<0&&iDeb<0&&iCre<0){presque=presque||{l:i,c};continue}
+    if(iLib<0){presque=presque||{l:i,c};continue}
     return {entete:i,iDate,iLib,iMt,iDeb,iCre,sep,nbCol:c.length};
   }
-  return null;
+  return {echec:true,presque};
 }
 function lireCSV(texte,nomFichier){
   const lignes=texte.split(/\r?\n/).filter(l=>l.trim()!=='');
   if(!lignes.length)return{ops:[],err:'fichier vide'};
   const sep=devineSep(lignes);
   const col=trouveColonnes(lignes,sep);
-  if(!col)return{ops:[],err:'colonnes introuvables (il faut une colonne date, une colonne libellé et un montant)'};
+  if(!col||col.echec){
+    let d='';
+    if(col&&col.presque)d=' — colonnes repérées : '+col.presque.c.filter(x=>x).join(', ');
+    else{
+      const ap=lignes.slice(0,3).map(l=>decoupeLigne(l,sep).filter(x=>x).slice(0,4).join(', ')).filter(x=>x);
+      if(ap.length)d=' — début du fichier : '+ap[0];
+    }
+    return{ops:[],err:'je ne retrouve pas le tableau des opérations dans ce fichier'+d};
+  }
   const banque=devineBanque(nomFichier,texte);
   const ops=[];
   for(let i=col.entete+1;i<lignes.length;i++){
@@ -1716,9 +1729,17 @@ function lireCSV(texte,nomFichier){
     if(!lib)continue;
     ops.push({d,l:lib,m:Math.round(m*100)/100,b:banque});
   }
-  return{ops,err:ops.length?null:'aucune opération lisible dans ce fichier'};
+  if(!ops.length)return{ops,err:lignes.length<=col.entete+1?'ce relevé ne contient aucune opération sur la période':'le tableau a été trouvé mais aucune ligne n\'a pu être lue (dates ou montants dans un format inattendu)'};
+  return{ops,err:null};
 }
 function devineBanque(nom,texte){
+  /* Un relevé de société porte souvent le nom de la structure : il est plus parlant
+     que celui de la banque, et permet de repérer tout de suite un compte professionnel. */
+  const tit=String(texte||'').slice(0,1500).match(/nom du titulaire[^;\n]*;\s*"?([^";\n]+)"?/i);
+  if(tit){
+    const soc=tit[1].trim();
+    if(/\b(sci|sarl|sasu|sas|eurl|scp|snc|sa|selarl|association)\b/i.test(soc))return soc.slice(0,40);
+  }
   const t=normLib((nom||'')+' '+String(texte||'').slice(0,800));
   if(/fortuneo/.test(t))return'Fortuneo';
   if(/indy/.test(t))return'Indy';
@@ -1812,7 +1833,7 @@ window.opeLeave=function(){document.getElementById('opeZone').classList.remove('
 const OTYPES=[{k:'perso',n:'Personnel'},{k:'commun',n:'Commun'},{k:'pro',n:'Pro (SCI)'}];
 function cptReg(b){
   if(!S.opeCpts)S.opeCpts={};
-  if(!S.opeCpts[b])S.opeCpts[b]={t:/indy|sci|pro/i.test(b)?'pro':'perso',p:100};
+  if(!S.opeCpts[b])S.opeCpts[b]={t:/\b(sci|sarl|sasu|sas|eurl|scp|snc)\b|indy|pro/i.test(b)?'pro':'perso',p:100};
   const r=S.opeCpts[b];
   if(r.p==null)r.p=100;
   if(!r.t)r.t='perso';
