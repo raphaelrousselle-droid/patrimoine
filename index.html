@@ -283,7 +283,7 @@ details summary{color:var(--text2)}
 </div>
 </div>
 <div class="side-perf" id="sidePerf"></div>
-<div id="appVersion" style="font-size:10px;color:var(--muted);text-align:center;padding:8px 0 2px;letter-spacing:.03em">version du 12/10 16h46</div>
+<div id="appVersion" style="font-size:10px;color:var(--muted);text-align:center;padding:8px 0 2px;letter-spacing:.03em">version du 12/10 16h55</div>
 </aside>
 <div class="side-ov" id="sideOv" onclick="toggleSide()"></div>
 <div class="shell">
@@ -1970,10 +1970,16 @@ window.detacheVir=function(id){
 };
 
 /* --- Filtres et sélections --- */
-let opeMois='',opeCpt='',opePer='perso',opePart=true;
+let opeCpt='',opePer='perso',opePart=true,opeAn='',opeMo='',opeRech='',opeInit=false;
 window.setOpePer=v=>{opePer=v;R(true)};
 window.setOpePart=v=>{opePart=(v==='part');R(true)};
-window.setOpeMois=v=>{opeMois=v;R(true)};
+window.setOpeAn=v=>{opeAn=v;R(true)};
+window.setOpeMo=v=>{opeMo=v;R(true)};
+let _tRech;
+window.setOpeRech=function(v){clearTimeout(_tRech);_tRech=setTimeout(()=>{opeRech=v;R(true);
+  const c=document.getElementById('opeRech');if(c){c.focus();c.setSelectionRange(c.value.length,c.value.length)}},250)};
+window.videRech=function(){opeRech='';R(true)};
+
 window.setOpeCpt=v=>{opeCpt=v;R(true)};
 window.setOpeVue=v=>{opeVue=v;R(true)};
 window.majOpeCat=function(sel,id){
@@ -2005,6 +2011,13 @@ function opeComptes(){
   const m={};opeListe().forEach(o=>{m[o.b]=(m[o.b]||0)+1});
   return Object.keys(m).sort();
 }
+/* Libellé de la période affichée, pour les titres de cartes */
+function libPeriode(){
+  if(opeRech)return'résultats de recherche';
+  if(!opeAn)return'';
+  if(!opeMo)return'Année '+opeAn;
+  return MOIS_LONG[parseInt(opeMo)-1].charAt(0).toUpperCase()+MOIS_LONG[parseInt(opeMo)-1].slice(1)+' '+opeAn;
+}
 function opeLibMois(k){
   const [a,m]=k.split('-');
   return MOIS_LONG[parseInt(m)-1].charAt(0).toUpperCase()+MOIS_LONG[parseInt(m)-1].slice(1)+' '+a;
@@ -2017,35 +2030,22 @@ function dansPerimetre(o){
   const t=cptReg(o.b).t;
   return opePer==='pro'?t==='pro':t!=='pro';
 }
+/* Une recherche porte sur tout l'historique : elle met de côté le filtre de période */
 function opeFiltre(){
-  return opeListe().filter(o=>(!opeMois||o.d.slice(0,7)===opeMois)&&(!opeCpt||o.b===opeCpt)&&dansPerimetre(o));
-}
-/* Repère les prélèvements qui reviennent tous les mois */
-function opeRecurrences(){
-  const g={};
-  opeListe().filter(o=>o.m<0&&dansPerimetre(o)&&HORS_DEPENSE.indexOf(o.c)<0).forEach(o=>{
-    const k=cleLib(o.l);if(!k||k.length<3)return;
-    (g[k]=g[k]||[]).push(o);
+  const q=opeRech?normLib(opeRech):'';
+  return opeListe().filter(o=>{
+    if(!dansPerimetre(o))return false;
+    if(opeCpt&&o.b!==opeCpt)return false;
+    if(q)return normLib(o.l).indexOf(q)>=0||normLib(o.c).indexOf(q)>=0||normLib(o.b).indexOf(q)>=0;
+    if(opeAn&&o.d.slice(0,4)!==opeAn)return false;
+    if(opeMo&&o.d.slice(5,7)!==opeMo)return false;
+    return true;
   });
-  const out=[];
-  for(const k in g){
-    const l=g[k];
-    const mois=[...new Set(l.map(o=>o.d.slice(0,7)))];
-    if(mois.length<3)continue;
-    const moy=l.reduce((a,o)=>a+Math.abs(mt(o)),0)/l.length;
-    const ecart=l.reduce((a,o)=>a+Math.abs(Math.abs(o.m)-moy),0)/l.length;
-    if(ecart>moy*0.25)continue;/* montant trop variable : ce n'est pas un abonnement */
-    out.push({k,n:l[0].l,moy:Math.round(moy*100)/100,nb:mois.length,c:l[0].c,dernier:l[0].d});
-  }
-  return out.sort((a,b)=>b.moy-a.moy).slice(0,12);
 }
 let _cOpeRD,_cOpeEvo;
 function rOpe(dc){
   const page=document.getElementById('page-ope');if(!page)return;
   const tous=opeListe();
-  const dispo=opeMoisDispo();
-  if(dispo.length&&(!opeMois||dispo.indexOf(opeMois)<0))opeMois=dispo[0];
-  if(!dispo.length)opeMois='';
 
   /* Où ranger le prochain fichier importé */
   const dest=document.getElementById('opeDest');
@@ -2062,14 +2062,26 @@ function rOpe(dc){
 
   /* Barre de filtres */
   const aPro=opeComptes().some(b=>cptReg(b).t==='pro');
-  const aPartagé=opeComptes().some(b=>cptReg(b).p<100);
+  const aPartage=opeComptes().some(b=>cptReg(b).p<100);
+  const annees=[...new Set(opeListe().map(o=>o.d.slice(0,4)))].sort().reverse();
+  if(annees.length&&(!opeAn||annees.indexOf(opeAn)<0))opeAn=annees[0];
+  const MOIS_N=['01','02','03','04','05','06','07','08','09','10','11','12'];
+  /* Mois réellement renseignés pour l'année choisie */
+  const moisAn=new Set(opeListe().filter(o=>o.d.slice(0,4)===opeAn).map(o=>o.d.slice(5,7)));
+  if(opeMo&&!moisAn.has(opeMo))opeMo='';
+  /* À la première ouverture, on montre le dernier mois renseigné plutôt que l'année entière */
+  if(!opeInit&&moisAn.size){opeMo=[...moisAn].sort().pop();opeInit=true}
   document.getElementById('opeFiltres').innerHTML=
-    '<select class="sel" onchange="setOpeMois(this.value)">'+dispo.map(m=>'<option value="'+m+'"'+(m===opeMois?' selected':'')+'>'+opeLibMois(m)+'</option>').join('')+(dispo.length?'':'<option>—</option>')+'</select>'+
+    '<input class="sel" id="opeRech" placeholder="Rechercher une dépense…" value="'+String(opeRech).replace(/"/g,'&quot;')+'" oninput="setOpeRech(this.value)" style="max-width:220px">'+
+    (opeRech?'<button class="pb" onclick="videRech()">✕ effacer</button>':'')+
+    '<select class="sel" onchange="setOpeAn(this.value)" style="max-width:110px">'+annees.map(a=>'<option value="'+a+'"'+(a===opeAn?' selected':'')+'>'+a+'</option>').join('')+(annees.length?'':'<option>—</option>')+'</select>'+
+    '<select class="sel" onchange="setOpeMo(this.value)" style="max-width:150px"><option value="">Toute l\'année</option>'+
+      MOIS_N.map((m,k)=>moisAn.has(m)?'<option value="'+m+'"'+(m===opeMo?' selected':'')+'>'+MOIS_LONG[k].charAt(0).toUpperCase()+MOIS_LONG[k].slice(1)+'</option>':'').join('')+'</select>'+
     '<select class="sel" onchange="setOpeCpt(this.value)"><option value="">Tous les comptes</option>'+opeComptes().map(b=>'<option value="'+b+'"'+(b===opeCpt?' selected':'')+'>'+b+'</option>').join('')+'</select>'+
     (aPro?'<select class="sel" onchange="setOpePer(this.value)">'+
       [{k:'perso',n:'Mes comptes privés'},{k:'pro',n:'Société (SCI)'},{k:'tout',n:'Tout confondu'}]
       .map(x=>'<option value="'+x.k+'"'+(x.k===opePer?' selected':'')+'>'+x.n+'</option>').join('')+'</select>':'')+
-    (aPartagé?'<div style="display:flex;gap:4px"><button class="ctb'+(opePart?' active':'')+'" onclick="setOpePart(\'part\')">Ma part</button><button class="ctb'+(opePart?'':' active')+'" onclick="setOpePart(\'tout\')">Montants entiers</button></div>':'')+
+    (aPartage?'<div style="display:flex;gap:4px"><button class="ctb'+(opePart?' active':'')+'" onclick="setOpePart(\'part\')">Ma part</button><button class="ctb'+(opePart?'':' active')+'" onclick="setOpePart(\'tout\')">Montants entiers</button></div>':'')+
     '<span style="flex:1"></span>'+
     (tous.length?'<button class="pb" onclick="reclasseOpe()">↺ Reclasser</button><button class="pb" onclick="videOpe()">✕ Tout effacer</button>':'');
 
@@ -2121,13 +2133,12 @@ function rOpe(dc){
   document.getElementById('opeCorps').innerHTML=
    opeHtmlComptes()+
    '<div class="g2" style="align-items:start">'+
-     '<div class="card"><div class="fb"><div class="ct" style="margin:0">Dépenses par catégorie</div><div style="font-size:11.5px;color:var(--muted)">'+opeLibMois(opeMois||'')+'</div></div>'+
+     '<div class="card"><div class="fb"><div class="ct" style="margin:0">Dépenses par catégorie</div><div style="font-size:11.5px;color:var(--muted)">'+libPeriode()+'</div></div>'+
        '<div class="cbs" style="height:230px"><canvas id="cOpeCat"></canvas></div><div id="opeLeg" style="padding:8px 2px 0"></div></div>'+
      '<div class="card"><div class="ct">Entrées et dépenses par mois</div><div class="cb"><canvas id="cOpeRD"></canvas></div></div>'+
    '</div>'+
    '<div class="card"><div class="ct">Évolution des dépenses par poste</div><div class="cb"><canvas id="cOpeEvo"></canvas></div>'+
      '<div style="font-size:11.5px;color:var(--muted);margin-top:10px">Chaque colonne cumule les postes du mois. Survolez une couleur pour voir son montant.</div></div>'+
-   opeHtmlRecurrences()+
    opeHtmlTable(f);
 
   if(dc){
@@ -2182,25 +2193,21 @@ function opeHtmlComptes(){
     'Les comptes de société restent à l\'écart de votre budget privé, sauf si vous choisissez « Tout confondu ».</div></div>';
   return h;
 }
-function opeHtmlRecurrences(){
-  const r=opeRecurrences();
-  if(!r.length)return'';
-  const tot=r.reduce((a,x)=>a+x.moy,0);
-  let h='<div class="card"><div class="fb"><div class="ct" style="margin:0">↻ Dépenses qui reviennent chaque mois</div><div style="font-size:12.5px;color:var(--accent);font-weight:600">'+F2(tot)+' / mois</div></div>';
-  h+='<div class="tw"><table><thead><tr><th class="l">Libellé</th><th>Catégorie</th><th>Mois</th><th>Montant moyen</th></tr></thead><tbody>';
-  r.forEach(x=>{h+='<tr><td class="l"><b style="font-size:12px">'+x.n.slice(0,42)+'</b></td>'+
-    '<td><span style="color:'+(OCAT_COUL[x.c]||'#8b95a5')+';font-size:11px">'+x.c+'</span></td>'+
-    '<td style="color:var(--muted)">'+x.nb+'</td>'+
-    '<td style="font-weight:700">'+F2(x.moy)+'</td></tr>'});
-  h+='</tbody></table></div><div style="font-size:11.5px;color:var(--muted);margin-top:10px">Opérations repérées au moins trois mois de suite pour un montant stable. Utile pour traquer les abonnements oubliés.</div></div>';
-  return h;
-}
 function opeHtmlTable(f){
   const opts=c=>OCATS.map(x=>'<option'+(x.n===c?' selected':'')+'>'+x.n+'</option>').join('');
-  let h='<div class="card"><div class="fb"><div class="ct" style="margin:0">Opérations du mois</div><div style="font-size:12px;color:var(--muted)">'+f.length+' ligne'+(f.length>1?'s':'')+'</div></div>';
+  const tot=f.reduce((a,o)=>a+mt(o),0);
+  let h='<div class="card"><div class="fb"><div class="ct" style="margin:0">'+(opeRech?'Résultats de la recherche':'Opérations · '+libPeriode())+'</div><div style="font-size:12px;color:var(--muted)">'+f.length+' ligne'+(f.length>1?'s':'')+'</div></div>';
+  if(opeRech){
+    const dep=f.filter(o=>o.m<0).reduce((a,o)=>a-mt(o),0);
+    h+='<div style="background:var(--card2);border-radius:9px;padding:10px 13px;margin-bottom:12px;font-size:12.5px;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center">'+
+      '<span>« <b>'+String(opeRech).replace(/</g,'&lt;')+'</b> » sur tout l\'historique</span>'+
+      '<span style="color:var(--red)">dépensé : <b>'+F2(dep)+'</b></span>'+
+      '<span style="color:var(--muted)">solde : '+F2(tot)+'</span>'+
+      '<span style="flex:1"></span><button class="pb" onclick="videRech()">Revenir au mois</button></div>';
+  }
   h+='<div class="tw"><table><thead><tr><th>Date</th><th class="l">Libellé</th><th class="l">Catégorie</th><th>Compte</th><th>Montant</th><th></th></tr></thead><tbody>';
   f.slice(0,400).forEach(o=>{
-    h+='<tr><td style="color:var(--muted);white-space:nowrap">'+o.d.slice(8)+'/'+o.d.slice(5,7)+'</td>'+
+    h+='<tr><td style="color:var(--muted);white-space:nowrap">'+o.d.slice(8)+'/'+o.d.slice(5,7)+((opeRech||!opeMo)?'/'+o.d.slice(2,4):'')+'</td>'+
       '<td class="l"><span style="font-size:12px">'+o.l.slice(0,48)+'</span></td>'+
       '<td class="l"><select class="sel sel-min" onchange="majOpeCat(this,\''+o.i+'\')" style="color:'+(OCAT_COUL[o.c]||'#8b95a5')+'">'+opts(o.c)+'</select></td>'+
       '<td style="color:var(--muted);font-size:11px">'+o.b+'</td>'+
