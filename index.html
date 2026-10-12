@@ -283,7 +283,7 @@ details summary{color:var(--text2)}
 </div>
 </div>
 <div class="side-perf" id="sidePerf"></div>
-<div id="appVersion" style="font-size:10px;color:var(--muted);text-align:center;padding:8px 0 2px;letter-spacing:.03em">version du 12/10 16h23</div>
+<div id="appVersion" style="font-size:10px;color:var(--muted);text-align:center;padding:8px 0 2px;letter-spacing:.03em">version du 12/10 16h40</div>
 </aside>
 <div class="side-ov" id="sideOv" onclick="toggleSide()"></div>
 <div class="shell">
@@ -307,7 +307,8 @@ details summary{color:var(--text2)}
 <div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Patrimoine Immo Net</div><div style="display:flex;gap:4px" id="immoPs"></div></div><div class="cb"><canvas id="cImmoNet"></canvas></div></div><div class="card"><div class="ct">Tableau récapitulatif mensuel</div><div class="tw" id="immoRecap"></div></div></div><div class="card" id="immoSCI" style="display:none"><div class="ct">⬡ Tableau de bord SCI</div><div id="sciDash"></div></div><div id="ic"></div>
 <div class="card"><div class="fb" style="margin-bottom:14px"><div class="ct" style="margin:0">⇄ Comparatif des biens</div><div style="font-size:11.5px;color:var(--muted)">TMI : <span class="ed" onclick="edTMI()" id="tmiVal"></span></div></div><div class="tw" id="immoCompare"></div><div style="font-size:11px;color:var(--muted);margin-top:12px">Effort d'épargne : ce que le bien te coûte (négatif) ou te rapporte (positif) chaque mois, impôts déduits.</div></div>
 <div class="card"><div class="fb"><div class="ct" style="margin:0">△ Projets d'achat</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addProjet()">+ Projet</button></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Prépare tes futurs achats : simule le cashflow avant de te lancer, puis transforme le projet en vrai bien le jour de l'achat.</div><div id="projetsList"></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">◫ Suivi courte durée</div></div><div id="immoCD"></div></div></div>
-<div class="page" id="page-ope"><div class="dropzone" id="opeZone" ondrop="opeDrop(event)" ondragover="opeOver(event)" ondragleave="opeLeave()" onclick="document.getElementById('opeFile').click()"><div style="font-size:26px;margin-bottom:8px;color:var(--muted)">⤓</div><div style="font-weight:600;margin-bottom:5px">Importer vos opérations bancaires</div><div style="font-size:12.5px;color:var(--muted);line-height:1.6">Glissez ici le fichier CSV exporté depuis votre banque, ou cliquez pour le choisir.<br>Fortuneo, Crédit Agricole, La Banque Postale, Indy et la plupart des autres sont reconnus automatiquement.</div><input type="file" id="opeFile" accept=".csv,.txt,.pdf" multiple style="display:none" onchange="opeFichiers(this.files);this.value=''"></div><div id="opeMsg" style="font-size:12.5px;margin:10px 2px 0;min-height:18px"></div><div id="opeFiltres" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:16px 0 18px"></div><div class="kr" id="opeKpi"></div><div id="opeCorps"></div></div><div class="page" id="page-reglages">
+<div class="page" id="page-ope"><div class="dropzone" id="opeZone" ondrop="opeDrop(event)" ondragover="opeOver(event)" ondragleave="opeLeave()" onclick="document.getElementById('opeFile').click()"><div style="font-size:26px;margin-bottom:8px;color:var(--muted)">⤓</div><div style="font-weight:600;margin-bottom:5px">Importer vos opérations bancaires</div><div style="font-size:12.5px;color:var(--muted);line-height:1.6">Glissez ici le fichier CSV exporté depuis votre banque, ou cliquez pour le choisir.<br>Fortuneo, Crédit Agricole, La Banque Postale, Indy et la plupart des autres sont reconnus automatiquement.</div><input type="file" id="opeFile" accept=".csv,.txt,.pdf" multiple style="display:none" onchange="opeFichiers(this.files);this.value=''"></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 2px 0;font-size:12.5px"><span style="color:var(--muted)">Ranger ce fichier dans :</span><select class="sel" id="opeDest"></select><span style="color:var(--muted);font-size:11.5px">ou tapez un nom si le compte est nouveau</span><input class="sel" id="opeDestNom" placeholder="Nom du compte" style="display:none;max-width:180px" oninput="document.getElementById('opeDest').dataset.libre=this.value"></div>
+<div id="opeMsg" style="font-size:12.5px;margin:10px 2px 0;min-height:18px"></div><div id="opeFiltres" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:16px 0 18px"></div><div class="kr" id="opeKpi"></div><div id="opeCorps"></div></div><div class="page" id="page-reglages">
 <div class="card"><div class="ct">⤓ Sauvegarde de secours</div>
 <div style="font-size:12.5px;color:var(--text2);line-height:1.6;margin-bottom:16px">Tes données sont stockées sur ton compte Google. Ce fichier de sauvegarde te permet de tout récupérer en cas de problème, ou de repartir d'une version antérieure. Pense à en faire une de temps en temps.</div>
 <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-g" onclick="expSauvegarde()">⤓ Télécharger une sauvegarde</button><button class="btn btn-o" onclick="document.getElementById('impFile').click()">⤒ Restaurer un fichier</button></div>
@@ -1710,7 +1711,9 @@ function lireCSV(texte,nomFichier){
     }
     return{ops:[],err:'je ne retrouve pas le tableau des opérations dans ce fichier'+d};
   }
-  const banque=devineBanque(nomFichier,texte);
+  const sig=decoupeLigne(lignes[col.entete],sep).map(normLib).filter(x=>x).join('|');
+  const banque=devineBanque(nomFichier,texte,sig);
+  const ident=extraitIdent(nomFichier,texte);
   const ops=[];
   for(let i=col.entete+1;i<lignes.length;i++){
     const c=decoupeLigne(lignes[i],sep);
@@ -1731,9 +1734,53 @@ function lireCSV(texte,nomFichier){
     ops.push({d,l:lib,m:Math.round(m*100)/100,b:banque});
   }
   if(!ops.length)return{ops,err:lignes.length<=col.entete+1?'ce relevé ne contient aucune opération sur la période':'le tableau a été trouvé mais aucune ligne n\'a pu être lue (dates ou montants dans un format inattendu)'};
-  return{ops,err:null};
+  return{ops,err:null,banque,ident,sig};
 }
-function devineBanque(nom,texte){
+/* Deux relevés du même compte doivent se retrouver au même endroit, et deux comptes
+   différents rester séparés : on cherche donc un IBAN ou un numéro de compte. */
+function extraitIdent(nom,texte){
+  const t=String(texte||'').slice(0,2000)+' '+String(nom||'');
+  let m=t.match(/\b([A-Z]{2}\d{2}[\sA-Z0-9]{10,30})\b/);
+  if(m)return m[1].replace(/\s/g,'').slice(-6);
+  m=t.match(/(?:compte|n°|no|num[ée]ro)\D{0,12}(\d{6,20})/i);
+  if(m)return m[1].slice(-6);
+  m=String(nom||'').match(/_(\d{8,20})_/);
+  if(m)return m[1].slice(-6);
+  return null;
+}
+/* Nom définitif du compte. Deux relevés du même compte doivent se rejoindre,
+   deux comptes différents rester séparés même si la banque n'a pas été reconnue. */
+function nomDuCompte(banque,ident,sig){
+  if(!S.opeIdent)S.opeIdent={};
+  if(!S.opeSig)S.opeSig={};
+  if(ident&&S.opeIdent[ident])return S.opeIdent[ident];
+  if(!ident&&sig&&S.opeSig[sig])return S.opeSig[sig];
+  const connus=opeComptes();
+  let nom=banque;
+  /* Le nom est déjà pris par un autre compte : on le numérote */
+  if(connus.indexOf(nom)>=0){
+    /* Un identifiant de compte prime sur la signature : deux comptes d'une même banque
+       ont la même mise en page mais pas le même IBAN. */
+    const dejaAMoi=ident?(S.opeIdent[ident]===nom):(!!sig&&S.opeSig[sig]===nom);
+    if(!dejaAMoi){
+      if(ident)nom=banque+' ••'+ident.slice(-4);
+      else{let k=2;while(connus.indexOf(banque+' '+k)>=0)k++;nom=banque+' '+k}
+    }
+  }
+  if(ident)S.opeIdent[ident]=nom;
+  if(sig&&!S.opeSig[sig])S.opeSig[sig]=nom;
+  return nom;
+}
+/* Chaque banque a sa propre façon de nommer ses colonnes : c'est une signature fiable,
+   même quand le nom du fichier ne dit rien. */
+const SIGNATURES=[
+  {b:'Fortuneo',r:/date operation\|date valeur\|libelle/},
+  {b:'La Banque Postale',r:/^date\|libelle\|montant\(euros\)/},
+  {b:'Crédit Agricole',r:/date\|libelle\|debit euros\|credit euros/},
+  {b:'Boursobank',r:/dateop\|datevaleur|date operation\|date valeur\|label/},
+  {b:'Indy',r:/date\|type\|description\|credit eur\|debit eur/}
+];
+function devineBanque(nom,texte,sig){
   /* Un relevé de société porte souvent le nom de la structure : il est plus parlant
      que celui de la banque, et permet de repérer tout de suite un compte professionnel. */
   const tit=String(texte||'').slice(0,1500).match(/nom du titulaire[^;\n]*;\s*"?([^";\n]+)"?/i);
@@ -1749,6 +1796,8 @@ function devineBanque(nom,texte){
   if(/boursorama|boursobank/.test(t))return'Boursobank';
   if(/trade republic|traderepublic/.test(t))return'Trade Republic';
   if(/bnp/.test(t))return'BNP';
+  /* Rien dans le nom ni dans l'en-tête : on se rabat sur la forme du tableau */
+  if(sig){const m=SIGNATURES.find(x=>x.r.test(sig));if(m)return m.b}
   return'Compte importé';
 }
 
@@ -1805,7 +1854,7 @@ function ajouteOps(liste){
 window.opeFichiers=async function(files){
   const zone=document.getElementById('opeMsg');
   if(!files||!files.length)return;
-  let tousNeufs=0,tousDbl=0;const soucis=[];
+  let tousNeufs=0,tousDbl=0;const soucis=[],dansQuoi={};
   for(const f of files){
     try{
       let txt;
@@ -1815,16 +1864,38 @@ window.opeFichiers=async function(files){
       if(/ /.test(txt)){try{txt=new TextDecoder('windows-1252').decode(buf)}catch(e){}}
       const r=lireCSV(txt,f.name);
       if(r.err){soucis.push(f.name+' : '+r.err);continue}
+      /* Nom du compte : celui que vous avez choisi, sinon celui déduit du fichier */
+      const force=destChoisie();
+      const nom=force||nomDuCompte(r.banque,r.ident,r.sig);
+      r.ops.forEach(o=>{o.b=nom});
       const a=ajouteOps(r.ops);tousNeufs+=a.neuf;tousDbl+=a.dbl;
-    }catch(e){soucis.push(f.name+' : fichier illisible')}
+      if(a.neuf)dansQuoi[nom]=(dansQuoi[nom]||0)+a.neuf;
+    }catch(e){soucis.push(f.name+' : '+(e&&e.message?e.message:'fichier illisible'));if(window.console)console.error('Import',f.name,e)}
   }
   if(tousNeufs)autoSave();
   let msg='';
-  if(tousNeufs)msg+='<span style="color:var(--green)">✓ '+tousNeufs+' opération'+(tousNeufs>1?'s':'')+' ajoutée'+(tousNeufs>1?'s':'')+'</span>';
+  if(tousNeufs){
+    const ou=Object.keys(dansQuoi).map(k=>dansQuoi[k]+' dans « '+k+' »').join(', ');
+    msg+='<span style="color:var(--green)">✓ '+tousNeufs+' opération'+(tousNeufs>1?'s':'')+' ajoutée'+(tousNeufs>1?'s':'')+(ou?' — '+ou:'')+'</span>';
+  }
   if(tousDbl)msg+=(msg?' · ':'')+'<span style="color:var(--muted)">'+tousDbl+' déjà présente'+(tousDbl>1?'s':'')+'</span>';
   soucis.forEach(s=>{msg+='<div style="color:var(--red);margin-top:4px">⚠ '+s+'</div>'});
   if(zone)zone.innerHTML=msg||'<span style="color:var(--muted)">Rien à importer</span>';
   R(true);
+};
+/* Compte de destination choisi par l'utilisateur ('' = détection automatique) */
+function destChoisie(){
+  const sel=document.getElementById('opeDest');if(!sel)return'';
+  if(sel.value==='__new'){
+    const t=document.getElementById('opeDestNom');
+    return t&&t.value.trim()?t.value.trim():'';
+  }
+  return sel.value||'';
+}
+window.majDest=function(){
+  const sel=document.getElementById('opeDest'),t=document.getElementById('opeDestNom');
+  if(t)t.style.display=sel.value==='__new'?'':'none';
+  if(sel.value==='__new'&&t)t.focus();
 };
 window.opeDrop=function(e){e.preventDefault();document.getElementById('opeZone').classList.remove('survol');opeFichiers(e.dataTransfer.files)};
 window.opeOver=function(e){e.preventDefault();document.getElementById('opeZone').classList.add('survol')};
@@ -1964,6 +2035,19 @@ function rOpe(dc){
   const dispo=opeMoisDispo();
   if(dispo.length&&(!opeMois||dispo.indexOf(opeMois)<0))opeMois=dispo[0];
   if(!dispo.length)opeMois='';
+
+  /* Où ranger le prochain fichier importé */
+  const dest=document.getElementById('opeDest');
+  if(dest){
+    const garde=dest.value;
+    dest.onchange=window.majDest;
+    dest.innerHTML='<option value="">Détection automatique</option>'+
+      opeComptes().map(b=>'<option value="'+b.replace(/"/g,'&quot;')+'">'+b+'</option>').join('')+
+      '<option value="__new">Un nouveau compte…</option>';
+    if(garde)dest.value=garde;
+    const t=document.getElementById('opeDestNom');
+    if(t)t.style.display=dest.value==='__new'?'':'none';
+  }
 
   /* Barre de filtres */
   const aPro=opeComptes().some(b=>cptReg(b).t==='pro');
