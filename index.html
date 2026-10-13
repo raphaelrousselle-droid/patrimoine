@@ -283,7 +283,7 @@ details summary{color:var(--text2)}
 </div>
 </div>
 <div class="side-perf" id="sidePerf"></div>
-<div id="appVersion" style="font-size:10px;color:var(--muted);text-align:center;padding:8px 0 2px;letter-spacing:.03em">version du 13/10 09h10</div>
+<div id="appVersion" style="font-size:10px;color:var(--muted);text-align:center;padding:8px 0 2px;letter-spacing:.03em">version du 13/10 09h38</div>
 </aside>
 <div class="side-ov" id="sideOv" onclick="toggleSide()"></div>
 <div class="shell">
@@ -2119,6 +2119,10 @@ let _tRech;
 window.setOpeRech=function(v){clearTimeout(_tRech);_tRech=setTimeout(()=>{opeRech=v;R(true);
   const c=document.getElementById('opeRech');if(c){c.focus();c.setSelectionRange(c.value.length,c.value.length)}},250)};
 window.videRech=function(){opeRech='';R(true)};
+/* Filtres propres à la liste : ils n'affectent ni les indicateurs ni les graphiques */
+let opeTri='',opeCatTab='';
+window.setOpeTri=v=>{opeTri=(opeTri===v?'':v);R(true)};
+window.setOpeCatTab=v=>{opeCatTab=v;R(true)};
 /* Remet tous les filtres à zéro et se place sur l'opération la plus récente */
 window.videFiltres=function(){
   opeRech='';opeCpt='';opePer='tout';opeMo='';
@@ -2489,19 +2493,45 @@ function opeHtmlBiens(){
     'Rattachez une dépense une fois : les suivantes du même fournisseur suivront toutes seules.</div></div>';
   return h;
 }
-function opeHtmlTable(f){
+function opeHtmlTable(ftout){
   const opts=c=>OCATS.map(x=>'<option'+(x.n===c?' selected':'')+'>'+x.n+'</option>').join('');
-  const tot=f.reduce((a,o)=>a+mt(o),0);
   const biens=(S.immo||[]).filter(b=>b.type!=='RP');
-  let h='<div class="card"><div class="fb"><div class="ct" style="margin:0">'+(opeRech?'Résultats de la recherche':'Opérations · '+libPeriode())+'</div><div style="font-size:12px;color:var(--muted)">'+f.length+' ligne'+(f.length>1?'s':'')+'</div></div>';
+  /* Compteurs calculés avant filtrage, pour que les pastilles restent parlantes */
+  const nAcl=ftout.filter(o=>o.c==='Non catégorisé').length;
+  const nSansB=biens.length?ftout.filter(o=>!o.bien&&o.m<0).length:0;
+  const nEnt=ftout.filter(o=>o.m>0).length, nSor=ftout.filter(o=>o.m<0).length;
+  let f=ftout;
+  if(opeTri==='aclasser')f=f.filter(o=>o.c==='Non catégorisé');
+  else if(opeTri==='sansbien')f=f.filter(o=>!o.bien&&o.m<0);
+  else if(opeTri==='entrees')f=f.filter(o=>o.m>0);
+  else if(opeTri==='sorties')f=f.filter(o=>o.m<0);
+  if(opeCatTab)f=f.filter(o=>o.c===opeCatTab);
+  const tot=f.reduce((a,o)=>a+mt(o),0);
+  let h='<div class="card"><div class="fb"><div class="ct" style="margin:0">'+(opeRech?'Résultats de la recherche':'Opérations · '+libPeriode())+'</div><div style="font-size:12px;color:var(--muted)">'+ftout.length+' ligne'+(ftout.length>1?'s':'')+'</div></div>';
   if(opeRech){
-    const dep=f.filter(o=>o.m<0).reduce((a,o)=>a-mt(o),0);
+    const dep=ftout.filter(o=>o.m<0).reduce((a,o)=>a-mt(o),0);
     h+='<div style="background:var(--card2);border-radius:9px;padding:10px 13px;margin-bottom:12px;font-size:12.5px;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center">'+
       '<span>« <b>'+String(opeRech).replace(/</g,'&lt;')+'</b> » sur tout l\'historique</span>'+
       '<span style="color:var(--red)">dépensé : <b>'+F2(dep)+'</b></span>'+
-      '<span style="color:var(--muted)">solde : '+F2(tot)+'</span>'+
+      '<span style="color:var(--muted)">solde : '+F2(ftout.reduce((a,o)=>a+mt(o),0))+'</span>'+
       '<span style="flex:1"></span><button class="pb" onclick="videRech()">Revenir au mois</button></div>';
   }
+  /* Pastilles de tri de la liste */
+  const past=[{k:'',n:'Toutes',c:ftout.length},{k:'aclasser',n:'À classer',c:nAcl,al:nAcl>0},
+    {k:'entrees',n:'Entrées',c:nEnt},{k:'sorties',n:'Sorties',c:nSor}];
+  if(biens.length)past.splice(2,0,{k:'sansbien',n:'Sans bien',c:nSansB});
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px">';
+  past.forEach(p=>{
+    if(p.k&&!p.c)return;
+    const on=opeTri===p.k;
+    h+='<button class="ctb'+(on?' active':'')+'" onclick="setOpeTri(\''+p.k+'\')" style="'+(p.al&&!on?'color:var(--accent);border-color:var(--accent)':'')+'">'+p.n+
+      (p.k?'<span style="opacity:.7;margin-left:5px">'+p.c+'</span>':'')+'</button>';
+  });
+  h+='<select class="sel" onchange="setOpeCatTab(this.value)" style="max-width:170px;margin-left:4px"><option value="">Toutes les catégories</option>'+
+    [...new Set(ftout.map(o=>o.c))].sort().map(c=>'<option value="'+c+'"'+(c===opeCatTab?' selected':'')+'>'+c+'</option>').join('')+'</select>';
+  if(opeTri||opeCatTab)h+='<span style="font-size:11.5px;color:var(--muted);margin-left:4px">'+f.length+' sur '+ftout.length+' · total '+F2(tot)+'</span>';
+  h+='</div>';
+  if(!f.length)h+='<div style="color:var(--muted);font-size:12.5px;padding:14px 2px">Aucune opération ne correspond à ce tri.</div>';
   h+='<div class="tw"><table><thead><tr><th>Date</th><th class="l">Libellé</th><th class="l">Catégorie</th>'+(biens.length?'<th class="l">Bien</th>':'')+'<th>Compte</th><th>Montant</th><th></th></tr></thead><tbody>';
   f.slice(0,400).forEach(o=>{
     h+='<tr><td style="color:var(--muted);white-space:nowrap">'+o.d.slice(8)+'/'+o.d.slice(5,7)+((opeRech||!opeMo)?'/'+o.d.slice(2,4):'')+'</td>'+
