@@ -283,7 +283,7 @@ details summary{color:var(--text2)}
 </div>
 </div>
 <div class="side-perf" id="sidePerf"></div>
-<div id="appVersion" style="font-size:10px;color:var(--muted);text-align:center;padding:8px 0 2px;letter-spacing:.03em">version du 12/10 21h07</div>
+<div id="appVersion" style="font-size:10px;color:var(--muted);text-align:center;padding:8px 0 2px;letter-spacing:.03em">version du 13/10 09h10</div>
 </aside>
 <div class="side-ov" id="sideOv" onclick="toggleSide()"></div>
 <div class="shell">
@@ -308,7 +308,8 @@ details summary{color:var(--text2)}
 <div class="card"><div class="fb" style="margin-bottom:14px"><div class="ct" style="margin:0">⇄ Comparatif des biens</div><div style="font-size:11.5px;color:var(--muted)">TMI : <span class="ed" onclick="edTMI()" id="tmiVal"></span></div></div><div class="tw" id="immoCompare"></div><div style="font-size:11px;color:var(--muted);margin-top:12px">Effort d'épargne : ce que le bien te coûte (négatif) ou te rapporte (positif) chaque mois, impôts déduits.</div></div>
 <div class="card"><div class="fb"><div class="ct" style="margin:0">△ Projets d'achat</div><button class="ab" style="width:auto;margin:0;padding:6px 12px;font-size:11px" onclick="addProjet()">+ Projet</button></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px">Prépare tes futurs achats : simule le cashflow avant de te lancer, puis transforme le projet en vrai bien le jour de l'achat.</div><div id="projetsList"></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">◫ Suivi courte durée</div></div><div id="immoCD"></div></div></div>
 <div class="page" id="page-ope"><div class="dropzone" id="opeZone" ondrop="opeDrop(event)" ondragover="opeOver(event)" ondragleave="opeLeave()" onclick="document.getElementById('opeFile').click()"><div style="font-size:26px;margin-bottom:8px;color:var(--muted)">⤓</div><div style="font-weight:600;margin-bottom:5px">Importer vos opérations bancaires</div><div style="font-size:12.5px;color:var(--muted);line-height:1.6">Glissez ici le fichier CSV exporté depuis votre banque, ou cliquez pour le choisir.<br>Fortuneo, Crédit Agricole, La Banque Postale, Indy et la plupart des autres sont reconnus automatiquement.</div><input type="file" id="opeFile" accept=".csv,.txt,.pdf" multiple style="display:none" onchange="opeFichiers(this.files);this.value=''"></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 2px 0;font-size:12.5px"><span style="color:var(--muted)">Ranger ce fichier dans :</span><select class="sel" id="opeDest"></select><span style="color:var(--muted);font-size:11.5px">ou tapez un nom si le compte est nouveau</span><input class="sel" id="opeDestNom" placeholder="Nom du compte" style="display:none;max-width:180px" oninput="document.getElementById('opeDest').dataset.libre=this.value"></div>
-<div id="opeMsg" style="font-size:12.5px;margin:10px 2px 0;min-height:18px"></div><div id="opeFiltres" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:16px 0 18px"></div><div class="kr" id="opeKpi"></div>
+<div id="opeMsg" style="font-size:12.5px;margin:10px 2px 0;min-height:18px"></div><div id="opeFiltres" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:16px 0 18px"></div><div id="opeMasque"></div>
+<div class="kr" id="opeKpi"></div>
 <div id="opeNote" style="font-size:11.5px;margin:-10px 2px 18px;line-height:1.6"></div><div id="opeCorps"></div></div><div class="page" id="page-reglages">
 <div class="card"><div class="ct">⤓ Sauvegarde de secours</div>
 <div style="font-size:12.5px;color:var(--text2);line-height:1.6;margin-bottom:16px">Tes données sont stockées sur ton compte Google. Ce fichier de sauvegarde te permet de tout récupérer en cas de problème, ou de repartir d'une version antérieure. Pense à en faire une de temps en temps.</div>
@@ -1970,7 +1971,7 @@ function ajouteOps(liste){
 window.opeFichiers=async function(files){
   const zone=document.getElementById('opeMsg');
   if(!files||!files.length)return;
-  let tousNeufs=0,tousDbl=0;const soucis=[],dansQuoi={};
+  let tousNeufs=0,tousDbl=0,derDate=null,derCompte=null;const soucis=[],dansQuoi={},natures={};
   for(const f of files){
     try{
       let txt;
@@ -2002,15 +2003,33 @@ window.opeFichiers=async function(files){
       r.ops.forEach(o=>{o.b=nom});
       const a=ajouteOps(r.ops);tousNeufs+=a.neuf;tousDbl+=a.dbl;
       if(a.neuf)dansQuoi[nom]=(dansQuoi[nom]||0)+a.neuf;
+      /* On note où ces lignes ont atterri pour y emmener l'affichage ensuite */
+      r.ops.forEach(o=>{if(!derDate||o.d>derDate)derDate=o.d});
+      derCompte=nom;natures[cptReg(nom).t]=1;
     }catch(e){soucis.push(f.name+' : '+(e&&e.message?e.message:'fichier illisible'));if(window.console)console.error('Import',f.name,e)}
   }
   if(tousNeufs)autoSave();
+  /* Sans cela, un relevé de société importé reste invisible derrière le filtre
+     « Mes comptes privés », et on croit que l'import n'a rien fait. */
+  let deplace='';
+  if(derDate){
+    const an=derDate.slice(0,4),mo=derDate.slice(5,7);
+    if(opeAn!==an||opeMo!==mo||opeRech){deplace=opeLibMois(an+'-'+mo)}
+    opeAn=an;opeMo=mo;opeInit=true;opeRech='';
+    const nat=Object.keys(natures);
+    if(nat.length>1)opePer='tout';
+    else if(nat[0]==='pro'&&opePer!=='pro'){opePer='pro';deplace=(deplace?deplace+', ':'')+'comptes de société'}
+    else if(nat[0]!=='pro'&&opePer==='pro'){opePer='perso';deplace=(deplace?deplace+', ':'')+'comptes privés'}
+    if(opeCpt&&opeCpt!==derCompte)opeCpt='';
+  }
   let msg='';
   if(tousNeufs){
     const ou=Object.keys(dansQuoi).map(k=>dansQuoi[k]+' dans « '+k+' »').join(', ');
     msg+='<span style="color:var(--green)">✓ '+tousNeufs+' opération'+(tousNeufs>1?'s':'')+' ajoutée'+(tousNeufs>1?'s':'')+(ou?' — '+ou:'')+'</span>';
   }
-  if(tousDbl)msg+=(msg?' · ':'')+'<span style="color:var(--muted)">'+tousDbl+' déjà présente'+(tousDbl>1?'s':'')+'</span>';
+  if(!tousNeufs&&tousDbl&&derCompte)msg+='<span style="color:var(--muted)">Ces opérations étaient déjà enregistrées. L\'affichage est placé dessus : '+opeLibMois(derDate.slice(0,7))+', compte « '+derCompte+' ».</span>';
+  if(tousDbl&&tousNeufs)msg+=' · <span style="color:var(--muted)">'+tousDbl+' déjà présente'+(tousDbl>1?'s':'')+'</span>';
+  if(deplace&&tousNeufs)msg+='<div style="color:var(--muted);margin-top:3px;font-size:11.5px">Affichage placé sur '+deplace+'.</div>';
   soucis.forEach(s=>{msg+='<div style="color:var(--red);margin-top:4px">⚠ '+s+'</div>'});
   if(zone)zone.innerHTML=msg||'<span style="color:var(--muted)">Rien à importer</span>';
   R(true);
@@ -2100,6 +2119,13 @@ let _tRech;
 window.setOpeRech=function(v){clearTimeout(_tRech);_tRech=setTimeout(()=>{opeRech=v;R(true);
   const c=document.getElementById('opeRech');if(c){c.focus();c.setSelectionRange(c.value.length,c.value.length)}},250)};
 window.videRech=function(){opeRech='';R(true)};
+/* Remet tous les filtres à zéro et se place sur l'opération la plus récente */
+window.videFiltres=function(){
+  opeRech='';opeCpt='';opePer='tout';opeMo='';
+  const d=(S.ope||[]).map(o=>o.d).sort().pop();
+  if(d){opeAn=d.slice(0,4);opeMo=d.slice(5,7)}
+  R(true);
+};
 
 window.setOpeCpt=v=>{opeCpt=v;R(true)};
 window.setOpeVue=v=>{opeVue=v;R(true)};
@@ -2249,6 +2275,16 @@ function rOpe(dc){
   const vir=f.filter(o=>o.c==='Virements internes');
   const virEnt=vir.filter(o=>o.m>0).reduce((a,o)=>a+mt(o),0);
   const virSor=vir.filter(o=>o.m<0).reduce((a,o)=>a-mt(o),0);
+  /* Filet de sécurité : des opérations existent mais aucune n'est visible */
+  const masquees=tous.length-f.length;
+  const alerte=document.getElementById('opeMasque');
+  if(alerte){
+    if(!f.length&&tous.length){
+      alerte.innerHTML='<div style="background:var(--card2);border-left:3px solid var(--accent);border-radius:8px;padding:11px 14px;margin-bottom:16px;font-size:12.5px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center">'+
+        '<span>Vous avez <b>'+tous.length+' opération'+(tous.length>1?'s':'')+'</b> enregistrée'+(tous.length>1?'s':'')+', mais aucune ne correspond aux filtres choisis.</span>'+
+        '<span style="flex:1"></span><button class="pb" onclick="videFiltres()">Tout afficher</button></div>';
+    }else alerte.innerHTML='';
+  }
   const note=document.getElementById('opeNote');
   if(note){
     if(vir.length&&estNeutre({c:'Virements internes'})){
