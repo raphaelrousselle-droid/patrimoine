@@ -283,7 +283,7 @@ details summary{color:var(--text2)}
 </div>
 </div>
 <div class="side-perf" id="sidePerf"></div>
-<div id="appVersion" style="font-size:10px;color:var(--muted);text-align:center;padding:8px 0 2px;letter-spacing:.03em">version du 13/10 09h38</div>
+<div id="appVersion" style="font-size:10px;color:var(--muted);text-align:center;padding:8px 0 2px;letter-spacing:.03em">version du 14/10 09h11</div>
 </aside>
 <div class="side-ov" id="sideOv" onclick="toggleSide()"></div>
 <div class="shell">
@@ -341,10 +341,10 @@ details summary{color:var(--text2)}
 <div class="page" id="page-revenus"><div class="kr" id="revKpi"></div><div class="g2"><div class="card"><div class="ct">Revenus passifs mensuels</div><div class="cbs" style="height:230px"><canvas id="cRevPie"></canvas></div><div id="revLeg" style="padding:8px 12px 0"></div></div><div class="card"><div class="ct">Projection revenus passifs</div><div class="cbs"><canvas id="cRevProj"></canvas></div></div></div><div class="card"><div class="ct">◎ Couverture de tes dépenses</div><div id="couvKpi"></div><div id="couvDetail" style="margin-top:16px"></div></div><div class="card"><div class="ct">Détail des sources</div><div id="revDetail"></div></div></div>
 <div class="page" id="page-marches">
 <div class="card"><div class="fb" style="margin-bottom:6px"><div class="ct" style="margin:0">◉ Revue de marchés</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="marPs" style="display:flex;gap:4px"></span><span id="marchesMaj" style="font-size:11px;color:var(--muted)"></span><button class="pb" onclick="fetchMarches(true)">Actualiser</button></div></div><div style="font-size:11.5px;color:var(--muted)" id="marLegende"></div></div>
-<div class="g2"><div class="card"><div class="ct">Indices mondiaux</div><div class="cb" style="height:330px"><canvas id="cRadIdx"></canvas></div><div id="legIdx" style="margin-top:12px"></div></div>
-<div class="card"><div class="ct">Secteurs américains</div><div class="cb" style="height:330px"><canvas id="cRadSec"></canvas></div><div id="legSec" style="margin-top:12px"></div></div></div>
-<div class="g2"><div class="card"><div class="ct">Matières premières & crypto</div><div class="cb" style="height:330px"><canvas id="cRadCom"></canvas></div><div id="legCom" style="margin-top:12px"></div></div>
-<div class="card"><div class="ct">Thématiques</div><div class="cb" style="height:330px"><canvas id="cRadThe"></canvas></div><div id="legThe" style="margin-top:12px"></div></div></div>
+<div class="g2"><div class="card"><div class="ct" data-radtitre="Indices mondiaux">Indices mondiaux</div><div class="cb" style="height:330px"><canvas id="cRadIdx"></canvas></div><div id="legIdx" style="margin-top:12px"></div></div>
+<div class="card"><div class="ct" data-radtitre="Secteurs américains">Secteurs américains</div><div class="cb" style="height:330px"><canvas id="cRadSec"></canvas></div><div id="legSec" style="margin-top:12px"></div></div></div>
+<div class="g2"><div class="card"><div class="ct" data-radtitre="Matières premières & crypto">Matières premières & crypto</div><div class="cb" style="height:330px"><canvas id="cRadCom"></canvas></div><div id="legCom" style="margin-top:12px"></div></div>
+<div class="card"><div class="ct" data-radtitre="Thématiques">Thématiques</div><div class="cb" style="height:330px"><canvas id="cRadThe"></canvas></div><div id="legThe" style="margin-top:12px"></div></div></div>
 </div>
 <div class="page" id="page-brokers"><div class="kr" id="brokersKpi"></div><div class="card"><div class="ct">⇄ Comparateur de brokers</div><div class="tw" id="brokersTable"></div></div><div class="card"><div class="ct">⇋ Impact devises EUR/USD</div><div id="devisesInfo"></div></div><div class="card"><div class="fb"><div class="ct" style="margin:0">◫ Benchmark personnalisé</div><div style="display:flex;gap:4px" id="benchBtns"></div></div><div class="cb"><canvas id="cBench"></canvas></div></div></div>
 <div class="page" id="page-analyse"><div class="card"><div class="fb" style="margin-bottom:12px"><div class="ct" style="margin:0">Évolution par poste</div><div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap"><button class="pb" onclick="edHistPoste()">Historique</button><span id="envPs" style="display:flex;gap:4px"></span></div></div><div class="cto" id="envCases"></div><div class="cb" style="height:310px"><canvas id="cEnv"></canvas></div><div id="envLeg" style="margin-top:14px"></div></div><div class="card"><div class="ct">◫ Rendement par poche</div><div id="rdtPoches"></div></div></div>
@@ -1438,29 +1438,52 @@ let marchesData={};
 
 const PERIODES=[{k:'sem',l:'Semaine',d:'depuis la clôture de vendredi dernier'},{k:'1m',l:'1 mois',d:'sur un mois glissant'},{k:'3m',l:'3 mois',d:'sur trois mois glissants'},{k:'6m',l:'6 mois',d:'sur six mois glissants'},{k:'ytd',l:'Depuis janvier',d:'depuis le 1er janvier'}];
 let marPer='sem';
+let _marEnCours=null;
 async function fetchMarches(force){
+  /* La période est figée ici une fois pour toutes : le chargement se fait en plusieurs
+     lots successifs, et changer de période entre-temps mélangeait les résultats. */
+  const per=marPer;
   const ajd=new Date().toISOString().slice(0,13);
   if(!S.marches)S.marches={};if(!S.envSel)S.envSel={pea:1,ctosb:1,ctoibkr:1,avl:1,pee:1,crypto:1,immoNet:1};
-  const stock=S.marches[marPer];
-  if(!force&&stock&&stock._maj===ajd&&Object.keys(stock).length>1){marchesData=stock;R(true);return}
+  const stock=S.marches[per];
+  if(!force&&stock&&stock._maj===ajd&&stock._per===per&&Object.keys(stock).length>2){
+    if(marPer===per){marchesData=stock;R(true)}
+    return;
+  }
+  if(_marEnCours===per)return;
+  _marEnCours=per;
   const tous=[];Object.values(MARCHES).forEach(g=>g.items.forEach(x=>tous.push(x.t)));
   const res={};
-  for(let i=0;i<tous.length;i+=10){
-    const lot=tous.slice(i,i+10);
-    try{
-      const r=await fetch(GAS+"?per="+marPer+"&t="+encodeURIComponent(lot.join(",")));
-      if(r.ok){const j=await r.json();Object.keys(j||{}).forEach(k=>{if(j[k]&&j[k].sem!=null)res[k]=j[k]})}
-    }catch(e){}
+  try{
+    for(let i=0;i<tous.length;i+=10){
+      const lot=tous.slice(i,i+10);
+      try{
+        const r=await fetch(GAS+"?per="+per+"&t="+encodeURIComponent(lot.join(",")));
+        if(r.ok){const j=await r.json();Object.keys(j||{}).forEach(k=>{if(j[k]&&j[k].sem!=null)res[k]=j[k]})}
+      }catch(e){}
+    }
+  }finally{if(_marEnCours===per)_marEnCours=null}
+  if(Object.keys(res).length){
+    res._maj=ajd;res._per=per;
+    S.marches[per]=res;
+    /* On n'affiche ces chiffres que si l'utilisateur regarde toujours cette période */
+    if(marPer===per)marchesData=res;
+    autoSave();
   }
-  if(Object.keys(res).length){res._maj=ajd;S.marches[marPer]=res;marchesData=res;autoSave()}
   R(true);
 }
-window.setMarPer=function(p){marPer=p;marchesData=(S.marches&&S.marches[p])||{};
-  if(!Object.keys(marchesData).length)fetchMarches();else R(true)};
+window.setMarPer=function(p){
+  marPer=p;
+  const c=(S.marches&&S.marches[p])||{};
+  marchesData=(c._per===p)?c:{};
+  if(!Object.keys(marchesData).length)fetchMarches();else R(true);
+};
 
 function radarMarche(cle,cid,lid){
   const g=MARCHES[cle];if(!g)return;
-  const d=marchesData&&Object.keys(marchesData).length?marchesData:((S.marches||{})[marPer]||{});
+  let d=marchesData&&Object.keys(marchesData).length?marchesData:((S.marches||{})[marPer]||{});
+  /* Garde-fou : des chiffres d'une autre période ne doivent jamais s'afficher ici */
+  if(d&&d._per&&d._per!==marPer)d={};
   const dispo=g.items.filter(x=>d[x.t]&&d[x.t].sem!=null).sort((a,b)=>d[b.t].sem-d[a.t].sem);
   const leg=document.getElementById(lid);
   if(dispo.length<3){if(leg)leg.innerHTML='<div style="color:var(--muted);font-size:12px">Clique sur Actualiser pour charger les données.</div>';return}
@@ -1527,7 +1550,11 @@ function radarMarche(cle,cid,lid){
           callback:(l,i)=>{const v=vals[i];return [l,(v>=0?'+':'')+v.toFixed(1)+'%']}}
       }},
       plugins:{legend:{display:false},
-        tooltip:tipOpts(c=>c.label+' : '+(c.raw>=0?'+':'')+c.raw.toFixed(2)+'%')}},
+        tooltip:tipOpts(c=>{
+      const nom=c.label,it=dispo[c.dataIndex],px=it&&d[it.t]?d[it.t].price:null;
+      const per=(PERIODES.find(p=>p.k===marPer)||{}).l||'';
+      return nom+' : '+(c.raw>=0?'+':'')+c.raw.toFixed(2)+'% sur '+per.toLowerCase()+(px?' · cours '+Math.round(px).toLocaleString('fr-FR'):'');
+    })}},
     plugins:[segments]
   });
 
@@ -4109,7 +4136,23 @@ if(dc&&document.getElementById('cRadIdx')){
   if(!marchesData||!Object.keys(marchesData).length)marchesData=(S.marches&&S.marches[marPer])||{};
   ['idx','sec','com','the'].forEach(k=>radarMarche(k,'cRad'+k.charAt(0).toUpperCase()+k.slice(1),'leg'+k.charAt(0).toUpperCase()+k.slice(1)));
   const mm=document.getElementById('marchesMaj');
-  if(mm){const m=((S.marches||{})[marPer]||{})._maj;mm.textContent=m?'à jour le '+m.slice(8,10)+'/'+m.slice(5,7)+' à '+m.slice(11,13)+'h':''}
+  if(mm){
+    const m=((S.marches||{})[marPer]||{})._maj;
+    if(!m)mm.innerHTML='';
+    else{
+      /* Les chiffres sont mis en cache : sans date affichée, on peut regarder des cours d'avant-hier */
+      const q=new Date(m+':00:00'), h=(Date.now()-q.getTime())/3600000;
+      const quand='calculé le '+m.slice(8,10)+'/'+m.slice(5,7)+' à '+m.slice(11,13)+'h';
+      mm.innerHTML=h>24
+        ? '<span style="color:var(--accent)">⚠ '+quand+' — cliquez sur Actualiser pour recalculer</span>'
+        : '<span style="color:var(--muted)">'+quand+'</span>';
+    }
+  }
+  /* La période est rappelée sur chaque panneau : un même indice n'a pas la même tête sur une semaine ou trois mois */
+  const perL=(PERIODES.find(p=>p.k===marPer)||{}).l||'';
+  document.querySelectorAll('[data-radtitre]').forEach(el=>{
+    el.textContent=el.getAttribute('data-radtitre')+' · '+perL;
+  });
 }
 setTimeout(initReveal,30);
 try{rOpe(dc)}catch(e){console.error('Erreur page Comptes :',e)}
@@ -4205,7 +4248,14 @@ window.edNote=function(section){if(!S||!S.notes)return;const cur=S.notes[section
 function noteBtn(section){const has=S&&S.notes&&S.notes[section];return ' <button style="font-size:10px;background:none;border:1px solid '+(has?'var(--accent)':'var(--border)')+';border-radius:4px;padding:2px 6px;cursor:pointer;color:'+(has?'var(--accent)':'var(--muted)')+'" onclick="edNote(\''+section+'\')">✎'+(has?' ✓':'')+'</button>'}
 function noteDisp(section){if(!S||!S.notes)return '';const n=S.notes[section];return n?'<div style="background:rgba(62,207,142,.05);border:1px solid rgba(62,207,142,.15);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text);margin-bottom:12px">✎ '+n+'</div>':''}
 
-function initApp(){rStat=texteCours();R(true);majOutils();fSP();setTimeout(doRef,2000);setInterval(function(){if(!rL)doRef()},300000)}
+function initApp(){
+  /* Les chiffres de marché enregistrés avant la correction du 14/10 pouvaient mélanger
+     deux périodes : on les jette une fois pour repartir sur des données sûres. */
+  if(S&&!S._marchesOk){
+    S.marches={};S._marchesOk=1;marchesData={};
+    try{autoSave()}catch(e){}
+  }
+  rStat=texteCours();R(true);majOutils();fSP();setTimeout(doRef,2000);setInterval(function(){if(!rL)doRef()},300000)}
 </script>
 </body>
 </html>
